@@ -153,6 +153,17 @@ CSRF_COOKIE_HTTPONLY = False # Default, but explicit
 CSRF_COOKIE_SECURE = False # For HTTP development
 # CSRF_COOKIE_SECURE = True # For HTTPS deployment
 
+
+import dj_database_url
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgres://localhost',  # fallback for local
+        conn_max_age=600
+    )
+}
+
+
 # Email settings for SMTP with Gmail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Use the SMTP backend
 EMAIL_HOST = 'smtp.gmail.com'  # Gmail's SMTP server
