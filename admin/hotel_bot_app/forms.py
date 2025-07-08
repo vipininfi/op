@@ -51,14 +51,6 @@ class IssueForm(forms.ModelForm):
         label="Related Floors (if type is Floor)",
         choices=[]  # Empty initially, will populate in __init__
     )
-
-    related_floors = forms.MultipleChoiceField(
-        widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'}),
-        # queryset=RoomData.objects.values_list('floor', flat=True).distinct(),
-        required=False,
-        label="Related Floors (if type is Floor)",
-        choices=[(i, f'Floor {i}') for i in RoomData.objects.values_list('floor', flat=True).distinct()]  # Assuming max 20 floors
-    )
     related_product = forms.ModelMultipleChoiceField(
         queryset=ProductData.objects.all(),
         widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'}),
