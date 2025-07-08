@@ -29,7 +29,19 @@ logger = logging.getLogger(__name__)
 
 
 # 1️⃣ Connect to your PostgreSQL DB
-DATABASE_URI = f"postgresql+psycopg2://{settings.DATABASES['default']['USER']}:{settings.DATABASES['default']['PASSWORD']}@{settings.DATABASES['default']['HOST']}:{settings.DATABASES['default']['PORT']}/{settings.DATABASES['default']['NAME']}"
+import urllib.parse
+
+# Get from environment (Render injects this automatically)
+render_database_url = os.getenv("DATABASE_URL")
+
+# SQLAlchemy expects `postgresql+psycopg2://`, not just `postgres://`
+if render_database_url.startswith("postgres://"):
+    render_database_url = render_database_url.replace("postgres://", "postgresql+psycopg2://", 1)
+
+# Optional: ensure special characters are encoded properly (e.g., password)
+render_database_url = urllib.parse.quote(render_database_url, safe=":/@?&=#")
+
+DATABASE_URI = render_database_url
 db = SQLDatabase.from_uri(DATABASE_URI)
 
 
