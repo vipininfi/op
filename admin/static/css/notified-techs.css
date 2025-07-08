@@ -1,0 +1,55 @@
+.dataTables_scrollBody {
+    overflow-x: hidden !important;
+}
+#NotifiedTechsTable th{
+    color: black;
+    white-space: nowrap;
+}
+#NotifiedTechsTable td{
+    white-space: nowrap;
+}
+.notified-tech-modal{
+    max-width: 90% !important;
+    margin-top: 2% !important;
+}
+#NotifiedTechsTable_wrapper,#NotifiedTechsTable{
+    min-width: -webkit-fill-available;
+    min-width: -moz-available;
+}
+@media only screen and (max-width: 1390px) {
+    .notified-tech-modal-content {
+    max-height: 580px;
+    overflow-x: scroll;
+      }
+}
+#NotifiedTechsTable_length{
+    margin-left:2%
+}
+#NotifiedTechsTable_filter{
+    margin-right:2%	
+}
+#NotifiedTechsTable_info{
+    margin-top: 1%
+}
+#NotifiedTechsTable_paginate{
+    margin-top: 1%
+}
+.page-item.active .page-link {
+    color: #ffffff !important;
+    background-color: #9c27b0;
+    border-color: #9c27b0;
+}
+.page-link{
+    color: #9c27b0;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    color: white !important;
+    border: 1px solid transparent !important;
+    background-color: transparent !important;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, transparent), color-stop(100%, transparent)) !important;
+    background: -webkit-linear-gradient(top, transparent 0%, transparent 100%) !important;
+    background: -moz-linear-gradient(top, transparent 0%, transparent 100%) !important;
+    background: -ms-linear-gradient(top, transparent 0%, transparent 100%) !important;
+    background: -o-linear-gradient(top, transparent 0%, transparent 100%) !important;
+    background: linear-gradient(to bottom, transparent 0%, transparent 100%) !important;
+}

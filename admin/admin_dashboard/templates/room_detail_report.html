@@ -1,0 +1,145 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .report-table th, .report-table td {
+        border: 1px solid #dee2e6;
+        padding: 0.5rem;
+        vertical-align: middle;
+        text-align: left;
+    }
+    .report-table th.phase-header {
+        text-align: center;
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+    .report-table td.label {
+        font-weight: 500;
+        width: 20%;
+    }
+    .report-table td.date-value {
+        width: 15%;
+        text-align: center;
+    }
+    .report-table td.status-value {
+        width: 15%;
+        text-align: center;
+        font-weight: bold;
+    }
+    .report-table td.difference-value {
+        width: 10%;
+        text-align: center;
+    }
+    .status-ok {
+        background-color: #d4edda; /* Light green */
+        color: #155724;
+    }
+    .status-delay {
+        background-color: #f8d7da; /* Light red */
+        color: #721c24;
+    }
+    .status-neutral {
+        background-color: #fff3cd; /* Light yellow/tan for NOT STARTED/ENDED */
+        color: #856404;
+    }
+    .color-ref-ok {
+        background-color: #d4edda;
+        padding: 5px;
+        margin-right: 5px;
+        border: 1px solid #c3e6cb;
+    }
+    .color-ref-delay {
+        background-color: #f8d7da;
+        padding: 5px;
+        margin-right: 5px;
+        border: 1px solid #f5c6cb;
+    }
+    .color-ref-neutral {
+        background-color: #fff3cd;
+        padding: 5px;
+        margin-right: 5px;
+        border: 1px solid #ffeeba;
+    }
+</style>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        {% include 'common/messages.html' %}
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h3 class="card-title pt-2 text-dark">Detail Report by Room</h3>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{% url 'admin_dashboard:room_detail_report' %}" class="form-inline mb-4">
+                    <div class="form-group mr-2">
+                        <label for="room_number" class="mr-2">SELECT THE ROOM NUMBER:</label>
+                        <input type="text" class="form-control" name="room_number" id="room_number" value="{{ room_number_query|default:'' }}" placeholder="e.g., 1815">
+                    </div>
+                    <button type="submit" class="btn btn-primary">View Report</button>
+                </form>
+
+                {% if room_number_query and report_data %}
+                <h4 class="mb-3">Report for Room: {{ room_number_query }}</h4>
+
+                <div class="mb-3">
+                    <h5>COLOR REFERENCE</h5>
+                    <span class="color-ref-ok">OK / STARTED</span>
+                    <span class="color-ref-delay">DELAY</span>
+                    <span class="color-ref-neutral">NOT STARTED / NOT ENDED</span>
+                </div>
+
+                {% for phase_name, phase_data_items in report_data.items %}
+                <h5 class="mt-4 text-uppercase font-weight-bold">{{ phase_name }}</h5>
+                <table class="table table-bordered report-table">
+                    <tbody>
+                        <tr>
+                            <td class="label">SCHEDULE START DATE</td>
+                            <td class="date-value">{{ phase_data_items.start.schedule|date:"d/m/Y"|default:"N/A" }}</td>
+                            <td class="label">SCHEDULE END DATE</td>
+                            <td class="date-value">{{ phase_data_items.end.schedule|date:"d/m/Y"|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">ACTUAL START DATE</td>
+                            <td class="date-value">{{ phase_data_items.start.actual|date:"d/m/Y"|default:"N/A" }}</td>
+                            <td class="label">ACTUAL END DATE</td>
+                            <td class="date-value">{{ phase_data_items.end.actual|date:"d/m/Y"|default:"N/A" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">DIFFERENCE</td>
+                            <td class="difference-value {{ phase_data_items.start.css_class }}">
+                                {% if phase_data_items.start.difference is not None %}
+                                    {{ phase_data_items.start.difference }} (DAYS)
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="label">DIFFERENCE</td>
+                            <td class="difference-value {{ phase_data_items.end.css_class }}">
+                                {% if phase_data_items.end.difference is not None %}
+                                    {{ phase_data_items.end.difference }} (DAYS)
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">STATUS</td>
+                            <td class="status-value {{ phase_data_items.start.css_class }}">{{ phase_data_items.start.status|default:"N/A" }}</td>
+                            <td class="label">STATUS</td>
+                            <td class="status-value {{ phase_data_items.end.css_class }}">{{ phase_data_items.end.status|default:"N/A" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                {% endfor %}
+
+                {% elif room_number_query %}
+                    <p>No data available to generate the report for room {{ room_number_query }}. Please check the room number or data sources.</p>
+                {% else %}
+                    <p>Please enter a room number to generate the report.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %} 

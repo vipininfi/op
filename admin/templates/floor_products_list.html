@@ -1,0 +1,129 @@
+{% extends 'frontend_base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+#productTable tbody tr {
+    height: auto;
+}
+#productTable th,
+#productTable td {
+    white-space: nowrap;
+    padding: 15px;
+    vertical-align: middle;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+
+@media (max-width: 768px) {
+  
+    .border.border-light {
+    border-radius: 11px !important;
+    /* box-shadow: 14px 2px 17px 0px #ded8d8 !important; */
+
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  }
+}
+@media (max-width: 768px) {
+    .margin_class {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 434px) {
+    .margin_class {
+        padding: 10px;
+    }
+}
+
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h4 class="card-title text-dark mt-2">Floor Wise Products Needed</h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="GET" action="" class="form-inline mb-4" style="gap:10px;">
+                            <div class="form-group mr-2">
+                                <label for="floor_number" class="mr-2">Enter Floor Number:</label>
+                                <input type="number" class="form-control" id="floor_number" name="floor_number" value="{{ floor_number|default:'' }}" placeholder="e.g., 5" required>
+                            </div>
+                            <button type="submit" class="btn btn-secondary btn-md margin_class">Search</button>
+                            {% if product_list and floor_number %}
+                                <!-- Add Download Button -->
+                                <a href="?floor_number={{ floor_number }}&download=xls" class="btn btn-success margin_class">Download XLS</a>
+                            {% endif %}
+                        </form>
+
+                        {% if error_message %}
+                            <div class="alert alert-danger">{{ error_message }}</div>
+                        {% endif %}
+
+                        {% if product_list %}
+
+                            <!-- ✅ Mobile-Friendly Stacked View -->
+                            <div class="d-block d-md-none">
+                                {% for product in product_list %}
+                                    <div class="card mb-3 border border-light rounded-top">
+                                        <div class="card-body p-3">
+                                            <p><strong>Client ID:</strong> {{ product.client_id|default:"N/A" }}</p>
+                                            <p><strong>Description:</strong> {{ product.description|default:"N/A" }}</p>
+                                            <p><strong>Total Needed for Floor:</strong> {{ product.total_quantity_needed|default:"0" }}</p>
+                                            <p><strong>Qty Pulled Already:</strong> {{ product.pulled_quantity|default:"0" }}</p>
+                                            <p><strong>Remaining Needed:</strong> {{ product.remaining_quantity_needed|default:"0" }}</p>
+                                            <p><strong>Qty Available (Overall):</strong> {{ product.available_qty|default:"0" }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- ✅ Standard Table View for Desktop -->
+                            <div class="table-responsive d-none d-md-block">
+                                <table id="productTable" class="table table-striped" style="min-width: 800px;">
+                                    <thead class="text-secondary">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>Description</th>
+                                            <th>Total Needed for Floor</th>
+                                            <th>Qty Pulled Already</th>
+                                            <th>Remaining Needed</th>
+                                            <th>Qty Available (Overall)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in product_list %}
+                                        <tr>
+                                            <td>{{ product.client_id|default:"N/A" }}</td>
+                                            <td title="{{ product.description|default:"N/A" }}">{{ product.description|default:"N/A"|truncatechars:20 }}</td>
+                                            <td>{{ product.total_quantity_needed|default:"0" }}</td>
+                                            <td>{{ product.pulled_quantity|default:"0" }}</td>
+                                            <td>{{ product.remaining_quantity_needed|default:"0" }}</td>
+                                            <td>{{ product.available_qty|default:"0" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        {% elif floor_number and not error_message %}
+                             <div class="alert alert-info">No products found for floor {{ floor_number }}.</div>
+                        {% else %}
+                            <p class="text-muted">Please enter a floor number and click Search.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,517 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Report a New Issue{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css">
+    <style>
+        /* Hide asterisk for required fields */
+        span.asteriskField {
+            display: none !important; 
+        }
+
+        /* Optional: Improve Select2 styling with Bootstrap 5 */
+        .select2-container .select2-selection--multiple {
+            min-height: calc(1.5em + .75rem + 2px); /* Match Bootstrap input height */
+            border: 1px solid #ced4da;
+        }
+        .select2-container--bootstrap5 .select2-selection--multiple .select2-selection__choice {
+            background-color: #0d6efd;
+            border: 1px solid #0a58ca;
+            color: white;
+        }
+        .select2-container--bootstrap5 .select2-selection--multiple .select2-selection__choice__remove {
+            color: rgba(255,255,255,0.7);
+        }
+         /* Ensure select2 dropdown appears above other elements if in a modal or complex layout */
+        .select2-container {
+            z-index: 1050; /* Adjust if necessary, Bootstrap modal z-index is often around 1050 */
+        }
+        /* .select2-multiple {
+            overflow: auto;
+            height: 100px;
+        } */
+        .field-type-radio{
+            display: flex;
+            gap: 10px;
+        }
+        #related-rooms-checkboxes{
+            display: none;
+            max-height: 150px;
+            overflow: auto;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        #related-floor-checkboxes{
+            display: none;
+            max-height: 150px;
+            overflow: auto;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        /* File upload styling */
+        .file-upload-container {
+            border: 2px dashed #ced4da;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        .file-upload-container:hover {
+            border-color: #0d6efd;
+            background-color: #f1f3f5;
+        }
+        .file-upload-icon {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+        .file-upload-input {
+            display: none;
+        }
+        .file-upload-label {
+            cursor: pointer;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .file-upload-preview {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .file-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .file-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .file-preview-item .remove-file {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #dc3545;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    
+    <!-- Message container for dynamic alerts -->
+    <div id="message-container" class="mb-3">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-header card-header-primary">
+            <h4 class="card-title text-dark mt-2">Report a New Issue</h4>
+        </div>
+        <div class="card-body">
+            <form id="issue-form" method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        {{ form.title|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6 mb-3 karun">
+                        {{ form.type|as_crispy_field }}
+                    </div>
+                </div>
+
+                <div id="related-rooms-container" class="mb-3" style="display: none;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="allowMultipleRooms" checked>
+                        <label class="form-check-label" for="allowMultipleRooms">
+                            Allow selecting multiple rooms
+                        </label>
+                    </div>
+                    <div id="related-rooms-checkboxes" style="display: none;">
+                        <label class="form-label">
+                            Related rooms
+                        </label>
+                        <div>
+                            {% for room_id, room_label in form.fields.related_rooms.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{ room_id }}" id="room_{{ room_id }}" name="related_rooms">
+                                    <label class="form-check-label" for="room_{{ room_id }}">
+                                        {{ room_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="related-rooms-select" class="mb-3">
+                        {{ form.related_rooms|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div id="related-floor-container" class="mb-3" style="display: none;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" id="allowMultipleFloor" checked>
+                        <label class="form-check-label" for="allowMultipleFloor">
+                            Allow selecting multiple floor items
+                        </label>
+                    </div>
+                    <div id="related-floor-checkboxes" style="display: none;">
+                        <label class="form-label">
+                            Related floor items
+                        </label>
+                        <div>
+                            {% for item_id, item_label in form.fields.related_inventory_items.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="{{ item_id }}" id="item_{{ item_id }}" name="related_inventory_items">
+                                    <label class="form-check-label" for="item_{{ item_id }}">
+                                        {{ item_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="related-floor-select" class="mb-3">
+                        {{ form.related_inventory_items|as_crispy_field }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    {{ form.description|as_crispy_field }}
+                </div>
+
+                <div class="mb-4">
+                    <div class="file-upload-container">
+                        <i class="bi bi-images file-upload-icon"></i>
+                        <label for="id_images" class="file-upload-label">
+                            <span class="fw-semibold">Upload Images (Max 4)</span>
+                            <br>
+                            <small class="text-muted">Click to select or drag and drop up to 4 images here</small>
+                        </label>
+                        <input type="file" name="images" id="id_images" multiple accept="image/*" class="file-upload-input">
+                        <div class="file-upload-preview" id="imagePreview"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="file-upload-container">
+                        <i class="bi bi-camera-reels file-upload-icon"></i>
+                        <label for="id_video" class="file-upload-label">
+                            <span class="fw-semibold">Upload Video (Max 100MB)</span>
+                            <br>
+                            <small class="text-muted">Click to select or drag and drop a video (max 100MB)</small>
+                        </label>
+                        <input type="file" name="video" id="id_video" accept="video/*" class="file-upload-input">
+                        <div class="file-upload-preview" id="videoPreview"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        {{ form.observers|as_crispy_field }}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <a href="{% url 'issue_list' %}" class="btn btn-outline-secondary mr-3">Cancel</a>
+                    <button type="submit" class="btn btn-secondary" id="submit-btn">Submit Issue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script for AJAX and conditional fields -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const issueTypeRadioGroup = document.querySelectorAll('input[name="type"]'); 
+    const roomsContainer = document.getElementById('related-rooms-container');
+    const floorContainer = document.getElementById('related-floor-container');
+
+    const allowMultipleRoomsCheckbox = document.getElementById('allowMultipleRooms');
+    const relatedRoomsCheckboxesDiv = document.getElementById('related-rooms-checkboxes');
+    const relatedRoomsSelectDiv = document.getElementById('related-rooms-select');
+
+    const allowMultipleFloorCheckbox = document.getElementById('allowMultipleFloor');
+    const relatedFloorCheckboxesDiv = document.getElementById('related-floor-checkboxes');
+    const relatedFloorSelectDiv = document.getElementById('related-floor-select');
+
+    // Toggle visibility for rooms
+    allowMultipleRoomsCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            relatedRoomsCheckboxesDiv.style.display = 'block';
+            relatedRoomsSelectDiv.style.display = 'none';
+        } else {
+            relatedRoomsCheckboxesDiv.style.display = 'none';
+            relatedRoomsSelectDiv.style.display = 'block';
+        }
+    });
+
+    // Toggle visibility for floor items
+    allowMultipleFloorCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            relatedFloorCheckboxesDiv.style.display = 'block';
+            relatedFloorSelectDiv.style.display = 'none';
+        } else {
+            relatedFloorCheckboxesDiv.style.display = 'none';
+            relatedFloorSelectDiv.style.display = 'block';
+        }
+    });
+
+    // Set initial visibility on page load
+    if (allowMultipleRoomsCheckbox.checked) {
+        relatedRoomsSelectDiv.style.display = 'none';
+        relatedRoomsCheckboxesDiv.style.display = 'block';
+    } else {
+        relatedRoomsSelectDiv.style.display = 'block';
+        relatedRoomsCheckboxesDiv.style.display = 'none';
+    }
+
+    if (allowMultipleFloorCheckbox.checked) {
+        relatedFloorSelectDiv.style.display = 'none';
+        relatedFloorCheckboxesDiv.style.display = 'block';
+    } else {
+        relatedFloorSelectDiv.style.display = 'block';
+        relatedFloorCheckboxesDiv.style.display = 'none';
+    }
+
+    // Radio type toggle (ROOM or FLOOR)
+    function getSelectedTypeValue() {
+        for (const radio of issueTypeRadioGroup) {
+            if (radio.checked) return radio.value;
+        }
+        return null;
+    }
+
+    function toggleConditionalFields() {
+        const selectedType = getSelectedTypeValue();
+        if (roomsContainer) {
+            roomsContainer.style.display = selectedType === 'ROOM' ? 'block' : 'none';
+        }
+        if (floorContainer) {
+            floorContainer.style.display = selectedType === 'FLOOR' ? 'block' : 'none';
+        }
+    }
+
+    if (issueTypeRadioGroup.length > 0) {
+        issueTypeRadioGroup.forEach(radio => {
+            radio.addEventListener('change', toggleConditionalFields);
+        });
+        toggleConditionalFields();
+    } else {
+        console.warn('Issue type radio buttons (name="type") not found.');
+    }
+
+    // AJAX form submission
+    const issueForm = document.getElementById('issue-form');
+    if (issueForm) {
+        issueForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const form = this;
+            const submitBtn = document.getElementById('submit-btn');
+            const messageContainer = document.getElementById('message-container');
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
+            messageContainer.innerHTML = '';
+
+            form.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+            form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action || window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${data.success ? 'success' : 'danger'} alert-dismissible fade show`;
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                messageContainer.appendChild(alertDiv);
+
+                if (data.success) {
+                    form.reset();
+                    toggleConditionalFields();
+                    setTimeout(() => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        }
+                    }, 2000);
+                } else {
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            let fieldElement = form.querySelector(`[name="${field}"]`) || document.getElementById(`id_${field}`);
+                            let errorDisplayContainer = fieldElement ? fieldElement.closest('.mb-3') || fieldElement.parentNode : null;
+
+                            if (field === 'related_rooms') errorDisplayContainer = roomsContainer;
+                            if (field === 'related_inventory_items') errorDisplayContainer = floorContainer;
+
+                            if (errorDisplayContainer) {
+                                data.errors[field].forEach(error => {
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'invalid-feedback d-block';
+                                    errorDiv.textContent = error.message || error;
+                                    errorDisplayContainer.appendChild(errorDiv);
+                                });
+                                if (fieldElement && !fieldElement.classList.contains('is-invalid')) {
+                                    fieldElement.classList.add('is-invalid');
+                                }
+                            } else {
+                                console.warn(`Could not find container for field errors: ${field}`);
+                            }
+                        });
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Submit Issue';
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `An unexpected error occurred. Please try again. (${error.message})<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+                messageContainer.appendChild(alertDiv);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Submit Issue';
+            }
+        });
+    }
+
+    // File upload preview functionality
+    const imageInput = document.getElementById('id_images');
+    const videoInput = document.getElementById('id_video');
+    const imagePreview = document.getElementById('imagePreview');
+    const videoPreview = document.getElementById('videoPreview');
+
+    function handleFileSelect(event, previewContainer, isVideo = false) {
+        const files = event.target.files;
+        previewContainer.innerHTML = '';
+
+        for (let file of files) {
+            if (isVideo) {
+                if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.controls = true;
+                    video.style.width = '200px';
+                    video.style.height = 'auto';
+                    previewContainer.appendChild(video);
+                }
+            } else {
+                if (file.type.startsWith('image/')) {
+                    const div = document.createElement('div');
+                    div.className = 'file-preview-item';
+                    
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    
+                    const removeBtn = document.createElement('span');
+                    removeBtn.className = 'remove-file';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.onclick = function() {
+                        div.remove();
+                        // Clear the file input
+                        event.target.value = '';
+                    };
+                    
+                    div.appendChild(img);
+                    div.appendChild(removeBtn);
+                    previewContainer.appendChild(div);
+                }
+            }
+        }
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener('change', (e) => handleFileSelect(e, imagePreview));
+    }
+
+    if (videoInput) {
+        videoInput.addEventListener('change', (e) => handleFileSelect(e, videoPreview, true));
+    }
+
+    // Drag and drop functionality
+    const fileContainers = document.querySelectorAll('.file-upload-container');
+    
+    fileContainers.forEach(container => {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            container.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            container.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            container.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            container.classList.add('border-primary');
+        }
+
+        function unhighlight(e) {
+            container.classList.remove('border-primary');
+        }
+
+        container.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            const input = container.querySelector('input[type="file"]');
+            
+            if (input) {
+                input.files = files;
+                const event = new Event('change');
+                input.dispatchEvent(event);
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

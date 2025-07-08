@@ -1,0 +1,398 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    #roomModelTable tbody tr {
+        height: 60px;
+    }
+    #roomModelTable th, #roomModelTable td {
+        white-space: nowrap;
+        padding: 15px;
+    }
+    th.sorting::after {
+        content: "\2195";
+        margin-left: 5px;
+    }
+    th.sorting_asc::after {
+        content: "\2191";
+    }
+    th.sorting_desc::after {
+        content: "\2193";
+    }
+    th.sorting, th.sorting_asc, th.sorting_desc {
+        cursor: pointer;
+    }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .modal-content {
+        width: 42%;
+        height: 74vh;
+        overflow: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .form-group {
+        padding: 10px;
+        position: relative;
+        margin: 20px 0 0;
+    }
+</style>
+
+<!-- Loader -->
+<div class="ajax-loader" id="modelLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Schedule</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="addModelBtn" class="btn">Add Schedule</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="roomModelTable" class="table table-striped" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Phase</th>
+                                        <th>Floor</th>
+                                        <th>Production Starts</th>
+                                        <th>Production Ends</th>
+                                        <th>Shipping Departure</th>
+                                        <th>Shipping Arrival</th>
+                                        <th>Custom Clearing Starts</th>
+                                        <th>Custom Clearing Ends</th>
+                                        <th>Arrive on Site</th>
+                                        <th>Pre-Work Starts</th>
+                                        <th>Pre-Work Ends</th>
+                                        <th>Install Starts</th>
+                                        <th>Install Ends</th>
+                                        <th>Post-Work Starts</th>
+                                        <th>Post-Work Ends</th>
+                                        <th>Floor Completed</th>
+                                        <th>Floor Closes</th>
+                                        <th>Floor Opens</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for schedule in schedule %}
+                                    <tr>
+                                        <td>{{ schedule.id }}</td>
+                                        <td>{{ schedule.phase }}</td>
+                                        <td>{{ schedule.floor }}</td>
+                                        <td>{{ schedule.production_starts | default:"" }}</td>
+                                        <td>{{ schedule.production_ends | default:"" }}</td>
+                                        <td>{{ schedule.shipping_depature | default:"" }}</td>
+                                        <td>{{ schedule.shipping_arrival | default:"" }}</td>
+                                        <td>{{ schedule.custom_clearing_starts | default:"" }}</td>
+                                        <td>{{ schedule.custom_clearing_ends | default:"" }}</td>
+                                        <td>{{ schedule.arrive_on_site | default:"" }}</td>
+                                        <td>{{ schedule.pre_work_starts | default:"" }}</td>
+                                        <td>{{ schedule.pre_work_ends | default:"" }}</td>
+                                        <td>{{ schedule.install_starts | default:"" }}</td>
+                                        <td>{{ schedule.install_ends | default:"" }}</td>
+                                        <td>{{ schedule.post_work_starts | default:"" }}</td>
+                                        <td>{{ schedule.post_work_ends | default:"" }}</td>
+                                        <td>{{ schedule.floor_completed | default:"" }}</td>
+                                        <td>{{ schedule.floor_closes | default:"" }}</td>
+                                        <td>{{ schedule.floor_opens | default:"" }}</td>
+                                        <td>
+                                            <button class="btn editModelBtn"
+                                            data-id="{{ schedule.id }}"
+                                            data-phase="{{ schedule.phase }}"
+                                            data-floor="{{ schedule.floor }}"
+                                            data-production_starts="{{ schedule.formatted_production_starts }}"
+                                            data-production_ends="{{ schedule.formatted_production_ends }}"
+                                            data-shipping_depature="{{ schedule.formatted_shipping_depature }}"
+                                            data-shipping_arrival="{{ schedule.formatted_shipping_arrival }}"
+                                            data-custom_clearing_starts="{{ schedule.formatted_custom_clearing_starts }}"
+                                            data-custom_clearing_ends="{{ schedule.formatted_custom_clearing_ends }}"
+                                            data-arrive_on_site="{{ schedule.formatted_arrive_on_site }}"
+                                            data-pre_work_starts="{{ schedule.formatted_pre_work_starts }}"
+                                            data-pre_work_ends="{{ schedule.formatted_pre_work_ends }}"
+                                            data-install_starts="{{ schedule.formatted_install_starts }}"
+                                            data-install_ends="{{ schedule.formatted_install_ends }}"
+                                            data-post_work_starts="{{ schedule.formatted_post_work_starts }}"
+                                            data-post_work_ends="{{ schedule.formatted_post_work_ends }}"
+                                            data-floor_completed="{{ schedule.formatted_floor_completed }}"
+                                            data-floor_closes="{{ schedule.formatted_floor_closes }}"
+                                            data-floor_opens="{{ schedule.formatted_floor_opens }}">
+                                            Edit
+                                            </button>
+                                            <button class="btn deleteModelBtn" data-id="{{ schedule.id }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!--  odal Overlay -->
+<div class="modal-overlay" id="modelModalOverlay"></div>
+
+<!-- Add/Edit Inventory Modal -->
+<div id="modelModal" class="modal">
+    <div class="modal-content mx-auto p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 id="modelModalTitle">Add Schedule</h2>
+            <span class="close" id="closeModelModal">×</span>
+        </div>
+        <form id="modelForm" method="POST" action="{% url 'save_schedule' %}">
+            {% csrf_token %}
+            <input type="hidden" id="model-id" name="schedule_id">
+            <div class="form-group">
+                <label for="phase">Phase:</label>
+                <input type="text" id="phase" name="phase" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="floor">Floor:</label>
+                <input type="text" id="floor" name="floor" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="production_starts">Production Starts:</label>
+                <input type="date" id="production_starts" name="production_starts" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="production_ends">Production Ends:</label>
+                <input type="date" id="production_ends" name="production_ends" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="shipping_depature">Shipping Departure:</label>
+                <input type="date" id="shipping_depature" name="shipping_depature" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="shipping_arrival">Shipping Arrival:</label>
+                <input type="date" id="shipping_arrival" name="shipping_arrival" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="custom_clearing_starts">Custom Clearing Starts:</label>
+                <input type="date" id="custom_clearing_starts" name="custom_clearing_starts" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="custom_clearing_ends">Custom Clearing Ends:</label>
+                <input type="date" id="custom_clearing_ends" name="custom_clearing_ends" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="arrive_on_site">Arrive on Site:</label>
+                <input type="date" id="arrive_on_site" name="arrive_on_site" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="pre_work_starts">Pre-Work Starts:</label>
+                <input type="date" id="pre_work_starts" name="pre_work_starts" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="pre_work_ends">Pre-Work Ends:</label>
+                <input type="date" id="pre_work_ends" name="pre_work_ends" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="install_starts">Install Starts:</label>
+                <input type="date" id="install_starts" name="install_starts" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="install_ends">Install Ends:</label>
+                <input type="date" id="install_ends" name="install_ends" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="post_work_starts">Post-Work Starts:</label>
+                <input type="date" id="post_work_starts" name="post_work_starts" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="post_work_ends">Post-Work Ends:</label>
+                <input type="date" id="post_work_ends" name="post_work_ends" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="floor_completed">Floor Completed:</label>
+                <input type="date" id="floor_completed" name="floor_completed" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="floor_closes">Floor Closes:</label>
+                <input type="date" id="floor_closes" name="floor_closes" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="floor_opens">Floor Opens:</label>
+                <input type="date" id="floor_opens" name="floor_opens" class="form-control">
+            </div>            
+            <button type="submit" class="btn float-right">Save Schedule</button>
+        </form>        
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    $('#modelLoader').hide();
+    $('#roomModelTable').show();
+
+    $('#roomModelTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [5, 10, 15, 20],
+        dom : 'Bfr<"row pt-5"<"col-sm-12"t>><"row pt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+			buttons : [{
+	            extend: 'excel',
+	            text: 'Export To Excel',
+                className:'custom-download-btn'
+	        }]
+    });
+
+    $('#addModelBtn').click(function () {
+    $('#modelModalTitle').text("Add Schedule");
+    $('#model-id').val("");
+    $('#phase').val("");
+    // $('#phase').prop('readonly', false);
+    $('#floor').val("");
+    // $('#floor').prop('readonly', false);
+    $('#production_starts').val("");
+    $('#production_ends').val("");
+    $('#shipping_depature').val("");
+    $('#shipping_arrival').val("");
+    $('#custom_clearing_starts').val("");
+    $('#custom_clearing_ends').val("");
+    $('#arrive_on_site').val("");
+    $('#pre_work_starts').val("");
+    $('#pre_work_ends').val("");
+    $('#install_starts').val("");
+    $('#install_ends').val("");
+    $('#post_work_starts').val("");
+    $('#post_work_ends').val("");
+    $('#floor_completed').val("");
+    $('#floor_closes').val("");
+    $('#floor_opens').val("");
+    $('#modelModal').fadeIn();
+    $('#modelModalOverlay').fadeIn();
+                });
+
+$(document).on('click', '.editModelBtn', function () {
+    $('#modelModalTitle').text("Edit Schedule");
+    $('#model-id').val($(this).data('id'));
+    $('#phase').val($(this).data('phase'));
+    // $('#phase').prop('readonly', true);
+    $('#floor').val($(this).data('floor'));
+    // $('#floor').prop('readonly', true);
+    $('#production_starts').val($(this).data('production_starts'));
+    $('#production_ends').val($(this).data('production_ends'));
+    $('#shipping_depature').val($(this).data('shipping_depature'));
+    $('#shipping_arrival').val($(this).data('shipping_arrival'));
+    $('#custom_clearing_starts').val($(this).data('custom_clearing_starts'));
+    $('#custom_clearing_ends').val($(this).data('custom_clearing_ends'));
+    $('#arrive_on_site').val($(this).data('arrive_on_site'));
+    $('#pre_work_starts').val($(this).data('pre_work_starts'));
+    $('#pre_work_ends').val($(this).data('pre_work_ends'));
+    $('#install_starts').val($(this).data('install_starts'));
+    $('#install_ends').val($(this).data('install_ends'));
+    $('#post_work_starts').val($(this).data('post_work_starts'));
+    $('#post_work_ends').val($(this).data('post_work_ends'));
+    $('#floor_completed').val($(this).data('floor_completed'));
+    $('#floor_closes').val($(this).data('floor_closes'));
+    $('#floor_opens').val($(this).data('floor_opens'));
+    $('#modelModal').fadeIn();
+    $('#modelModalOverlay').fadeIn();
+    });
+
+    $(document).on('click', '.deleteModelBtn', function () {
+        const modelId = $(this).data('id');
+        if (confirm("Are you sure you want to delete this item?")) {
+            $.ajax({
+                url: '{% url "delete_schedule" %}',
+                type: 'POST',
+                data: {
+                    model_id: modelId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Inventory item deleted successfully!");
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $('#modelForm').submit(function (e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        const formAction = $(this).attr('action');
+
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#modelModal').fadeOut();
+                    $('#modelModalOverlay').fadeOut();
+
+                    if ($('#model-id').val()) {
+                        toastr.success("Inventory updated successfully!");
+                    } else {
+                        toastr.success("Inventory added successfully!");
+                    }
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    toastr.error(response.error || 'Something went wrong!');
+                }
+            }
+        });
+    });
+
+    $('#closeModelModal, #modelModalOverlay').click(function () {
+        $('#modelModal').fadeOut();
+        $('#modelModalOverlay').fadeOut();
+    });
+});
+</script>
+
+{% endblock %}

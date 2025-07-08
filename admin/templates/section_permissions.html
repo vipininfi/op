@@ -1,0 +1,79 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<div class="loader" id="permissionsLoader">
+    <img src="{% static 'loaders/ajax-loader.gif'  %}" />
+</div>
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 ">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2">Section Permissions</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <a href="#" id="add_permissions" class="btn btn-default add-new-btn">+ Add New</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="permissions_table" class="table" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    let table_cols = [
+        { "title": 'Section Type' },
+        { "title": 'Section Name' },
+        { "title": 'Section Permissions' },
+        { "title": 'Action' }
+    ]
+    $(document).ready(function () {
+        $('#permissionsLoader').show();
+        function get_section_permissions() {
+            let link = "{% url 'get_permissions' %}"
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: link,
+                    data: { 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+                    success: function (data) {
+                        if (data.success) {
+                            $('#permissionsLoader').hide();
+                            $('#permissions_table').dataTable({
+                                "data": data.permissions_list,
+                                "ordering": false,
+                                "columns": table_cols,
+                                "bDestroy": true,
+                            });
+                            $('#permissions_table').show();
+                        } else {
+                            toastr.error(data.message)
+                        }
+                    }
+                })
+            }
+            catch (err) {
+                console.log("error in get_section_permissions ::::::: ", err)
+            }
+        }
+        get_section_permissions();
+    });
+</script>
+
+{% endblock %}

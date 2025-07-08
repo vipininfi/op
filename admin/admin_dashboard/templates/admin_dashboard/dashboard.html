@@ -1,0 +1,69 @@
+{% extends 'frontend_base.html' %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome -->
+<h2 class="text-center text-secondary mb-4 mt-4">Welcome, {{ name }}</h2>
+
+<div class="row justify-content-center">
+    {% if 'installation' in roles %}
+        <div class="col-lg-6 col-md-9 col-12 mb-4">
+            <div class="card action-card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle mb-3 bg-secondary text-white">
+                        <span class="material-icons md-36">construction</span>
+                    </div>
+                    <h5 class="card-title text-secondary font-weight-bold">Installation</h5>
+                    <p class="card-text text-muted">Manage and submit room installation checklists.</p>
+                    <a href="{% url 'installation_form' %}" class="btn btn-secondary btn-block btn-lg">Installation Form</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if 'inventory' in roles %}
+        <div class="col-lg-6 col-md-9 col-12 mb-4">
+            <div class="card action-card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle mb-3 bg-secondary text-white">
+                        <span class="material-icons md-36">local_shipping</span>
+                    </div>
+                    <h5 class="card-title text-secondary font-weight-bold">Inventory Shipment</h5>
+                    <p class="card-text text-muted">Record outgoing inventory shipments.</p>
+                    <a href="{% url 'inventory_shipment' %}" class="btn btn-secondary btn-block btn-lg">Start Shipment</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-9 col-12 mb-4">
+            <div class="card action-card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle mb-3 bg-secondary text-white">
+                        <span class="material-icons md-36">inventory_2</span>
+                    </div>
+                    <h5 class="card-title text-secondary font-weight-bold">Inventory Received</h5>
+                    <p class="card-text text-muted">Log incoming inventory to the system.</p>
+                    <a href="{% url 'inventory_received' %}" class="btn btn-secondary btn-block btn-lg">Inventory Received</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-9 col-12 mb-4">
+            <div class="card action-card shadow border-0 h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle mb-3 bg-secondary text-white">
+                        <span class="material-icons md-36">warehouse</span>
+                    </div>
+                    <h5 class="card-title text-secondary font-weight-bold">Inventory Pull</h5>
+                    <p class="card-text text-muted">Manage inventory pull requests and records.</p>
+                    <a href="{% url 'inventory_pull' %}" class="btn btn-secondary btn-block btn-lg">Inventory Pull</a>
+                </div>
+            </div>
+        </div>
+        
+        {# The Room Wise Products and Floor Wise Products cards have been moved to the header in frontend_base.html #}
+
+    {% endif %}
+</div>
+{% endblock %}

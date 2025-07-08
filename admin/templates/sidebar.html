@@ -1,0 +1,289 @@
+{% load static %}
+<style>
+@media only screen and (min-width: 992px) {
+    .log-out {
+        display: none !important;
+    }
+}
+
+/* Active link styling */
+.nav-link.active {
+    background-color: #57626a !important;
+    color: white !important;
+}
+
+/* Ensuring icons and text inside active links are also white */
+.nav-link.active i,
+.nav-link.active p {
+    color: white !important;
+}
+@media (max-width: 991px) {
+    .sidebar {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 260px;
+        z-index: 1040;
+        background-color: white;
+    }
+
+    .sidebar.show-mobile {
+        display: block;
+		transform: translateX(0);
+    }
+
+    .main-panel {
+        margin-left: 0 !important;
+    }
+}
+
+
+</style>
+
+<!-- Sidebar Toggle Button (visible only on mobile) -->
+<button id="mobileSidebarToggle" class="btn btn-outline-secondary d-lg-none" style="position: absolute; top: 10px; right: 32px; z-index: 1050;">
+    <i class="material-icons">menu</i>
+</button>
+
+<div class="sidebar" data-color="purple" data-background-color="white" data-image="{% static 'img/sidebar-1.jpg' %}">
+    <div class="logo">
+        <a href="{% url 'admin_dashboard:dashboard'  %}" class="simple-text logo-normal">
+            <img class="img-fluid" width="200" height="40px" src="{% static 'img/LOGO.png' %}" />
+        </a>
+    </div>
+
+    <div class="sidebar-wrapper">
+        <ul class="nav">
+			<li class="nav-item dashboard li-elements-js" id="dashboard">
+                <a class="nav-link" id="dashboard-link" href="{% url 'admin_dashboard:dashboard' %}">
+                    <i class="material-icons">dashboard</i>
+                    <p class="dashboard-link">Dashboard</p>
+                </a>
+            </li>
+            <li class="nav-item chat li-elements-js" id="chatbot">
+                <a class="nav-link" id="chat-link" href="{% url 'chatbot' %}">
+                    <i class="material-icons">chat</i>
+                    <p class="chat-link">Chat Bot</p>
+                </a>
+            </li>
+			{% if request.user.is_superuser %}
+				<li class="nav-item display_prompts li-elements-js" id="prompt">
+					<a class="nav-link" id="prompt-link" href="{% url 'edit_prompts' %}">
+						<i class="material-icons">edit</i>
+						<p class="display_prompts-link">Edit Prompt</p>
+					</a>
+				</li>
+				{% if request.user.is_superuser or 'administrator' in request.session.user_roles %}
+				<li class="nav-item user_management li-elements-js" id="management">
+					<a class="nav-link" id="management-link" href="{% url 'user_management' %}">
+						<i class="material-icons">management</i>
+						<p class="user_management-link">User Management</p>
+					</a>
+				</li>
+				{% endif %}
+
+				<li class="nav-item admin_issues_nav li-elements-js" id="admin_issues_li">
+					<a class="nav-link" id="admin_issues_link" href="{% url 'admin_dashboard:admin_issue_list' %}">
+						<i class="material-icons">bug_report</i>
+						<p>Issues</p>
+					</a>
+				</li>
+				<li class="nav-item chat_history li-elements-js" id="chat_history">
+					<a class="nav-link" id="management-link" href="{% url 'chat_history' %}">
+						<i class="material-icons">chat</i>
+						<p class="chat_history-link">Chat History</p>
+					</a>
+				</li>
+				<li class="nav-item manage-rooms">
+					<a class="nav-link" data-toggle="collapse" href="#collapseRoom" role="button" aria-expanded="false" aria-controls="collapseRoom">
+						<i class="material-icons">room</i>
+						<p style="color:#666666 !important">
+							Hotel Data
+							<span><i class="fas fa-caret-down caret-down"></i></span>
+							<span><i class="fas fa-caret-up caret-up"></i></span>
+						</p>
+					</a>
+					<div class="collapse" id="collapseRoom">
+						<ul class="nav" id="collapseRoomId" data-parent-id="request-parent-list">
+							<li class="nav-item rooms li-elements-js" id="room">
+								<a class="nav-link" id="rooms-link" href="{% url 'room_data_list' %}">
+									<i class="material-icons">meeting_room</i>
+									<p class="rooms-link">Room Data</p>
+								</a>
+							</li>
+							<li class="nav-item room-models li-elements-js" id="room_model_list">
+								<a class="nav-link" id="room-models-link" href="{% url 'room_model_list' %}">
+									<i class="material-icons">category</i>
+									<p class="room-models-link">Room Models</p>
+								</a>
+							</li>
+							<li class="nav-item inventory li-elements-js" id="inventory_list">
+								<a class="nav-link" id="inventory-link" href="{% url 'inventory_list' %}">
+									<i class="material-icons">inventory</i>
+									<p class="inventory-link">inventory</p>
+								</a>
+							</li>
+							<li class="nav-item install li-elements-js" id="install_list">
+								<a class="nav-link" id="install-link" href="{% url 'install_list' %}">
+									<i class="material-icons">build</i>
+									<p class="install-link">install</p>
+								</a>
+							</li>	
+							<li class="nav-item products li-elements-js" id="product_data_list">
+								<a class="nav-link" id="products-link" href="{% url 'product_data_list' %}">
+									<i class="material-icons">settings</i>
+									<p class="products-link">Product Data</p>
+								</a>
+							</li>
+							<li class="nav-item product-room-models li-elements-js" id="product_room_model_list">
+								<a class="nav-link" id="product-room-models-link" href="{% url 'product_room_model_list' %}">
+									<i class="material-icons">link</i>
+									<p class="product-room-models-link">Product Room Mapping</p>
+								</a>
+							</li>
+							<li class="nav-item schedule li-elements-js" id="schedule_list">
+								<a class="nav-link" id="schedule-link" href="{% url 'schedule_list' %}">
+									<i class="material-icons">build</i>
+									<p class="schedule-link">Schedule</p>
+								</a>
+							</li>
+
+					
+						</ul>
+					</div>
+				</li>
+			{% else %}
+				<li class="nav-item manage-rooms">
+					<a class="nav-link" data-toggle="collapse" href="#collapseRoom" role="button" aria-expanded="false" aria-controls="collapseRoom">
+						<i class="material-icons">room</i>
+						<p style="color:#666666 !important">
+							Hotel Data
+							<span><i class="fas fa-caret-down caret-down"></i></span>
+							<span><i class="fas fa-caret-up caret-up"></i></span>
+						</p>
+					</a>
+					<div class="collapse" id="collapseRoom">
+						<ul class="nav" id="collapseRoomId" data-parent-id="request-parent-list">
+
+							<li class="nav-item inventory li-elements-js" id="inventory_list">
+								<a class="nav-link" id="inventory-link" href="{% url 'inventory_list' %}">
+									<i class="material-icons">inventory</i>
+									<p class="inventory-link">inventory</p>
+								</a>
+							</li>
+							<li class="nav-item schedule li-elements-js" id="schedule_list">
+								<a class="nav-link" id="schedule-link" href="{% url 'schedule_list' %}">
+									<i class="material-icons">build</i>
+									<p class="schedule-link">Schedule</p>
+								</a>
+							</li>
+						</ul>
+					</div>
+				</li>
+			{% endif %}
+
+            <li class="nav-item log-out">
+                <a class="nav-link" href="{% url 'logout' %}">
+                    <i class="fas fa-user"></i>
+                    <p class="log-out-link">Log Out</p>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const currentUrl = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar-wrapper .nav-link');
+
+    navLinks.forEach(link => {
+        const liParent = link.closest('li.nav-item');
+
+        link.classList.remove('active');
+        if (liParent) {
+            liParent.classList.remove('active');
+        }
+
+        if (link.getAttribute('href') === currentUrl) {
+            link.classList.add('active');
+            if (liParent) {
+                liParent.classList.add('active');
+            }
+        }
+    });
+
+    const activeLinkInCollapse = document.querySelector('.collapse .nav-link.active');
+    if (activeLinkInCollapse) {
+        const collapseElement = activeLinkInCollapse.closest('.collapse');
+        if (collapseElement && !collapseElement.classList.contains('show')) {
+            var bsCollapse = new bootstrap.Collapse(collapseElement, {
+                toggle: false
+            });
+            bsCollapse.show();
+        }
+    }
+});
+</script>
+
+<script type="text/javascript">
+	function hideAllElements(perm_list){
+		try{
+			let promise = new Promise((resolve,reject)=>{
+				$(".li-elements-js").each(async(index,ele)=>{
+				let permisssion_status = ele.id
+				if(!perm_list.includes(permisssion_status)){
+					ele.style.display = "none"
+				}
+				})
+				resolve(true)
+			})
+			return promise;
+		}
+		catch(err){
+			console.log("error in hideAllElements :::: ",err)
+		}
+	}
+	
+	async function handleUserPermissions(perm_list){
+		let elementHidden = await hideAllElements(perm_list)
+
+		$.getchildrenLength = function(){
+				return ($(this).css('display') != 'none')
+		}
+
+		if(elementHidden){
+
+			if ($("#collapseRoomId").children().filter($.getchildrenLength).length < 1) {
+				const parent_id = $("#collapseRoomId").attr("data-parent-id");
+				$("#" + parent_id).hide();
+			}
+
+		}
+	}
+	
+
+	$('.caret-down').css('display','block')
+	$('.caret-up').css('display','none')
+	$('.manage-rooms').on('click',function(){
+		if($(this).find('.caret-down').css('display') === 'block'){
+			$('.caret-down').css('display','none')
+			$('.caret-up').css('display','block')
+		}
+		else{
+			$('.caret-up').css('display','none')
+			$('.caret-down').css('display','block')
+		}
+	})
+	document.addEventListener("DOMContentLoaded", function () {
+		const sidebar = document.querySelector('.sidebar');
+		const toggleBtn = document.getElementById('mobileSidebarToggle');
+
+		toggleBtn.addEventListener('click', function () {
+			sidebar.classList.toggle('show-mobile');
+		});
+	});
+	
+</script>

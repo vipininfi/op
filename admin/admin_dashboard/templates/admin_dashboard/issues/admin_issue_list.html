@@ -1,0 +1,158 @@
+{% extends 'dashboard_layout.html' %}
+
+{% load static %}
+
+{% block title %}Admin - All Issues{% endblock %}
+
+{% block content %}
+<style>
+    .edit-button{
+        background-color: #5a6268;
+        &:hover{
+            background-color: #5a6268;
+        }
+    }
+    .page-item.active .page-link {
+    background-color: #5a6268 !important;  /* Your desired color */
+    border-color: #5a6268 !important;
+    color: #fff !important;
+    }
+    .filter-button {
+    background-color: #5a6268;
+    border-color: #5a6268;
+    color: #fff;
+}
+.filter-button:hover {
+    background-color: #4e555b; /* slightly darker for hover effect */
+    border-color: #4e555b;
+}
+</style>
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %} {# Moved messages inside the card structure for consistency #}
+                <div class="card">
+                    <div class="card-header card-header-primary d-flex justify-content-between">
+                        <h4 class="card-title pt-2 text-dark">Admin - All Issues</h4>
+                        <a href="{% url 'admin_dashboard:admin_issue_create' %}" class="btn btn-secondary mb-3 text-white" style="background-color: #5a6268; border-color: #5a6268;">Create New Issue</a>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" class="row g-2 mb-3 align-items-end" style="background: #f8f9fa; border-radius: 8px; padding: 12px 8px; box-shadow: 0 1px 4px rgba(90,98,104,0.04);">
+                            <div class="col-12 col-md-2 mb-2 mb-md-0">
+                                <input type="text" name="q" class="form-control border-secondary" placeholder="Search by title..." value="{{ search_query|default:'' }}">
+                            </div>
+                            <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                <select name="status" class="form-select">
+                                    <option value="" class="text-secondary">All Statuses</option>
+                                    {% for value, label in all_statuses %}
+                                        <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-2   mb-2 mb-md-0">
+                                <select name="type" class="form-select">
+                                    <option value="" class="text-secondary">All Types</option>
+                                    {% for value, label in all_types %}
+                                        <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                <select name="created_by" class="form-select">
+                                    <option value="" class="text-secondary">All Creators</option>
+                                    {% for user in all_users %}
+                                        <option value="{{ user.id }}" {% if selected_created_by == user.id|stringformat:"s" %}selected{% endif %}>{{ user.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-2 mb-2 mb-md-0">
+                                <select name="assignee" class="form-select">
+                                    <option value="" class="text-secondary">All Assignees</option>
+                                    {% for user in all_users %}
+                                        <option value="{{ user.id }}" {% if selected_assignee == user.id|stringformat:"s" %}selected{% endif %}>{{ user.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-2 col-md-2">
+                                <button type="submit" class="btn filter-button w-100">Filter</button>
+                            </div>
+                        </form>
+                        {% if issues_page.object_list %}
+                            <div class="table-responsive"> {# Added for consistency #}
+                                <table class="table table-striped table-hover"> {# Kept table-hover, chat_history uses table-striped #}
+                                    <thead class="text-secondary"> {# Consistent with chat_history.html #}
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Title</th>
+                                            <th>Status</th>
+                                            <th>Type</th>
+                                            <th>Created By</th>
+                                            <th>Assigned To</th>
+                                            <th>Hotel Admin Visible?</th>
+                                            <th>Created At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for issue in issues_page.object_list %}
+                                            <tr>
+                                                <td>{{ issue.id }}</td>
+                                                <td>{{ issue.title }}</td>
+                                                <td>
+                                                    <span class="text-{% if issue.status == 'OPEN' %}primary{% elif issue.status == 'WORKING' %}warning{% elif issue.status == 'PENDING' %}info{% elif issue.status == 'CLOSE' %}success{% else %}secondary{% endif %}">
+                                                        {{ issue.get_status_display }}
+                                                    </span>                                                    
+                                                </td>  
+                                                <td>{{ issue.get_type_display }}</td>
+                                                <td>{{ issue.created_by.name }}</td>
+                                                <td>{{ issue.assignee.name|default:"-" }}</td>
+                                                <td>{% if issue.is_for_hotel_owner %}Yes{% else %}No{% endif %}</td>
+                                                <td>{{ issue.created_at|date:"Y-m-d H:i" }}</td>
+                                                <td>
+                                                    <a href="{% url 'admin_dashboard:admin_issue_edit' issue.id %}" class="btn btn-sm edit-button ">Edit</a>
+                                                    <a href="{% url 'admin_dashboard:admin_issue_detail' issue.id %}" class="btn btn-sm edit-button ">View</a>
+                                       
+                                                    {# Add delete button/logic if needed #}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {# Pagination Links - style might need adjustment if it doesn't fit the card body well #}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if issues_page.has_previous %}
+                                        <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                                        <li class="page-item"><a class="page-link" href="?page={{ issues_page.previous_page_number }}">Previous</a></li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">&laquo; First</span></li>
+                                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                    {% endif %}
+
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">Page {{ issues_page.number }} of {{ issues_page.paginator.num_pages }}.</span>
+                                    </li>
+
+                                    {% if issues_page.has_next %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ issues_page.next_page_number }}">Next</a></li>
+                                        <li class="page-item"><a class="page-link" href="?page={{ issues_page.paginator.num_pages }}">Last &raquo;</a></li>
+                                    {% else %}
+                                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                        <li class="page-item disabled"><span class="page-link">Last &raquo;</span></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+
+                        {% else %}
+                            <p>No issues found.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

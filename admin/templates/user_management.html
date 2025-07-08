@@ -1,0 +1,425 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Loader -->
+<div class="ajax-loader" id="permissionsLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">User Information</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="addUserBtn" class="btn">Add User</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="user_table" class="table" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Role</th>
+                                        <th>Email</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user_item in prompts %}
+                                    <tr>
+                                        <td>{{ user_item.name|title }}</td>
+                                        <td>{{ user_item.role|join:", "|title }}</td>                                          
+                                        <td>{{ user_item.email }}</td>
+                                        <td>{{ user_item.status|title }}</td>
+                                        <td>
+                                            <button class="btn btn-sm editUserBtn"
+                                                    data-id="{{ user_item.id }}"
+                                                    data-name="{{ user_item.name }}"
+                                                    data-email="{{ user_item.email }}"
+                                                    data-role="{{ user_item.role|join:", " }}"
+                                                    data-status="{{ user_item.status }}">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- Modal for Adding/Editing User -->
+<div id="userModal" class="modal">
+    <div class="modal-content mx-auto p-4" >
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 id="modalTitle">Add User</h2>
+            <span class="close" id="closeModal">×</span>
+        </div>
+            <form method="POST" action="{% url 'add_users_roles' %}" id="userForm">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" id="user_id">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            <div class="form-group" id="passwordGroup">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" class="form-control">
+                <small>Leave blank to keep current password (for editing).</small>
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="roleDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Role
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="roleDropdown">
+                        <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="inventory" data-role="inventory"> Inventory
+                            <span class="tick-mark">✔</span>
+                        </label>
+                        <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="installation" data-role="installation"> Installation
+                            <span class="tick-mark">✔</span>
+                        </label>
+                        <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="hotel_warehouse" data-role="hotel_warehouse">  Hotel Warehouse
+                            <span class="tick-mark">✔</span>
+                        </label>
+                         <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="admin" data-role="admin"> Hotel Owner
+                            <span class="tick-mark">✔</span>
+                        </label>
+                        <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="administrator" data-role="administrator"> Administrator
+                            <span class="tick-mark">✔</span>
+                        </label>
+                        <label class="dropdown-item">
+                            <input type="checkbox" class="role-checkbox" value="floormanager" data-role="floormanager"> Floor Manager
+                            <span class="tick-mark">✔</span>
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" name="role" id="selectedRoles">
+            </div>
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="statusDropdownButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Select Status
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="statusDropdownButton">
+                        <a class="dropdown-item status-option" href="#" data-value="activated">Activated</a>
+                        <a class="dropdown-item status-option" href="#" data-value="deactivated">Deactivated</a>
+                    </div>
+                </div>
+                <input type="hidden" name="status" id="selectedStatus">
+            </div>
+            <button type="submit" class="btn float-right" id="saveUser">
+                <span class="btn-text">Save</span>
+                <span class="btn-loader" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                </span>
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .dropdown-item input[type="checkbox"] {
+        margin-right: 12px; /* Increased space between checkbox and text */
+    }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .modal-content {
+        width: 80%;
+    }
+    .close {
+        float: right;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    .tick-mark {
+        display: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: green;
+    }
+    .dropdown-item input:checked + .tick-mark {
+        display: inline-block;
+    }
+
+    /* Small spinner for the button */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+        border-width: .2em;
+    }
+    .spinner-border {
+        display: inline-block;
+        vertical-align: text-bottom;
+        border: .25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        -webkit-animation: spinner-border .75s linear infinite;
+        animation: spinner-border .75s linear infinite;
+    }
+    @-webkit-keyframes spinner-border {
+        to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+    }
+    @keyframes spinner-border {
+        to { -webkit-transform: rotate(360deg); transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+    $(document).ready(function () {
+        $('#permissionsLoader').hide();
+        $('#user_table').show();
+
+        const userForm = $('#userForm');
+        const modalTitle = $('#modalTitle');
+        const userIdInput = $('#user_id');
+        const nameInput = $('#name');
+        const emailInput = $('#email');
+        const passwordInput = $('#password');
+        const passwordGroup = $('#passwordGroup');
+        const selectedRolesInput = $('#selectedRoles');
+        const roleDropdownButton = $('#roleDropdown');
+        const statusDropdownButton = $('#statusDropdownButton');
+        const selectedStatusInput = $('#selectedStatus');
+        const modalOverlay = $('.modal-overlay');
+        const userModal = $('#userModal');
+        const saveUserButton = $('#saveUser');
+        const saveUserButtonText = saveUserButton.find('.btn-text');
+        const saveUserButtonLoader = saveUserButton.find('.btn-loader');
+        const addUsersRolesUrl = "{% url 'add_users_roles' %}";
+        // Define edit_user_roles_url here. It will be set dynamically if needed, or you can create a placeholder URL.
+        // For now, we'll set it to an empty string and update it if an actual edit URL is available.
+        let editUserRolesUrl = "{% url 'add_users_roles' %}"; // Placeholder, will be replaced by actual edit URL later
+
+        function resetForm() {
+            userForm[0].reset();
+            modalTitle.text("Add User");
+            userForm.attr('action', addUsersRolesUrl);
+            userIdInput.val("");
+            passwordInput.prop('required', true);
+            passwordGroup.find('small').hide();
+            selectedRolesInput.val("");
+            roleDropdownButton.text("Select Role");
+            $('.role-checkbox').prop('checked', false).trigger('change');
+            selectedStatusInput.val("");
+            statusDropdownButton.text("Select Status");
+        }
+
+        // Open Add User modal
+        $('#addUserBtn').click(function () {
+            resetForm();
+            modalOverlay.fadeIn();
+            userModal.fadeIn();
+        });
+
+        // Open Edit User modal
+        $('.editUserBtn').click(function () {
+            resetForm(); // Reset form first to clear any previous add/edit state
+            modalTitle.text("Edit User");
+            // It's crucial to have a distinct URL for editing. 
+            // Replace "edit_user_placeholder" with the actual name of your edit URL pattern
+            try {
+                 editUserRolesUrl = "{% url 'edit_users_roles' user_id=0 %}".replace('0', $(this).data('id'));
+            } catch (e) {
+                console.warn("Edit URL pattern 'edit_users_roles' not defined yet. Using add URL as placeholder.");
+                // Fallback or error handling if the URL isn't set up yet.
+                // For now, we'll log a warning and potentially use the add URL,
+                // but this should be fixed by defining the edit URL.
+                 editUserRolesUrl = addUsersRolesUrl; // Or handle error appropriately
+            }
+            userForm.attr('action', editUserRolesUrl);
+
+
+            userIdInput.val($(this).data('id'));
+            nameInput.val($(this).data('name'));
+            emailInput.val($(this).data('email'));
+            passwordInput.prop('required', false); // Password not required for edit
+            passwordGroup.find('small').show();
+
+            const roles = $(this).data('role').toString().split(',').map(role => role.trim().toLowerCase());
+            selectedRolesInput.val(roles.join(', '));
+            $('.role-checkbox').each(function() {
+                $(this).prop('checked', roles.includes($(this).data('role').toString().toLowerCase()));
+            });
+            updateSelectedRolesText(); // Update dropdown text
+
+            const status = $(this).data('status').toString().toLowerCase();
+            selectedStatusInput.val(status);
+            statusDropdownButton.text(status.charAt(0).toUpperCase() + status.slice(1));
+            
+            modalOverlay.fadeIn();
+            userModal.fadeIn();
+        });
+
+
+        // Close modal
+        $('#closeModal, .modal-overlay').click(function () {
+            modalOverlay.fadeOut();
+            userModal.fadeOut();
+        });
+
+        // Role dropdown handling
+        let checkboxes = document.querySelectorAll(".role-checkbox");
+        
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener("change", function() {
+                updateSelectedRoles();
+                
+                // Administrator role handling is now simplified - no popup
+            });
+        });
+
+        function updateSelectedRoles() {
+            let selectedRoles = [];
+            document.querySelectorAll(".role-checkbox:checked").forEach(function(input) {
+                selectedRoles.push(input.value); // Use value attribute
+            });
+            selectedRolesInput.val(selectedRoles.join(", "));
+            updateSelectedRolesText();
+        }
+
+        function updateSelectedRolesText() {
+            let currentSelectedRoles = selectedRolesInput.val().split(", ").filter(Boolean);
+            if (currentSelectedRoles.length > 0) {
+                roleDropdownButton.text(currentSelectedRoles.map(r => r.charAt(0).toUpperCase() + r.slice(1)).join(", "));
+            } else {
+                roleDropdownButton.text("Select Role");
+            }
+        }
+        
+        // Status dropdown handling
+        $('.status-option').click(function(e) {
+            e.preventDefault();
+            const selectedValue = $(this).data('value');
+            selectedStatusInput.val(selectedValue);
+            statusDropdownButton.text($(this).text());
+            // Close the dropdown (optional, depends on desired UX)
+            $(this).closest('.dropdown-menu').removeClass('show');
+            $(this).closest('.dropdown').find('.dropdown-toggle').dropdown('toggle'); // Bootstrap 4/5 way to toggle
+        });
+
+
+        // Form submission
+        $('#userForm').submit(function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const url = form.attr('action');
+            const method = form.attr('method');
+            const isEditMode = !!$('#user_id').val();
+
+            // If editing and password is blank, remove it from data sent
+            let formData = form.serializeArray();
+            if (isEditMode && $('#password').val() === '') {
+                formData = formData.filter(item => item.name !== 'password');
+            }
+            
+            const serializedData = $.param(formData);
+
+
+            // Show loader and disable button
+            saveUserButton.prop('disabled', true);
+            saveUserButtonText.hide();
+            saveUserButtonLoader.show();
+
+            $.ajax({
+                url: url,
+                type: method,
+                data: serializedData,
+                success: function(response) {
+                    // Check if response is HTML or JSON
+                    if (typeof response === 'string' && response.includes('<!DOCTYPE html>')) {
+                        // Response is HTML, show generic success message
+                        alert("User created successfully!");
+                    } else {
+                        // Response is JSON
+                        alert(response.message || "User action successful!");
+                    }
+                    modalOverlay.fadeOut();
+                    userModal.fadeOut();
+                    location.reload();
+                },
+                error: function(xhr) {
+                    let errorMessage = "Error performing action.";
+                    if (xhr.responseJSON && xhr.responseJSON.error) {
+                        errorMessage = xhr.responseJSON.error;
+                    } else if (xhr.responseText) {
+                         try {
+                            const parsed = JSON.parse(xhr.responseText);
+                            errorMessage = parsed.error || xhr.responseText;
+                        } catch (e) {
+                            errorMessage = xhr.responseText;
+                        }
+                    }
+                    alert(errorMessage);
+                },
+                complete: function() {
+                    // Hide loader and enable button
+                    saveUserButton.prop('disabled', false);
+                    saveUserButtonText.show();
+                    saveUserButtonLoader.hide();
+                }
+            });
+        });
+        // Initial setup
+        updateSelectedRolesText(); // Ensure dropdown text is correct on page load if needed
+    });
+</script>
+
+<div>
+    {% include "chat_widget.html" %}
+</div>
+{% endblock %}

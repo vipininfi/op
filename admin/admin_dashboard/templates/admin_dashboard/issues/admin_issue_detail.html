@@ -1,0 +1,309 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% load crispy_forms_tags %} {# Assuming crispy_forms, otherwise use {{ comment_form.as_p }} #}
+{% load widget_tweaks %}
+{% load comment_colors %}
+{% block title %}Admin - Issue #{{ issue.id }}: {{ issue.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="margin-top: 50px!important;">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="card" style="height: 250px; margin-bottom: 5px;">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Issue : {{ issue.title|title }}</h4>
+            <span
+                class="badge fs-6 bg-{% if issue.status == 'OPEN' %}primary{% elif issue.status == 'WORKING' %}warning{% elif issue.status == 'PENDING' %}info{% elif issue.status == 'CLOSE' %}success{% else %}secondary{% endif %}">{{issue.get_status_display}}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <p><strong>Type:</strong> {{ issue.get_type_display|title }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <small class="text-muted">Reported by: {{issue.created_by.name|title}} on {{issue.created_at|date:"Y-m-d H:i"}}
+                                </small>
+                            </p>
+                        </div>
+                        {% if issue.assignee %}
+                        <div class="col-md-6">
+                            <p><small class="text-muted">Assigned to: {{ issue.assignee.name|title }}aaa</small></p>
+                        </div>
+                        {% endif %}
+                    </div>  
+                </div>
+            </div>
+            {% if issue.description %}
+            <div class="row">
+                <div class="col-md-12">
+                    <p><strong>Description:</strong> {{ issue.description|truncatechars:100 }}</p>
+                </div>
+            </div>
+            {% endif %}
+            <hr>
+            <div class="row">
+                <div class="col-md-8">
+                    {% if issue.observers.count > 0 %}
+                    <p><small class="text-muted">Observers:
+                            {% for observer in issue.observers.all %}
+                            {{ observer.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small></p>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex justify-content-end align-items-center gap-2">
+                        <!-- <a href="{% url 'admin_dashboard:admin_issue_list' %}" class="btn btn-secondary">Back to Admin Issue List</a> -->
+                        <a href="{% url 'admin_dashboard:admin_issue_edit' issue.id %}" class="btn  btn-sm primary">Edit Issue Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="comments-section" style="max-height: 520px; overflow-y: auto; border-radius: 10px;">
+        {% for comment in comment_data %}
+            <div class="d-flex mb-3 {% if comment.is_by_current_user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                {% if comment.is_by_current_user %}
+                    <div class="d-flex align-items-start flex-row-reverse" style="max-width: 70%;">
+                        <div class="ms-2">
+                            <div class="comment-avatar comment-avatar-current">
+                                {{ comment.commenter_name|slice:":2"|upper }}
+                            </div>
+                        </div>
+                        <div class="comment-bubble-current text-dark p-3 rounded-3">
+                            <small class="fw-bold">{{ comment.commenter_name|title }}</small>
+                            <p class="mb-1">{{ comment.text_content|linebreaksbr }}</p>
+                            {% if comment.media %}
+                                <div class="mt-2">
+                                    {% for media_item in comment.media %}
+                                        {% if media_item.type == 'image' %}
+                                            <a href="{{ media_item.url }}" target="_blank" class="d-inline-block mb-2">
+                                                <img src="{{ media_item.url }}" alt="{{ media_item.name }}" class="rounded" style="max-width: 200px; max-height: 200px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.3);">
+                                            </a>
+                                        {% elif media_item.type == 'video' %}
+                                            <div class="mb-2">
+                                                <a href="{{ media_item.url }}" target="_blank" class="text-decoration-none text-secondary">[Video: {{ media_item.name }}]</a>
+                                            </div>
+                                        {% else %}
+                                            <div class="mb-2">
+                                                <a href="{{ media_item.url }}" target="_blank" class="text-decoration-none text-secondary">[Media: {{ media_item.name }}]</a>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="text-secondary" style="opacity: 0.8;">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="d-flex align-items-start" style="max-width: 70%;">
+                        <div class="me-2">
+                            <div class="comment-avatar comment-avatar-other" style="background: {{ comment.commenter_id|bubble_color }};">
+                                {{ comment.commenter_name|slice:":2"|upper }}
+                            </div>
+                        </div>
+                        <div class="comment-bubble-other text-dark p-3 rounded-3">
+                            <small class="fw-bold">{{ comment.commenter_name|title }}</small>
+                            <p class="mb-1">{{ comment.text_content|linebreaksbr }}</p>
+                            {% if comment.media %}
+                                <div class="mt-2">
+                                    {% for media_item in comment.media %}
+                                        {% if media_item.type == 'image' %}
+                                            <a href="{{ media_item.url }}" target="_blank" class="d-inline-block mb-2">
+                                                <img src="{{ media_item.url }}" alt="{{ media_item.name }}" class="rounded" style="max-width: 200px; max-height: 200px; object-fit: cover; border: 1px solid rgba(255, 255, 255, 0.3);">
+                                            </a>
+                                        {% elif media_item.type == 'video' %}
+                                            <div class="mb-2">
+                                                <a href="{{ media_item.url }}" target="_blank" class="text-decoration-none text-primary">[Video: {{ media_item.name }}]</a>
+                                            </div>
+                                        {% else %}
+                                            <div class="mb-2">
+                                                <a href="{{ media_item.url }}" target="_blank" class="text-decoration-none text-primary">[Media: {{ media_item.name }}]</a>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted" style="opacity: 0.8;">{{ comment.created_at|date:"Y-m-d H:i" }}</small>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p class="text-muted text-center">No comments yet.</p>
+        {% endfor %}
+    </div>
+
+    {% if can_comment %}
+    <form method="post" enctype="multipart/form-data" class="comment-form position-relative" action="{% url 'admin_dashboard:admin_comment_create' issue.id %}">
+        {% csrf_token %}
+        <div class="comment-input-container d-flex align-items-end bg-white rounded-4 shadow-sm p-3 gap-2 flex-wrap" style="border: 2px solid whitesmoke; border-radius: 5px 0px 5px 0px;">
+            <div class="flex-grow-1">
+                <label for="{{ comment_form.text_content.id_for_label }}" class="visually-hidden">Your Comment</label>
+                {{ comment_form.text_content|add_class:"form-control comment-textarea-custom border-0"|attr:"placeholder:Write a comment..." }}
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <label for="{{ comment_form.images.id_for_label }}" class="attachment-btn btn btn-light border shadow-sm px-2 py-1" title="Attach Images">
+                    <i class="bi bi-images fs-5"></i>
+                </label>
+                {{ comment_form.images|add_class:"d-none"|attr:"multiple:true"|attr:"accept:image/*" }}
+                <label for="{{ comment_form.video.id_for_label }}" class="attachment-btn btn btn-light border shadow-sm px-2 py-1" title="Attach Video">
+                    <i class="bi bi-camera-reels fs-5"></i>
+                </label>
+                {{ comment_form.video|add_class:"d-none" }}
+                <button type="submit" class="send-btn btn-secondary rounded-circle d-flex align-items-center justify-content-center ms-2" title="Send Comment" style="width: 50px; height: 50px;">
+                    <i class="bi bi-send-fill fs-5"></i>
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% else %}
+    <p class="text-muted">Commenting is managed on this issue.</p>
+    {% endif %}
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.min.css">
+
+    <style>
+    .comment-input-container {
+        border: 1.5px solid #e0e0e0;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .comment-input-container:focus-within {
+        border-color: #1976d2;
+        box-shadow: 0 0 0 2px #1976d230;
+    }
+    .comment-textarea-custom {
+        min-height: 45px;
+        resize: none;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 1rem;
+        color: #333;
+        box-shadow: none;
+    }
+    .comment-textarea-custom:focus {
+        background: #fff;
+        outline: none;
+        box-shadow: none;
+    }
+    .comments-section {
+        background: #e9ecef;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background-size: cover;
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        padding: 0px 10px;
+    }
+
+    .comments-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #e9ecef;
+        opacity: 0.1;
+        z-index: -1;
+        padding: 0px 10px;
+
+    }
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
+
+    .comment-bubble {
+        transition: transform 0.2s ease;
+    }
+
+    .comment-bubble:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    .attachment-btn {
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    .attachment-btn:hover {
+        background: #e3f2fd;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+    }
+    .send-btn {
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+    .send-btn:hover {
+        background: #3C4858;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+    }
+    .rounded-pill {
+        border-radius: 50rem !important;
+    }
+    @media (max-width: 576px) {
+        .comments-section {
+            max-height: 400px;
+            padding: 10px;
+        }
+        .comment-textarea-custom {
+            min-height: 40px;
+            font-size: 14px;
+        }
+        .rounded-circle {
+            width: 35px !important;
+            height: 35px !important;
+            font-size: 14px !important;
+        }
+        .comment-bubble {
+            max-width: 85% !important;
+        }
+    }
+    .comment-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: bold;
+    }
+    .comment-avatar-current {
+        background: #0f0f1e;
+    }
+    .comment-avatar-other {
+        /* background set inline via bubble_color */
+    }
+    .comment-bubble-current {
+        background: rgba(132, 132, 132, 0.2)
+        backdrop-filter: blur(10px);
+        /* border: 1px solid rgba(59, 130, 246, 0.3); */
+        border-radius: 20px 20px 5px 20px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+    .comment-bubble-other {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px 20px 20px 5px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+    }
+    </style>
+    {% endblock %}

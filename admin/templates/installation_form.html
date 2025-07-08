@@ -1,0 +1,544 @@
+{% extends "frontend_base.html" %}
+{% load static %}
+
+{% block title %}Installation Control Form{% endblock %}
+
+{% block content %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+@media (max-width: 768px) {
+  .border.border-light {
+    border-radius: 11px !important;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  }
+  input[type='checkbox'] {
+      width: 22px;
+      height: 22px;
+    }
+  #search_room {
+    height: 40px;
+    font-size: 16px;
+    padding: 5px 15px;
+  }
+  .form-group {
+    padding: 8px;
+    margin: 10px 0 0;
+  }
+  .d-flex.flex-md-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .right-group {
+    margin-top: 6px;
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: left !important;
+    padding-bottom: 0 !important;
+  }
+  .left-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  .product-thumb {
+    margin: 10px 0 !important;
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
+.card{
+  font-size: 16px;
+}
+.form-control{
+  font-size: 16px;
+}
+@media (max-width: 576px) {
+  .btn-lg {
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+  }
+  .container-lg {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+@media (min-width: 769px) {
+  .form-group.d-flex.flex-md-row {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  .left-group {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    text-align: left !important;
+  }
+  .right-group {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+    text-align: right !important;
+    width: 200px !important;
+    min-width: 160px !important;
+  }
+}
+</style>
+<div class="container-lg my-5">
+    <div class="card shadow-sm rounded-4">
+        <div class="card-body p-4">
+            <h3 class="mb-4 text-center text-secondary py-4">Installation Control Form</h3>
+            <form method="post">
+                {% csrf_token %}
+                <!-- Room Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6 col-12 mb-3 mb-md-0">
+                        <label for="room_number" class="form-label" >Room #</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="room_number" id="room_number"  required>
+                            <button type="button" class="btn btn-secondary" id="search_room">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="search_spinner"></span>
+                                <span id="search_text">Search</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                        <label for="room_type" class="form-label">Room Type</label>
+                        <input type="text" class="form-control" name="room_type" id="room_type" readonly required>
+                    </div>
+                </div>
+                <!-- Product Information -->
+                <div id="check-items-wrapper">
+                    {% for product in product_list %}
+                    <div class="card mb-3">
+                        <div class="card-body p-3">
+                            <div class="row">
+                                <div class="col-12 col-md-4"><p><strong>Client ID:</strong> {{ product.client_id|default:"N/A" }}</p></div>
+                                <div class="col-12 col-md-4"><p><strong>Description:</strong> {{ product.description|default:"N/A" }}</p></div>
+                                <div class="col-12 col-md-4"><p><strong>Needed per Room:</strong> {{ product.quantity_needed_per_room|default:"0" }}</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <hr class="my-4">
+                <!-- Dynamic Check Items Render Here -->
+                <div id="check-items-wrapper-2"></div>
+                <hr class="my-4">
+                <!-- Submit Button -->
+                <div class="text-center">
+                    <div class="d-inline-flex flex-wrap gap-3">
+                        <button type="submit" class="btn btn-secondary btn-lg px-5 mr-3">Submit</button>
+                        <a href="{% url 'issue_create' %}" class="btn btn-secondary btn-lg px-4">Report New Issue</a>
+                    </div>
+                </div>
+            </form>
+            <!-- Full Image Modal -->
+            <div id="fullImageModal" style="display:none;visibility:hidden;position:fixed;z-index:9999;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;">
+              <img id="fullImage" src="" style="max-width:90vw;max-height:90vh;border-radius:8px;">
+            </div>
+<hr class="my-5">
+<h4 class="mb-3">Previous Summary</h4>
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped" id="summary-table">
+        <thead>
+          <tr>
+            <th>Room #</th>
+            <th>Prework</th>
+            <th>Product Arrival</th>
+            <th>Retouching</th>
+            <th>Product Installed</th>
+            <th>Pending Products</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for summary in previous_summaries %}
+          <tr>
+            <td>{{ summary.room_number }}</td>
+            <td>{{ summary.prework }}</td>
+            <td>{{ summary.product_arrival }}</td>
+            <td>{{ summary.retouching }}</td>
+            <td>{{ summary.product_installed }}</td>
+            <td>{{ summary.pending_products }}</td>
+            <td>
+              <button type="button" class="btn btn-secondary btn-sm edit-summary" data-room="{{ summary.room_number }}" data-roomtype="{{ summary.room_type }}">Edit</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center">No previous summaries found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <!-- Pagination controls -->
+{% if is_paginated %}
+<nav>
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+  </div>
+</div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Ensure modal is hidden on page load
+  $(function() {
+    $('#fullImageModal').hide().css('visibility', 'hidden');
+  });
+  $(document).ready(function () {
+    // Store initial state of checkboxes to track changes during a session
+    let initialCheckboxState = {};
+    
+    // Add custom CSS for our status indicators
+    $('<style>')
+      .prop('type', 'text/css')
+      .html(`
+        .previously-installed {
+          background-color: rgba(40, 167, 69, 0.1) !important;
+          border-left: 4px solid #28a745 !important;
+        }
+        .current-selection {
+          background-color: rgba(23, 162, 184, 0.1) !important;
+          border-left: 4px solid #17a2b8 !important;
+        }
+      `)
+      .appendTo('head');
+    $('#search_room').on('click', function () {
+      const roomNumber = $('#room_number').val();
+      if (!roomNumber) {
+        toastr.error("Please enter a room number");
+        return;
+      }
+
+      setLoading('search_room', true);
+      $('#select_all_section').hide(); // Hide select all section while loading
+
+      $.ajax({
+        url: "{% url 'get_room_type' %}",
+        type: "GET",
+        data: { room_number: roomNumber },
+        success: function (data) {
+          console.log("Received data:", data);
+          setLoading('search_room', false);
+          if (data.success) {
+            $('#room_type').val(data.room_type);
+            renderCheckItems(data.check_items, data.saved_items);
+            
+            // Add form submission handler to track what's actually being submitted
+            $('form').off('submit.track').on('submit.track', function() {
+              console.log('Form submitted with these checkboxes:');
+              $('.form-check-input').each(function() {
+                const id = $(this).attr('id');
+                const isChecked = $(this).is(':checked');
+                const wasModified = id && initialCheckboxState[id] !== undefined && 
+                                   initialCheckboxState[id] !== isChecked;
+                
+                if (id && wasModified) {
+                  console.log(`${id}: ${isChecked ? 'CHECKED' : 'UNCHECKED'} (Modified from ${initialCheckboxState[id]})`);
+                }
+              });
+              return true; // Allow form submission to continue
+            });
+          } else {
+            toastr.error("Room number does not exist");
+            $('#room_type').val('');
+            $('#check-items-wrapper-2').html('');
+          }
+          
+        },
+        error: function () {
+          toastr.error("Error fetching room type");
+          setLoading('search_room', false);
+          $('#room_type').val('');
+          $('#check-items-wrapper-2').html('');
+        }
+      });
+    });
+
+    function renderCheckItems(items, savedItems = []) {
+      const wrapper = $('#check-items-wrapper-2');
+      wrapper.html('');
+
+      // Show/hide select all section based on whether there are items
+      if (items.length > 0) {
+        $('#select_all_section').show();
+      } else {
+        $('#select_all_section').hide();
+      }
+
+      // Create a map of previously installed products to product_client_id
+      const installedItemsMap = {};
+      savedItems.forEach(item => {
+        if (item.install_id !== undefined && item.status === "YES" && item.product_client_id) {
+          // If a product is already installed (status YES), track it
+          if (!installedItemsMap[item.product_client_id]) {
+            installedItemsMap[item.product_client_id] = [];
+          }
+          installedItemsMap[item.product_client_id].push(item);
+        }
+      });
+
+      const savedItemsMap = {};
+      savedItems.forEach(item => {
+        if (item.install_id !== undefined) {
+          savedItemsMap[`detail-${item.install_id}`] = item;
+        }
+      });
+
+      // Track already processed products to avoid duplicates
+      const processedProducts = new Set();
+
+      items.forEach(item => {
+        const key = `${item.type}-${item.id}`;
+        const saved = savedItemsMap[key] || {};
+        
+        let isChecked = false;
+        let installedBy = "";
+        let installedOn = "";
+        let product_client_id = "";
+        let alreadyInstalled = false;
+        let installedCount = 0;
+        
+        if (item.type === "installation") {
+          isChecked = item.status === "YES";
+          installedBy = item.checked_by || "";
+          installedOn = item.check_on ? item.check_on.split("T")[0] : "";
+        } else if (item.type === "detail") {
+          product_client_id = item.client_id || saved.product_client_id || "";
+          
+          // Check if this product is already installed
+          if (product_client_id && installedItemsMap[product_client_id]) {
+            const installedItems = installedItemsMap[product_client_id];
+            installedCount = installedItems.length;
+            
+            // Determine if this specific item was already installed
+            const matchingInstalled = installedItems.find(installed => 
+              installed.install_id === item.id || 
+              (saved.install_id && installed.install_id === saved.install_id)
+            );
+            
+            if (matchingInstalled) {
+              isChecked = true;
+              installedBy = matchingInstalled.installed_by || "";
+              installedOn = matchingInstalled.installed_on ? matchingInstalled.installed_on.split("T")[0] : "";
+              alreadyInstalled = true;
+            }
+          }
+          
+          // If not specifically identified as already installed, check if saved
+          if (!alreadyInstalled) {
+            isChecked = saved.status === "YES";
+            installedBy = saved.installed_by || "";
+            installedOn = saved.installed_on ? saved.installed_on.split("T")[0] : "";
+          }
+        }
+        
+        const requiredQty = item.required_quantity || item.quantity_needed_per_room || 0;
+        const floorQty = item.floor_quantity || 0;
+        // const canCheck = floorQty >= requiredQty; // No longer needed for frontend
+        
+        // For products, check if we already have a row for this product client ID
+        if (item.type === "detail" && product_client_id) {
+          // If we've already processed this product and it's already installed, skip it
+          if (processedProducts.has(product_client_id) && alreadyInstalled) {
+            return; // Skip this item
+          }
+          processedProducts.add(product_client_id);
+        }
+        
+        // Create special classes for different item states
+        let itemClass = "";
+        if (alreadyInstalled && installedOn && installedBy) {
+          // Previously installed in a past session
+          itemClass = "previously-installed bg-light";
+        } else if (isChecked) {
+          // Selected in current session
+          itemClass = "current-selection bg-info-light";
+        }
+        
+        // Build HTML using string concatenation to avoid template literal syntax errors
+        let html = '<div class="form-group mb-3 border border-light rounded-top d-flex flex-md-row flex-column align-items-stretch">';
+        html += '<div class="left-group" style="flex:1 1 auto; min-width:0;">';
+        html += '<div class="form-check mb-2">';
+        html += '<input type="hidden" name="step_' + item.type + '_' + item.id + '" value="off">';
+        
+        // Only lock items that were installed in previous sessions with confirmed install data
+        // We want a clear threshold for "permanent" vs "in progress" installs
+        const fromPreviousSession = item.type === "installation" ? 
+          (alreadyInstalled && installedOn && installedBy) : 
+          false; // Never lock product items so they can be unchecked if needed
+        
+        if (fromPreviousSession) {
+          // Only installation steps can be locked - product items are always changeable
+          html += '<input class="form-check-input" type="checkbox" disabled checked>';
+          html += '<input type="hidden" name="step_' + item.type + '_' + item.id + '" value="on">';
+          html += '<input type="hidden" name="previous_install_' + item.type + '_' + item.id + '" value="true">';
+        } else {
+          // All product items and new installation steps are toggleable
+          html += '<input class="form-check-input" type="checkbox" name="step_' + item.type + '_' + item.id + '" id="step_' + item.type + '_' + item.id + '" value="on" ' + (isChecked ? 'checked' : '') + '>';
+          
+          // Add a data attribute to track items checked in current session
+          if (isChecked) {
+            html += '<input type="hidden" class="current-session-flag" name="current_session_' + item.type + '_' + item.id + '" value="true">';
+          }
+        }
+        
+        html += '<input type="hidden" name="product_id_' + item.type + '_' + item.id + '" value="' + product_client_id + '">';
+        html += '<label class="form-check-label" for="step_' + item.type + '_' + item.id + '">';
+        html += item.label;
+        // Add thumbnail if image_url exists
+        if (item.image_url) {
+          html += ' <img src="' + item.image_url + '" class="product-thumb" style="width:40px;height:40px;object-fit:cover;cursor:pointer;border-radius:4px;margin:0 10px;" onclick="showFullImage(\'' + item.image_url + '\')" />';
+        }
+        
+        if (fromPreviousSession) {
+          html += ' <span class="badge bg-success text-white ml-2">Previously Installed</span>';
+        } else if (isChecked) {
+          html += ' <span class="badge bg-info text-white ml-2">Selected for Installation</span>';
+        }
+        
+        html += '</label>';
+        // Only show requirements for detail (product) items, not for installation steps
+        if (item.type === "detail") {
+          html += '<div class="text-muted" style="font-size: 0.95em; margin-left: 0.5rem; text-align: left;">';
+          html += 'Required: ' + requiredQty;
+          if (installedCount > 0) {
+            html += ' <span class="text-success"> (' + installedCount + ' previously installed)</span>';
+          }
+          html += '</div>';
+        }
+        html += '</div>';
+        html += '</div>';
+        html += '<div class="right-group" style="flex:0 0 auto; margin-left:auto; text-align:right; width:200px; min-width:160px;">';
+        html += '<input type="date" readonly class="form-control" style="width:100%;" name="date_' + item.type + '_' + item.id + '" value="' + installedOn + '">';
+        html += '</div>';
+        html += '</div>';
+        wrapper.append(html);
+      });
+      
+      // After rendering all items, save their initial state
+      setTimeout(saveInitialCheckboxState, 100);
+    }
+
+    // After rendering check items, save their initial state
+    function saveInitialCheckboxState() {
+      initialCheckboxState = {};
+      $('.form-check-input').each(function() {
+        const id = $(this).attr('id');
+        if (id) {
+          initialCheckboxState[id] = $(this).is(':checked');
+        }
+      });
+    }
+    
+    // Fill checked_by and check_on when checkbox is ticked
+    $(document).on("change", ".form-check-input", function () {
+      const checkbox = $(this);
+      const checkboxId = checkbox.attr("id");
+      const idParts = checkboxId.split("_"); // ["step", "detail", "23"]
+      const type = idParts[1];
+      const id = idParts[2];
+
+      const isChecked = checkbox.is(":checked");
+      const currentDate = new Date().toISOString().split("T")[0];
+      const currentUser = "{{ invited_user.name|escapejs }}";
+      
+      // Get the parent row to apply visual indicators
+      const parentRow = checkbox.closest('.form-group.row');
+      
+      if (isChecked) {
+        // Add checked state and visual indicator
+        $(`input[name="date_${type}_${id}"]`).val(currentDate);
+        $(`input[name="checked_by_${type}_${id}"]`).val(currentUser);
+        parentRow.addClass('current-selection');
+        
+        // If this was a change from initial state, mark it
+        if (initialCheckboxState[checkboxId] === false) {
+          parentRow.find('.form-check-label').append(' <span class="badge bg-warning text-white ml-2">Modified</span>');
+        }
+      } else {
+        // Remove checked state and visual indicator
+        $(`input[name="date_${type}_${id}"]`).val("");
+        $(`input[name="checked_by_${type}_${id}"]`).val("");
+        parentRow.removeClass('current-selection');
+        
+        // If this was a change from initial state, mark it
+        if (initialCheckboxState[checkboxId] === true) {
+          parentRow.find('.form-check-label').append(' <span class="badge bg-warning text-white ml-2">Modified</span>');
+        }
+      }
+      
+      // Add a hidden input to track that this checkbox was modified
+      if (initialCheckboxState[checkboxId] !== undefined && initialCheckboxState[checkboxId] !== isChecked) {
+        if (!parentRow.find('input[name^="modified_"]').length) {
+          parentRow.append(`<input type="hidden" name="modified_${type}_${id}" value="true">`);
+        }
+      }
+    });
+
+    // Toastr for Django messages
+    {% if messages %}
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "timeOut": "4000"
+    };
+    {% for message in messages %}
+      {% if message.tags == "success" %}
+        toastr.success("{{ message|escapejs }}");
+      {% elif message.tags == "error" %}
+        toastr.error("{{ message|escapejs }}");
+      {% endif %}
+    {% endfor %}
+    {% endif %}
+    
+    // Handle edit button click in the previous summary table
+    $('.edit-summary').on('click', function() {
+      const roomNumber = $(this).data('room');
+      
+      // Set the room number in the search field
+      $('#room_number').val(roomNumber);
+      
+      // Trigger the search button click to load room data
+      $('#search_room').trigger('click');
+      
+      // Scroll to the top of the form for better UX
+      $('html, body').animate({
+        scrollTop: $("#room_number").offset().top - 100
+      }, 500);
+      
+      // Visual feedback
+      toastr.info(`Loading details for room ${roomNumber}...`);
+    });
+  });
+  function showFullImage(url) {
+    $('#fullImage').attr('src', url);
+    $('#fullImageModal').css('visibility', 'visible').fadeIn();
+  }
+  $('#fullImageModal').click(function() {
+    $(this).fadeOut(function() {
+      $(this).css('visibility', 'hidden');
+    });
+  });
+</script>
+{% endblock %}

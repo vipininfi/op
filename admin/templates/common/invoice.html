@@ -1,0 +1,229 @@
+<div id="invoice" class="container p-4" style="visibility: hidden;z-index: -1;position: absolute;">
+    <div class="row">
+        <div class="col col-12" style="text-align: center; padding-bottom: 2rem">
+            <image src="https://winkit-software-images.s3.amazonaws.com/geeker_logo.png" alt="tetch"
+                style="width: 150;"></image>
+        </div>
+        <div class="col col-12" style="text-align: center; font-size: 30px; font-weight: bold;">
+            <b>Thanks for using Geeker service.</b>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 5rem; font-size: 16px;">
+        <div class="col col-9" id="detail-1">
+            <p>
+                <b>Invoice ID : </b> <span id="invoiceId"></span>
+            </p>
+            <p>
+                <b>Customer : </b> <span id="custName"></span>
+            </p>
+            <p>
+                <b>Date : </b> <span id="date"></span>
+            </p>
+            <p>
+                <b>Phone : </b> <span id="custPhone"></span>
+            </p>
+            <p>
+                <b>Payment status :</b> <span id="paymentStatus"></span>
+            </p>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 10rem; font-size: 16px;">
+        <div class="col col-12">
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>
+                            <b>Job Id </b>
+                        </th>
+                        <th>
+                            <b>Software Name </b>
+                        </th>
+                        <th>
+                            <b>Issue Summary </b>
+                        </th>
+                        <th>
+                            <b>Total time</b>
+                        </th>
+                        <th>
+                            <b>Time used from subscription</b>
+                        </th>
+                        <th>
+                            <b>Is Long Job</b>
+                        </th>
+                        <th>
+                            <b>Total Amount </b>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="job_id"></td>
+                        <td><span id="software"></span><span id="subSoftware"></span></td>
+                        <td id="issueDescription"></td>
+                        <td id="totalTime"></td>
+                        <td id="totalSubscriptionSeconds"></td>
+                        <td id="isLongJob"></td>
+                        <td id="totalCost"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row" style="margin-top: 3rem; font-size: 24px; background-color: #f6fbfe;">
+        <div class="col col-9" style="font-weight: bold;">
+            <b>Billed Amount</b>
+        </div>
+        <div class="col col-3" id="billedAmount"></div>
+    </div>
+</div>
+<script>
+    /**
+	 * This function makes ajax call and uses it's response to update the html elements of the invoice with respective data
+	 * @params : jobId (Type:String),
+	 * @response : javascript object,
+	 * @author :Kartik
+	 **/
+    function callAjaxToMakeInvoice(jobId){
+        try{
+            let link = "{% url 'invoice_data'  %}"
+            $.ajax({
+                "url":link,
+                "method":"POST",
+                "data":{"jobId":jobId,'csrfmiddlewaretoken': '{{ csrf_token }}'},
+                success:function(data){
+                    if(data.success){
+						document.getElementById("invoiceId").textContent = data.invoiceId
+                        document.getElementById("custName").textContent = data.custName
+                        document.getElementById("date").textContent = data.date
+                        document.getElementById("custPhone").textContent = data.custPhone
+                        document.getElementById("paymentStatus").textContent = data.paymentStatus
+                        document.getElementById("job_id").textContent = data.job_id
+                        document.getElementById("software").textContent = data.software
+                        if (data.subSoftware != ''){
+                            console.log("here")
+                            document.getElementById("subSoftware").textContent = data.subSoftware
+                        }
+                        else{
+                            document.getElementById("subSoftware").textContent = ''
+                        }
+                        document.getElementById("issueDescription").textContent = data.issueDescription
+                        document.getElementById("totalTime").textContent = data.totalTime
+                        document.getElementById("totalSubscriptionSeconds").textContent = data.totalSubscriptionSeconds
+                        document.getElementById("isLongJob").textContent = data.isLongJob
+                        document.getElementById("totalCost").textContent = data.totalCost
+                        document.getElementById("billedAmount").textContent = data.billedAmount
+						console.log("Data received>>>",data)
+						printElement(document.getElementById("invoice"))
+                    }
+                    else{
+                        toastr.error(data.message)
+                    }
+                },
+                 error: function (jqXHR, exception) {
+                    console.log("exception>>>>>",exception)
+                    toastr.error("Server error please contact developer")
+                 }
+            })
+        }
+        catch(err){
+            console.log("error in callAjaxToMakeInvoice >>>",err)
+        }
+    }
+
+    /**
+	 * This function calls another function to make ajax call by passing specific job id.
+	 * @params : event,
+	 * @response : none,
+	 * @author :Kartik
+	 **/
+    async function pdfInvoice(event){
+        try{
+            let jobId
+            if ( event.currentTarget.getAttribute("data-id") && (event.currentTarget.getAttribute("data-id") !== null || event.currentTarget.getAttribute("data-id") !== undefined)){
+                jobId = event.currentTarget.getAttribute("data-id")
+            }
+            else {
+                let arr = window.location.pathname.split('/')
+                jobId = arr[arr.length-1]
+            }
+            console.log("dataValue >>>>>>",jobId)
+            if(jobId){
+				await callAjaxToMakeInvoice(jobId)
+                // setTimeout(() => {
+                //     printElement(document.getElementById("invoice"));
+                // }, 300);
+            }
+            else{
+                toastr.error("Some server issue occured. please contact to developer")
+            }
+        }
+        catch(err){
+            toastr.error("Some server issue please contact developer")
+        }
+    }
+    
+    /**
+	 * This function opens browser print modal by passing invoice html into it.
+	 * @params : elem (Type:HTML),
+	 * @response : none,
+	 * @author :Kartik
+	 **/
+    function printElement(elem) {
+        var domClone = elem.cloneNode(true);
+        var $printSection = document.getElementById("printSection");
+        if (!$printSection) {
+            var $printSection = document.createElement("div");
+            $printSection.id = "printSection";
+            document.body.appendChild($printSection);
+        }
+        $printSection.innerHTML = "";
+        $printSection.appendChild(domClone);
+        window.print();
+    }
+</script>
+<style>
+    @media screen {
+        #printSection {
+            display: none;
+        }
+    }
+
+    @media print {
+        body {
+            visibility: hidden;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        #printSection,
+        #printSection * {
+            visibility: visible;
+        }
+
+        #printSection {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    }
+
+    #detail-1 p {
+        font-size: 16px;
+    }
+
+    #detail-1 p b {
+        font-weight: bold;
+    }
+
+    #table {
+        font-size: 16px;
+    }
+
+    #table thead tr th,
+    #table tbody tr td {
+        border: solid 1px lightgrey;
+        padding: 6px;
+    }
+</style>

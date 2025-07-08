@@ -1,0 +1,603 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    .report-table th, .report-table td {
+        border: 1px solid #dee2e6;
+        padding: 0.5rem;
+        vertical-align: middle;
+        text-align: left;
+        font-size: 0.85rem; /* Smaller font for dense report */
+    }
+    .report-table th.phase-header {
+        text-align: center;
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+    .report-table td.label {
+        font-weight: 500;
+        width: 20%;
+        background-color: #f8f9fa; /* Light grey for label cells */
+    }
+    .report-table td.date-value {
+        width: 15%;
+        text-align: center;
+    }
+    .report-table td.status-value {
+        width: 15%;
+        text-align: center;
+        font-weight: bold;
+    }
+    .report-table td.difference-value {
+        width: 10%;
+        text-align: center;
+    }
+    .status-ok {
+        background-color: #d4edda !important; /* Light green */
+        color: #155724 !important;
+    }
+    .status-delay {
+        background-color: #f8d7da !important; /* Light red */
+        color: #721c24 !important;
+    }
+    .status-neutral {
+        background-color: #fff3cd !important; /* Light yellow/tan for NOT STARTED/ENDED/N/A */
+        color: #856404 !important;
+    }
+    .color-ref-ok {
+        background-color: #d4edda;
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    .color-ref-delay {
+        background-color: #f8d7da;
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    .color-ref-neutral {
+        background-color: #fff3cd;
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: 1px solid #ffeeba;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+    .card .card-body+.card-footer .stats a, .card .card-footer .stats a{
+        color: #2e2bda;
+    }
+    .card .card-body+.card-footer .stats a:hover, .card .card-footer .stats a:hover{
+        font-weight: bold;
+        color: #2e2bda;
+    }
+    .floor-numbers-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-height: 60px;
+        overflow-y: auto;
+        word-break: break-all;
+    }
+    .floor-numbers-list a {
+        background: #f1f1f1;
+        border-radius: 3px;
+        padding: 2px 7px;
+        margin-bottom: 2px;
+        font-size: 0.95em;
+        display: inline-block;
+        text-decoration: none;
+        color: #2e2bda;
+    }
+    .floor-numbers-list a:hover {
+        background: #e0e0e0;
+        font-weight: bold;
+    }
+</style>
+
+<!-- Loader -->
+<div class="ajax-loader d-none" id="permissionsLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Dashboard</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Floor Renovation Status Summary -->
+                        <h4 class="mt-3">Floor Renovation Status Overview</h4>
+                        <div class="row mb-4">
+                            {% if floor_status_summary %}
+                            <div class="col-md-4">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-success card-header-icon">
+                                        <div class="card-icon bg-success bg-gradient">
+                                            <i class="material-icons">done_all</i>
+                                        </div>
+                                        <p class="card-category text-ok h5 text-secondary" title="When the post work is completed for all rooms on a floor, the floor is considered as renovated.">Floors Already Renovated</p>
+                                        <h3 class="card-title mt-3">{{ floor_status_summary.renovated.count }}</h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            Floor Numbers:
+                                            {% if floor_status_summary.renovated.numbers %}
+                                                <div class="floor-numbers-list">
+                                                {% for floor in floor_status_summary.renovated.numbers %}
+                                                    <a href="/install/?floor={{ floor }}">{{ floor }}</a>{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-warning card-header-icon">
+                                        <div class="card-icon bg-primary bg-gradient">
+                                            <i class="material-icons">construction</i>
+                                        </div>
+                                        <p class="card-category text-ok h5 text-secondary" title="When some rooms on a floor are have installation completed, the floor is considered as closed for renovation.">Floors Closed for Renovation</p>
+                                        <h3 class="card-title mt-3">{{ floor_status_summary.closed.count }}</h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            Floor Numbers:
+                                            {% if floor_status_summary.closed.numbers %}
+                                                <div class="floor-numbers-list">
+                                                {% for floor in floor_status_summary.closed.numbers %}
+                                                    <a href="/install/?floor={{ floor }}">{{ floor }}</a>{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card card-stats">
+                                    <div class="card-header card-header-info card-header-icon">
+                                        <div class="card-icon bg-warning bg-gradient">
+                                            <i class="material-icons">pending_actions</i>
+                                        </div>
+                                        <p class="card-category text-ok h5 text-secondary" title="When no rooms on a floor have installation completed status, the floor is considered as pending renovation.">Floors Pending Renovation</p>
+                                        <h3 class="card-title mt-3">{{ floor_status_summary.pending.count }}</h3>
+                                    </div>
+                                    <div class="card-footer">
+                                        <div class="stats">
+                                            Floor Numbers:
+                                            {% if floor_status_summary.pending.numbers %}
+                                                <div class="floor-numbers-list">
+                                                {% for floor in floor_status_summary.pending.numbers %}
+                                                    <a href="/install/?floor={{ floor }}">{{ floor }}</a>{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </div>                                        
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="col-md-12">
+                                <p>Floor renovation status summary is currently unavailable.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Dashboard tables and graphs goes here -->
+                        <h4 class="mt-3 mb-3">Floor Renovation Progress (Detailed)</h4>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+                                    <table class="table table-hover">
+                                        <thead class="text-primary">
+                                            <tr>
+                                            <th>Floor Number</th>
+                                            <th>% Completed</th>
+                                            <th>Prework Status</th>
+                                            <th>Install Status</th>
+                                            <th>Post Work Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for floor in floor_progress_data %}
+                                        <tr>
+                                            <td>{{ floor.floor_number }}</td>
+                                            <td>{{ floor.percentage_completed }}</td>
+                                            <td>{{ floor.prework_status }}</td>
+                                            <td>{{ floor.install_status }}</td>
+                                            <td>{{ floor.postwork_status }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">No floor renovation data available.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <h4 class="mt-3">Overall Project Completion</h4>
+                                <div style="max-width: 400px; margin: 20px auto; height: 300px;">
+                                    <div id="completionPieChartContainer"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Efficiency Tracking -->
+                        <h4 class="mt-3 mb-3">EFFICIENCY</h4>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h5 class="">ROOMS (DAYS)</h5>
+                                <table class="table table-bordered text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40%;"></th>
+                                            <th>PRE-WORK</th>
+                                            <th>INSTALL</th>
+                                            <th>POST WORK</th>
+                                            <th>TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-start">Average Time to Complete a Room</td>
+                                            {% with avg=efficiency_data.room_efficiency.average_time exp=efficiency_data.room_efficiency.expected_time %}
+                                            <td style="{% if avg.pre_work > exp.pre_work %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.pre_work|default:0 }}</td>
+                                            <td style="{% if avg.install > exp.install %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.install|default:0 }}</td>
+                                            <td style="{% if avg.post_work > exp.post_work %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.post_work|default:0 }}</td>
+                                            <td style="{% if avg.total > exp.total %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.total|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                        <tr>
+                                            <td class="text-start">Expected</td>
+                                            {% with exp=efficiency_data.room_efficiency.expected_time %}
+                                            <td>{{ exp.pre_work|default:0 }}</td>
+                                            <td>{{ exp.install|default:0 }}</td>
+                                            <td>{{ exp.post_work|default:0 }}</td>
+                                            <td>{{ exp.total|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <h5 class="">FLOOR (DAYS)</h5>
+                                <table class="table table-bordered text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40%;"></th>
+                                            <th>PRE-WORK</th>
+                                            <th>INSTALL</th>
+                                            <th>POST WORK</th>
+                                            <th>TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-start">Average Time to Complete a Floor</td>
+                                            {% with avg=efficiency_data.floor_efficiency.average_time exp=efficiency_data.floor_efficiency.expected_time %}
+                                            <td style="{% if avg.pre_work > exp.pre_work %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.pre_work|default:0 }}</td>
+                                            <td style="{% if avg.install > exp.install %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.install|default:0 }}</td>
+                                            <td style="{% if avg.post_work > exp.post_work %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.post_work|default:0 }}</td>
+                                            <td style="{% if avg.total > exp.total %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ avg.total|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                        <tr>
+                                            <td class="text-start">Expected</td>
+                                            {% with exp=efficiency_data.floor_efficiency.expected_time %}
+                                            <td>{{ exp.pre_work|default:0 }}</td>
+                                            <td>{{ exp.install|default:0 }}</td>
+                                            <td>{{ exp.post_work|default:0 }}</td>
+                                            <td>{{ exp.total|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Overall Project Time Table -->
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                 <h5 class="">OVERALL PROJECT TIME (AVERAGE PER ROOM)</h5>
+                                 <table class="table table-bordered text-center">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th style="width: 40%;">Total Days</th> {# Header for the description column #}
+                                            <th>PRE-WORK</th>
+                                            <th>INSTALL</th>
+                                            <th>POST WORK</th>
+                                            <th>TOTAL</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-start">Average Time</td>
+                                            {% with data=overall_project_time %}
+                                            <td style="{% if data.pre_work.is_delayed %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ data.pre_work.avg|default:0 }}</td>
+                                            <td style="{% if data.install.is_delayed %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ data.install.avg|default:0 }}</td>
+                                            <td style="{% if data.post_work.is_delayed %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ data.post_work.avg|default:0 }}</td>
+                                            <td style="{% if data.total.is_delayed %}background-color: #ffcccc;{% else %}background-color: #e6ffe6;{% endif %}">{{ data.total.avg|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                        <tr>
+                                            <td class="text-start">Expected</td>
+                                            {% with data=overall_project_time %}
+                                            <td>{{ data.pre_work.expected|default:0 }}</td>
+                                            <td>{{ data.install.expected|default:0 }}</td>
+                                            <td>{{ data.post_work.expected|default:0 }}</td>
+                                            <td>{{ data.total.expected|default:0 }}</td>
+                                            {% endwith %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Room Detail Report Section -->
+                        <h4 class="mt-3 mb-3">Detail Report by Room</h4>
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <form method="GET" action="{% url 'admin_dashboard:dashboard' %}" class="form-inline mb-4">
+                                    <div class="form-group mr-2">
+                                        <label for="room_number_report" class="mr-2">SELECT THE ROOM NUMBER:</label>
+                                        <input type="text" class="form-control" name="room_number" id="room_number_report" value="{{ room_number_query|default:'' }}" placeholder="e.g., 1815">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">View Room Report</button>
+                                </form>
+
+                                {% if room_number_query and room_report_data %}
+                                    <h4 class="mb-1">Report for Room: {{ room_number_query }}
+
+                                        {% if queried_room_data %}
+                                            <span class="mb-3 text-muted"> on Floor: {{ queried_room_data.floor.floor_number|default:"N/A" }}</span>
+                                        {% endif %}
+                                    </h4>
+                                    
+
+                                    {% for phase_name, phase_data_items in room_report_data.items %}
+                                    <h5 class="mt-4 text-uppercase font-weight-bold">{{ phase_name }}</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered report-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td class="label">SCHEDULE START DATE</td>
+                                                    <td class="date-value">{{ phase_data_items.start.schedule|date:"d/m/Y"|default:"N/A" }}</td>
+                                                    <td class="label">SCHEDULE END DATE</td>
+                                                    <td class="date-value">{{ phase_data_items.end.schedule|date:"d/m/Y"|default:"N/A" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label">ACTUAL START DATE</td>
+                                                    <td class="date-value">{{ phase_data_items.start.actual|date:"d/m/Y"|default:"N/A" }}</td>
+                                                    <td class="label">ACTUAL END DATE</td>
+                                                    <td class="date-value">{{ phase_data_items.end.actual|date:"d/m/Y"|default:"N/A" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label">DIFFERENCE</td>
+                                                    <td class="difference-value {{ phase_data_items.start.css_class }}">
+                                                        {% if phase_data_items.start.difference is not None %}
+                                                            {{ phase_data_items.start.difference }} DAY{{ phase_data_items.start.difference|pluralize:"S" }}
+                                                        {% else %}
+                                                            N/A
+                                                        {% endif %}
+                                                    </td>
+                                                    <td class="label">DIFFERENCE</td>
+                                                    <td class="difference-value {{ phase_data_items.end.css_class }}">
+                                                        {% if phase_data_items.end.difference is not None %}
+                                                            {{ phase_data_items.end.difference }} DAY{{ phase_data_items.end.difference|pluralize:"S" }}
+                                                        {% else %}
+                                                            N/A
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="label">STATUS</td>
+                                                    <td class="status-value {{ phase_data_items.start.css_class }}">{{ phase_data_items.start.status|default:"N/A" }}</td>
+                                                    <td class="label">STATUS</td>
+                                                    <td class="status-value {{ phase_data_items.end.css_class }}">{{ phase_data_items.end.status|default:"N/A" }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% endfor %}
+                                    <div class="mb-3 mt-3 text-right">
+                                        <h5>COLOR REFERENCE</h5>
+                                        <span class="color-ref-ok">OK / STARTED</span>
+                                        <span class="color-ref-delay">DELAY</span>
+                                        <span class="color-ref-neutral mr-0">NOT STARTED / NOT ENDED / N/A</span>
+                                    </div>
+                                {% elif room_number_query %}
+                                    <p>No data available to generate the report for room {{ room_number_query }}. This could be due to missing Room data, Schedule data for the floor, or Install data for the room.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- End Room Detail Report Section -->
+                         
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hotel Admin Issues Section -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header card-header-info">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4 class="card-title pt-2 text-dark">Top Issues</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- <ul class="nav nav-tabs" id="topIssuesSectionTabs" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="top-issues-open-tab-link" data-toggle="tab" href="#top-issues-open-tab-pane" role="tab" aria-controls="top-issues-open-tab-pane" aria-selected="true">Open Issues</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="top-issues-closed-tab-link" data-toggle="tab" href="#top-issues-closed-tab-pane" role="tab" aria-controls="top-issues-closed-tab-pane" aria-selected="false">Closed Issues</a>
+                            </li>
+                        </ul> -->
+                        <div class="tab-content" id="topIssuesSectionTabsContent">
+                            <div class="tab-pane fade show active" id="top-issues-open-tab-pane" role="tabpanel" aria-labelledby="top-issues-open-tab-link">
+                                {% include 'admin_dashboard/issues/_issue_table_partial.html' with issues=hotel_admin_open_issues table_id='topIssuesOpenTable' %}
+                            </div>
+                            <div class="tab-pane fade" id="top-issues-closed-tab-pane" role="tabpanel" aria-labelledby="top-issues-closed-tab-link">
+                                {% include 'admin_dashboard/issues/_issue_table_partial.html' with issues=hotel_admin_closed_issues table_id='topIssuesClosedTable' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Hotel Admin Issues Section -->
+
+    </div>
+</div>
+
+
+
+
+{# Safely pass Django context data to JavaScript as JSON #}
+{{ pie_chart_data|json_script:"pieChartDataJSON" }}
+
+{% block scripts %}
+{{ block.super }} {# Ensures scripts from parent template are included #}
+{# <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> #}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script> {# Optional: for export functionality #}
+<script src="https://code.highcharts.com/modules/accessibility.js"></script> {# Optional: for accessibility #}
+
+<!-- DataTables CSS and JS -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Check if Bootstrap tab function is loaded
+        if (typeof $.fn.tab === 'undefined') {
+            console.error('ERROR: Bootstrap tab.js component is not loaded. Tabs will not function.');
+        }
+
+        console.log('DOM fully loaded. Initializing Highcharts pie chart if container exists...');
+
+        const pieChartContainer = document.getElementById('completionPieChartContainer');
+        if (!pieChartContainer) {
+            console.warn('Highcharts WARN: Container element #completionPieChartContainer not found. Skipping pie chart initialization.');
+        } else {
+            console.log('Highcharts LOG: Container element #completionPieChartContainer found:', pieChartContainer);
+            let completedVal = 0;
+            let pendingVal = 100; // Default values
+
+            try {
+                const pieDataElement = document.getElementById('pieChartDataJSON');
+                if (pieDataElement) {
+                    const jsonData = JSON.parse(pieDataElement.textContent);
+                    if (jsonData && typeof jsonData.completed !== 'undefined' && typeof jsonData.pending !== 'undefined') {
+                        completedVal = parseFloat(jsonData.completed);
+                        pendingVal = parseFloat(jsonData.pending);
+                        if (isNaN(completedVal)) completedVal = 0;
+                        if (isNaN(pendingVal)) pendingVal = 100 - completedVal;
+                    }
+                }
+            } catch (e) {
+                console.error('Highcharts ERROR: Error parsing pie chart JSON data. Using default values. Error:', e);
+            }
+
+            if (typeof Highcharts !== 'undefined') {
+                try {
+                    Highcharts.chart(pieChartContainer, {
+                        chart: { type: 'pie' },
+                        title: { text: 'Overall Project Completion', align: 'center' },
+                        tooltip: { pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>' },
+                        accessibility: { point: { valueSuffix: '%' } },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: { enabled: true, format: '<b>{point.name}</b>: {point.percentage:.1f} %' },
+                                showInLegend: true
+                            }
+                        },
+                        series: [{
+                            name: 'Status',
+                            colorByPoint: true,
+                            data: [
+                                { name: 'Pending', y: pendingVal, color: 'rgba(255, 99, 132, 0.7)' },
+                                { name: 'Completed', y: completedVal, color: 'rgba(75, 192, 192, 0.7)', sliced: true, selected: true }
+                            ]
+                        }]
+                    });
+                } catch (chartError) {
+                    console.error('Highcharts ERROR: Error during chart initialization:', chartError);
+                }
+            } else {
+                console.error('Highcharts ERROR: Highcharts library not loaded.');
+            }
+        }
+
+        // Initialize DataTables for Hotel Admin Issues (Top Issues section)
+        function initializeTopIssuesDataTable(tableId) {
+            if ($('#' + tableId).length === 0) {
+                console.warn('DataTables WARN: Table with id ' + tableId + ' not found. Skipping initialization.');
+                return;
+            }
+            $('#' + tableId).DataTable({
+                "pagingType": "full_numbers",
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                responsive: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search records",
+                }
+            });
+        }
+
+        initializeTopIssuesDataTable('topIssuesOpenTable');
+        initializeTopIssuesDataTable('topIssuesClosedTable');
+       
+        // Adjust DataTable columns when tabs are shown
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            console.log('Tab shown event triggered for: ', e.target.id);
+            // Check if the event is for the tabs we care about, to be more specific
+            if ($(e.target).closest('#topIssuesSectionTabs').length > 0) {
+                 $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+                 console.log('DataTables columns adjusted for Top Issues section.');
+            }
+        });
+    });
+</script>
+{% endblock scripts %}
+
+{% endblock %}

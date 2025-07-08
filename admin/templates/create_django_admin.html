@@ -1,0 +1,62 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Create Django Admin User{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card my-4">
+                <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+                    <div class="bg-gradient-primary shadow-primary border-radius-lg pt-4 pb-3">
+                        <h6 class="text-white text-capitalize ps-3">Create Django Admin User</h6>
+                    </div>
+                </div>
+                <div class="card-body px-0 pb-2">
+                    <div class="p-4">
+                        <div class="alert alert-info">
+                            <p><strong>Note:</strong> You can now create administrator users directly from the "Add User" form by selecting the "Administrator" role.</p>
+                            <p>This form is kept for backward compatibility but using the main Add User form is recommended.</p>
+                        </div>
+                        
+                        {% include 'common/messages.html' %}
+                        
+                        <form method="post" action="{% url 'create_django_admin' %}">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="input-group input-group-outline">
+                                        <label class="form-label">Username</label>
+                                        <input type="text" name="username" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="input-group input-group-outline">
+                                        <label class="form-label">Email</label>
+                                        <input type="email" name="email" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="input-group input-group-outline">
+                                        <label class="form-label">Password</label>
+                                        <input type="password" name="password" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Create Admin User</button>
+                                    <a href="{% url 'user_management' %}" class="btn btn-secondary">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

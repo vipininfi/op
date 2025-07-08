@@ -1,0 +1,403 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+    #roomModelTable tbody tr {
+        height: 60px;
+    }
+    #roomModelTable th, #roomModelTable td {
+        white-space: nowrap;
+        padding: 15px;
+    }
+    th.sorting::after {
+        content: "\2195";
+        margin-left: 5px;
+    }
+    th.sorting_asc::after {
+        content: "\2191";
+    }
+    th.sorting_desc::after {
+        content: "\2193";
+    }
+    th.sorting, th.sorting_asc, th.sorting_desc {
+        cursor: pointer;
+    }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .modal-content {
+        width: 42%;
+        height: 74vh;
+        overflow: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .form-group {
+        padding: 10px;
+        position: relative;
+        margin: 20px 0 0;
+    }
+
+    /* Image preview modal styles */
+    #imagePreviewModal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #imagePreviewModal img {
+        max-width: 90vw;
+        max-height: 80vh;
+        border-radius: 8px;
+        box-shadow: 0 2px 16px #0008;
+    }
+</style>
+
+<!-- Loader -->
+<div class="ajax-loader" id="modelLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Product Data</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="addModelBtn" class="btn">Add Products</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="roomModelTable" class="table table-striped" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Item</th>
+                                        <th>Client ID</th>
+                                        <th>Description</th>
+                                        <th>Supplier</th>
+                                        <th>Client Selected</th>
+                                        <th>Actions</th>
+                                    </tr>                                    
+                                </thead>
+                                <tbody>
+                                    {% for model in product_data_list %}
+                                    <tr>
+                                        <td>{{ model.id }}</td>
+                                        <td>{{ model.item }}</td>
+                                        <td>{{ model.client_id }}</td>
+                                        <td>{{ model.description }}</td>
+                                        <td>{{ model.supplier | default:"N.A." }}</td>
+                                        <td>{{ model.client_selected }}</td>
+                                        <td>
+                                            <button class="btn editModelBtn"
+                                                data-id="{{ model.id }}"
+                                                data-item="{{ model.item }}"
+                                                data-client_id="{{ model.client_id }}"
+                                                data-description="{{ model.description }}"
+                                                data-supplier="{{ model.supplier| default:'' }}"
+                                                data-client_selected="{{ model.client_selected }}"
+                                                data-image="{% if model.image and model.image.name %}{{ model.image.url }}{% else %}{% endif %}"
+                                                data-image-name="{% if model.image and model.image.name %}{{ model.image.name }}{% else %}{% endif %}">
+                                                Edit
+                                            </button>
+                                            <button class="btn deleteModelBtn" data-id="{{ model.id }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modelModalOverlay"></div>
+
+<!-- Add/Edit Inventory Modal -->
+<div id="modelModal" class="modal">
+    <div class="modal-content mx-auto p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 id="modelModalTitle">Add Products</h2>
+            <span class="close" id="closeModelModal">×</span>
+        </div>
+        <form id="modelForm" method="POST" action="{% url 'save_product_data' %}">
+            {% csrf_token %}
+            <input type="hidden" id="model-id" name="product_id">
+
+            <div class="form-group"><label for="item">Item:</label><input type="text" id="item" name="item" class="form-control"></div>
+            <div class="form-group"><label for="client_id">Client ID:</label><input type="text" id="client_id" name="client_id" class="form-control"></div>
+            <div class="form-group"><label for="description">Description:</label><input type="text" id="description" name="description" class="form-control"></div>
+            <div class="form-group"><label for="supplier">Supplier:</label><input type="text" id="supplier" name="supplier" class="form-control"></div>
+            <div class="form-group"><label for="client_selected">Client Selected:</label><input type="text" id="client_selected" name="client_selected" class="form-control"></div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <label for="image" style="margin-bottom:0;min-width:70px;">Image:</label>
+                <div id="imageThumbContainer" style="display:none; align-items:center; gap:4px;">
+                    <img id="imageThumb" src="" style="width:48px;height:48px;object-fit:cover;border-radius:4px;border:1px solid #ccc;">
+                    <span id="deleteImageBtn" style="cursor:pointer;color:#d00;font-size:1.5em;margin-left:4px;">&times;</span>
+                </div>
+                <button type="button" id="imageUploadBtn" class="btn btn-light" style="margin-left:0;">
+                    <i class="fa fa-upload"></i> Upload
+                </button>
+                <input type="file" id="image" name="image" class="form-control" style="display: none;">
+                <span id="imageFileName" style="margin-left: 6px; font-size: 0.9em; color: #555;"></span>
+                <input type="hidden" id="deleteImageFlag" name="delete_image" value="0">
+                <div id="currentImageInfo" style="margin-top: 6px; font-size: 0.92em; color: #007bff;"></div>
+            </div>
+            <button type="submit" class="btn float-right" id="saveProductBtn">
+                <span id="saveProductSpinner" class="spinner-border spinner-border-sm mr-2" style="display:none;vertical-align:middle;" role="status" aria-hidden="true"></span>
+                Save Product Data
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="imagePreviewModal" style="display:none;visibility:hidden;">
+    <div>
+        <span id="closeImagePreview" style="position:absolute;top:-30px;right:0;font-size:2.2em;color:#fff;cursor:pointer;z-index:10;">&times;</span>
+        <img id="previewImage" src="" style="max-width:90vw;max-height:80vh;border-radius:8px;box-shadow:0 2px 16px #0008;">
+    </div>
+</div>
+
+<script>
+// Ensure image preview modal is hidden on page load
+$(function() {
+    $('#imagePreviewModal').hide().css('visibility', 'hidden');
+});
+$(document).ready(function () {
+    $('#modelLoader').hide();
+    $('#roomModelTable').show();
+
+    $('#roomModelTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [5, 10, 15, 20],
+        dom : 'Bfr<"row pt-5"<"col-sm-12"t>><"row pt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            buttons : [{
+                extend: 'excel',
+                text: 'Export To Excel',
+                className:'custom-download-btn'
+            }]
+    });
+
+    $('#addModelBtn').click(function () {
+    $('#modelModalTitle').text("Add Products");
+
+    $('#model-id').val("");
+    $('#item').val("");
+    $('#item').prop('readonly', false);
+    $('#client_id').val("");
+    $('#client_id').prop('readonly', false);
+    $('#description').val("");
+    $('#supplier').val("");
+    $('#client_selected').val("");
+
+    $('#modelModal').fadeIn();
+    $('#modelModalOverlay').fadeIn();
+    
+});
+
+$('#imageUploadBtn').click(function() {
+    $('#image').click();
+});
+$('#image').change(function() {
+    const file = this.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $('#imageThumb').attr('src', e.target.result);
+            $('#imageThumbContainer').show();
+            $('#deleteImageFlag').val('0');
+            $('#imageFileName').text(''); // Hide filename text
+            $('#currentImageInfo').hide();
+        };
+        reader.readAsDataURL(file);
+    } else {
+        $('#imageThumbContainer').hide();
+        $('#imageFileName').text('');
+        $('#currentImageInfo').show();
+    }
+});
+    $(document).on('click', '.editModelBtn', function () {
+    $('#modelModalTitle').text("Edit Products");
+    $('#model-id').val($(this).data('id'));
+    $('#item').val($(this).data('item'));
+    $('#item').prop('readonly', true);
+    $('#client_id').val($(this).data('client_id'));
+    $('#client_id').prop('readonly', true);
+    $('#description').val($(this).data('description'));
+    $('#supplier').val($(this).data('supplier'));
+    $('#client_selected').val($(this).data('client_selected'));
+
+    // Show previous image info
+    var imageUrl = $(this).data('image');
+    var imageName = $(this).data('image-name');
+    if (imageUrl) {
+        // Show thumbnail and delete icon
+        $('#imageThumb').attr('src', imageUrl);
+        $('#imageThumbContainer').show();
+        $('#deleteImageFlag').val('0');
+        $('#currentImageInfo').hide();
+    } else {
+        $('#imageThumbContainer').hide();
+        $('#deleteImageFlag').val('0');
+        $('#currentImageInfo').show();
+    }
+    $('#imageFileName').text(''); // Clear new file name
+
+    $('#modelModal').fadeIn();
+    $('#modelModalOverlay').fadeIn();
+});
+
+
+    $(document).on('click', '.deleteModelBtn', function () {
+        const modelId = $(this).data('id');
+        if (confirm("Are you sure you want to delete this item?")) {
+            $.ajax({
+                url: '{% url "delete_products_data" %}',
+                type: 'POST',
+                data: {
+                    model_id: modelId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success("Inventory item deleted successfully!");
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $('#modelForm').submit(function (e) {
+        e.preventDefault();
+        const form = $(this)[0];
+        const formData = new FormData(form);
+        const formAction = $(this).attr('action');
+
+        // Show spinner and disable button
+        $('#saveProductSpinner').show();
+        $('#saveProductBtn').prop('disabled', true);
+
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+                if (response.success) {
+                    $('#modelModal').fadeOut();
+                    $('#modelModalOverlay').fadeOut();
+
+                    if ($('#model-id').val()) {
+                        toastr.success("Inventory updated successfully!");
+                    } else {
+                        toastr.success("Inventory added successfully!");
+                    }
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    toastr.error(response.error || 'Something went wrong!');
+                }
+            },
+            error: function () {
+                toastr.error('Something went wrong!');
+            },
+            complete: function () {
+                // Hide spinner and enable button
+                $('#saveProductSpinner').hide();
+                $('#saveProductBtn').prop('disabled', false);
+            }
+        });
+    });
+
+    $('#closeModelModal, #modelModalOverlay').click(function () {
+        $('#modelModal').fadeOut();
+        $('#modelModalOverlay').fadeOut();
+    });
+
+    // Image preview popup logic
+    $(document).on('click', '.previewImageLink', function(e) {
+        e.preventDefault();
+        var url = $('#currentImageInfo').data('image-url');
+        if (url) {
+            $('#previewImage').attr('src', url);
+            $('#imagePreviewModal').css('visibility', 'visible').fadeIn();
+        }
+    });
+    $('#closeImagePreview, #imagePreviewModal').on('click', function(e) {
+        // Only close if clicking the close button or the overlay (not the image itself)
+        if (e.target === this) {
+            $('#imagePreviewModal').fadeOut(function() {
+                $(this).css('visibility', 'hidden');
+            });
+            $('#previewImage').attr('src', '');
+        }
+    });
+});
+
+$('#deleteImageBtn').on('click', function() {
+    $('#imageThumbContainer').hide();
+    $('#deleteImageFlag').val('1');
+    $('#currentImageInfo').show().html('<span style="color:#888;">Image will be deleted after save.</span>');
+    $('#image').val(''); // Clear the file input so user can re-upload
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,779 @@
+{% extends "frontend_base.html" %}
+{% load static %}
+
+{% block title %}Receiving Form{% endblock %}
+
+{% block content %}
+<style>
+  @media(max-width:768px) {
+    input[type='checkbox'] {
+      width: 25px;
+      height: 25px;
+    }
+    .product_item_class{
+      margin-top: 10px;
+    }
+    .form-label{
+      font-size: 16px;
+    }
+    .fw-bold{
+      font-size: 16px;
+    }
+    .container-lg {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    .card-body {
+      padding: 10px 5px;
+    }
+    h3 {
+      font-size: 20px;
+    }
+    h4 {
+      font-size: 18px;
+    }
+    
+    /* Table optimizations for mobile */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    .table {
+      font-size: 12px;
+    }
+    .table th, .table td {
+      padding: 5px;
+    }
+    .table input {
+      padding: 4px;
+      font-size: 13px;
+      height: 32px;
+    }
+    
+    /* Button optimizations for mobile */
+    .btn {
+      padding: 6px 10px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      height: auto;
+      white-space: normal;
+    }
+    .btn-lg {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    
+    /* Stack buttons on mobile */
+    .text-center .gap-3 {
+      flex-direction: column;
+      width: 100%;
+    }
+    .text-center .gap-3 .btn, 
+    .text-center .gap-3 a.btn {
+      width: 100%;
+      margin-bottom: 10px;
+      margin-right: 0 !important;
+      margin-left: 0 !important;
+    }
+  }
+
+  @media(min-width:768px) {
+    .check{
+      transform: translate(-6%,-14%);
+    }
+  }
+  
+  /* General responsive improvements */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  input.form-control, select.form-control {
+    height: 38px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+</style>
+
+<div class="container-lg my-5">
+  <!-- First Card: Receiving Form -->
+  <div class="card shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <h3 class="mb-4 text-center text-secondary py-4">Receiving Form</h3>
+      
+      <h4 class="form-title mb-4">Process Received Shipment</h4>
+
+      <form method="post" action="{% url 'inventory_received' %}" id="receiving-form">
+        {% csrf_token %}
+
+        <!-- Container ID -->
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label class="form-label">Container ID</label>
+            <div class="input-group">
+            <input type="text" class="form-control" name="container_id" id="container_id" placeholder="Enter Container ID" required style="text-transform:lowercase;">
+            <button type="button" class="btn btn-secondary btn-sm" id="search_container" style="margin-left: 5px;">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="search_spinner"></span>
+              <span id="search_text">Search</span>
+            </button>
+            
+          </div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label d-md-block d-none">Total Items</label>
+            <input type="text" class="form-control bg-light" id="total_items_box" placeholder="Total Items Received" readonly >
+          </div>
+        </div>
+
+        <!-- Container Items Table with Editable Fields -->
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label class="form-label">Arrival Date</label>
+                <input type="date" class="form-control rounded-3" name="received_date" required readonly>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Received By</label>
+                <input type="text" class="form-control rounded-3" name="checked_by" placeholder="Name" required readonly value="{{ user_name }}">
+              </div>
+              <input type="hidden" name="container_id_field" id="container_id_field" value="">
+            </div>
+ 
+            <hr class="my-4" style="border-top: 1px solid #9b9b9b;">
+ 
+            <h4 class="mb-3 px-2">Items in Container</h4>
+  
+            <div class="table-responsive" id="container_table_section" style="display: none;">
+              <table class="table table-bordered table-striped" id="container_table">
+                <thead>
+                  <tr>
+                    <th>Client Item #</th>
+                    <th>Product Name</th>
+                    <th>QTY Shipped</th>
+                    <th>Good QTY Received</th>
+                    <th>QTY Damaged</th>
+                  </tr>
+                </thead>
+                <tbody id="container_items">
+                  <!-- Container items will be listed here with editable fields -->
+                  <tr class="no-items">
+                    <td colspan="5" class="text-center">Enter Container ID to load items</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Hidden container for product count -->
+        <div id="hidden_product_count"></div>
+
+        <!-- Hidden fields for edit mode -->
+        <input type="hidden" name="is_editing" id="is_editing" value="0">
+        <input type="hidden" name="editing_record_id" id="editing_record_id" value="">
+
+        <div class="text-center mt-4">
+          <div class="d-inline-flex gap-3">
+            <button type="button" class="btn btn-outline-secondary mr-3" id="clear-form-btn">Cancel / Clear Form</button>
+            <button type="submit" class="btn btn-secondary btn-lg mr-3">Submit</button>
+            <a href="{% url 'issue_create' %}" class="btn btn-secondary btn-lg">Report New Issue</a>
+          </div>
+        </div>
+      </form>
+      <hr class="my-5" style="border-top: 1px solid #9b9b9b;">
+    </div>
+  </div>
+
+  <!-- Second Card: Previous Submissions -->
+  <div class="card shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h4 class="mb-3">Previous Shipments Received</h4>
+      <div class="row">
+        <div class="col-12">
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th>Container ID</th>
+                  <th>Received Date</th>
+                  <th>Product Count</th>
+                  <th>Damaged Products</th>
+                  <th>Checked By</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for submission in previous_submissions %}
+                <tr>
+                  <td>{{ submission.container_id }}</td>
+                  <td>{{ submission.received_date }}</td>
+                  <td>{{ submission.product_count }}</td>
+                  <td>{{ submission.damaged_count }}</td>
+                  <td>{{ submission.checked_by }}</td>
+                  <td>
+                    <button type="button" class="btn btn-secondary btn-sm w-100 edit-submission" data-id="{{ submission.id }}" 
+                            data-container="{{ submission.container_id }}" data-client="{{ submission.client_id }}">Edit</button>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">No previous submissions found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if is_paginated %}
+          <nav>
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+              </li>
+              {% endif %}
+              <li class="page-item disabled">
+                <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+              </li>
+              {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+              </li>
+              {% endif %}
+            </ul>
+          </nav>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include jQuery and Toastr -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+<script>
+  $(document).ready(function() {
+    const userName = "{{ user_name }}";
+
+    // Helper function to enforce received/damaged constraints for a row
+    function enforceConstraints(row) {
+      const shipped = parseInt(row.find('.qty-shipped').text()) || 0;
+      const receivedInput = row.find('input[name^="received_qty_"]');
+      const damagedInput = row.find('input[name^="damaged_qty_"]');
+
+      // Make sure max attributes are set
+      receivedInput.attr('max', shipped);
+
+      let receivedVal = parseInt(receivedInput.val()) || 0;
+      if (receivedVal > shipped) {
+        toastr.warning('Received quantity cannot exceed shipped quantity. It has been adjusted.');
+        receivedVal = shipped;
+        receivedInput.val(receivedVal);
+      }
+
+      const maxDamaged = Math.max(shipped - receivedVal, 0);
+      damagedInput.attr('max', maxDamaged);
+
+      let damagedVal = parseInt(damagedInput.val()) || 0;
+      if (damagedVal > maxDamaged) {
+        toastr.warning('Damaged quantity cannot exceed (shipped - received). It has been adjusted.');
+        damagedVal = maxDamaged;
+        damagedInput.val(damagedVal);
+      }
+    }
+    
+    // Ensure table is hidden on page load
+    $('#container_table_section').hide();
+    
+    // Helper function for loading states
+    function setLoading(action, isLoading) {
+      if (action === 'search_container') {
+        if (isLoading) {
+          $('#search_spinner').removeClass('d-none');
+          $('#search_text').text('Searching...');
+          $('#search_container').prop('disabled', true);
+        } else {
+          $('#search_spinner').addClass('d-none');
+          $('#search_text').text('Search Container');
+          $('#search_container').prop('disabled', false);
+        }
+      }
+    }
+    
+    // Set current date for arrival
+    const currentDate = new Date(); 
+    const isoDate = currentDate.toISOString().split('T')[0]; // "YYYY-MM-DD"
+    
+    // Auto-fill the date field with current date
+    $('input[name="received_date"]').val(isoDate);
+    
+    // Search for container
+    $('#search_container').on('click', function() {
+      let containerId = $('#container_id').val().trim().toLowerCase();
+      $('#container_id').val(containerId); // Ensure field stays lowercase
+      if (!containerId) {
+        toastr.error("Please enter a Container ID");
+        return;
+      }
+      setLoading('search_container', true);
+      // Store the container ID in the hidden field for form submission
+      $('#container_id_field').val(containerId);
+      
+      // First check if this container already has received entries
+      $.ajax({
+        url: "{% url 'get_container_received_items' %}",
+        type: "GET",
+        data: { container_id: containerId },
+        success: function(receivedData) {
+          // If we have existing received data, handle as edit
+          if (receivedData.success && receivedData.items && receivedData.items.length > 0) {
+            console.log("Found existing received data for container:", containerId);
+            
+            // Set edit mode flags
+            $('#is_editing').val('1');
+            // Set the first record's ID as the editing record ID
+            if (receivedData.items.length > 0) {
+              $('#editing_record_id').val(receivedData.items[0].id);
+            }
+            
+            // Update form title
+            $('.form-title').text('Editing Receiving Record: Container ID ' + containerId);
+            
+            // Get shipping data to show shipped quantities
+            $.ajax({
+              url: "{% url 'get_container_data' %}",
+              type: "GET",
+              data: { container_id: containerId },
+              success: function(shipmentData) {
+                setLoading('search_container', false);
+                
+                // Create a lookup map for shipped quantities by client ID
+                const shippedQtyMap = {};
+                if (shipmentData.success && shipmentData.items) {
+                  shipmentData.items.forEach(function(item) {
+                    shippedQtyMap[item.client_id] = item.quantity;
+                  });
+                }
+                
+                // Clear the container items
+                $('#container_items').empty();
+                
+                // Create table rows for each received item with actual values
+                receivedData.items.forEach(function(item, index) {
+                  // Get the shipped quantity from our map, default to "N/A" if not found
+                  const shippedQty = shippedQtyMap[item.client_id] || "N/A";
+                  
+                  $('#container_items').append(
+                    '<tr>' +
+                      '<td class="client-item">' + item.client_id + '</td>' +
+                      '<td class="product-name">' + item.product_name + '</td>' +
+                      '<td class="qty-shipped">' + shippedQty + '</td>' +
+                      '<td>' +
+                        '<input type="number" class="form-control" name="received_qty_' + index + '" min="0" value="' + item.received_qty + '" required>' +
+                        '<input type="hidden" name="client_item_' + index + '" value="' + item.client_id + '">' +
+                        '<input type="hidden" name="record_id_' + index + '" value="' + item.id + '">' +
+                      '</td>' +
+                      '<td>' +
+                        '<input type="number" class="form-control" name="damaged_qty_' + index + '" min="0" value="' + item.damaged_qty + '">' +
+                      '</td>' +
+                    '</tr>'
+                  );
+                });
+                
+                // Show the table since we have items
+                $('#container_table_section').show();
+                
+                // Set the hidden product count
+                $('#hidden_product_count').html('<input type="hidden" name="product_count" value="' + receivedData.items.length + '">');
+
+                // Calculate total received quantity
+                let totalReceived = 0;
+                receivedData.items.forEach(function(item) {
+                  totalReceived += parseInt(item.received_qty) || 0;
+                });
+                $('#total_items_box').val(totalReceived);
+
+                // Set the received date
+                if (receivedData.received_date) {
+                  $('input[name="received_date"]').val(receivedData.received_date);
+                }
+                
+                // Scroll to the form
+                $('html, body').animate({
+                  scrollTop: $("#container_id").offset().top - 100
+                }, 500);
+                
+                toastr.success("Loaded " + receivedData.items.length + " items for editing");
+              },
+              error: function() {
+                setLoading('search_container', false);
+                toastr.error("Error loading shipping data");
+              }
+            });
+          } else {
+            // No existing received data, treat as new entry
+            // Search for items with this container ID in the shipping table
+            $.ajax({
+              url: "{% url 'get_container_data' %}",
+              type: "GET",
+              data: { container_id: containerId },
+              success: function(data) {
+                setLoading('search_container', false);
+                
+                if (data.success) {
+                  $('#container_items').empty();
+                  
+                  // Reset edit mode flags
+                  $('#is_editing').val('0');
+                  $('#editing_record_id').val('');
+                  
+                  // Update form title
+                  $('.form-title').text('Process Received Shipment');
+                  
+                  if (data.items.length === 0) {
+                    $('#container_table_section').hide();
+                    $('#total_items_box').val('');
+                    toastr.warning('No items found in this container');
+                  } else {
+                    // Show the table when items are found
+                    $('#container_table_section').show();
+                    
+                    data.items.forEach(function(item, index) {
+                      $('#container_items').append(
+                        '<tr>' +
+                          '<td class="client-item">' + item.client_id + '</td>' +
+                          '<td class="product-name">' + (item.product_name || "Unknown Product") + '</td>' +
+                          '<td class="qty-shipped">' + item.quantity + '</td>' +
+                          '<td>' +
+                            '<input type="number" class="form-control" name="received_qty_' + index + '" min="0" value="0" required>' +
+                            '<input type="hidden" name="client_item_' + index + '" value="' + item.client_id + '">' +
+                          '</td>' +
+                          '<td>' +
+                            '<input type="number" class="form-control" name="damaged_qty_' + index + '" min="0" value="0">' +
+                          '</td>' +
+                        '</tr>'
+                      );
+                    });
+                    
+                    // Add a hidden field to track the number of products
+                    $('#hidden_product_count').html('<input type="hidden" name="product_count" value="' + data.items.length + '">');
+                    // Calculate total received quantity (initially zero for new entries)
+                    let totalReceived = 0;
+                    $('#container_items input[name^="received_qty_"]').each(function() {
+                      totalReceived += parseInt($(this).val()) || 0;
+                    });
+                    $('#total_items_box').val(totalReceived);
+                  }
+                  
+                  toastr.success('Found ' + data.items.length + ' items in container ' + containerId);
+                } else {
+                  toastr.error(data.message || "Failed to find container");
+                  $('#container_items').html(
+                    '<tr class="no-items">' +
+                      '<td colspan="5" class="text-center">Container not found</td>' +
+                    '</tr>'
+                  );
+                  
+                  // Clear the product count
+                  $('#hidden_product_count').empty();
+                }
+              },
+              error: function() {
+                setLoading('search_container', false);
+                toastr.error("Error searching for container");
+              }
+            });
+          }
+        },
+        error: function() {
+          setLoading('search_container', false);
+          toastr.error("Error checking for existing received items");
+        }
+      });
+    });
+    
+    // Handle item selection
+    $('#container_items').on('click', '.select-item', function() {
+      // Highlight the selected row
+      $('#container_items tr').removeClass('table-primary');
+      $(this).closest('tr').addClass('table-primary');
+      
+      // Get item details from the row
+      const clientItem = $(this).closest('tr').find('.client-item').text();
+      const productName = $(this).closest('tr').find('.product-name').text();
+      const containerId = $('#container_id').val().trim();
+      
+      // Fill the form fields
+      $('#client_item').val(clientItem);
+      $('#product_name').val(productName);
+      
+      // Show the form
+      $('#selected_item_form').slideDown();
+      
+      // Scroll to the form
+      $('html, body').animate({
+        scrollTop: $("#selected_item_form").offset().top - 100
+      }, 500);
+    });
+    
+    // Update total received quantity and enforce constraints when any received quantity changes
+    $('#container_items').on('input', 'input[name^="received_qty_"]', function() {
+      const row = $(this).closest('tr');
+      enforceConstraints(row);
+
+      // Re-calculate total received
+      let totalReceived = 0;
+      $('#container_items input[name^="received_qty_"]').each(function() {
+        totalReceived += parseInt($(this).val()) || 0;
+      });
+      $('#total_items_box').val(totalReceived);
+    });
+
+    // Enforce constraints when any damaged quantity changes
+    $('#container_items').on('input', 'input[name^="damaged_qty_"]', function() {
+      const row = $(this).closest('tr');
+      enforceConstraints(row);
+    });
+
+    // Reset form
+    function resetForm() {
+      // Reset form fields
+      $('#receiving-form')[0].reset();
+      
+      // Hide the item form
+      $('#selected_item_form').hide();
+      
+      // Hide the container table
+      $('#container_table_section').hide();
+
+      $('#total_items_box').val('');
+      
+      // Clear the container items
+      $('#container_items').html(
+        '<tr class="no-items">' +
+          '<td colspan="5" class="text-center">Enter Container ID to load items</td>' +
+        '</tr>'
+      );
+      
+      // Clear the product rows
+      $('#container_products').empty();
+      
+      // Remove any product count hidden field
+      $('input[name="product_count"]').remove();
+      
+      // Reset edit mode flags
+      $('#is_editing').val('0');
+      $('#editing_record_id').val('');
+      
+      // Update form title
+      $('.form-title').text('Process Received Shipment');
+      
+      toastr.info('Form has been cleared.');
+    }
+    
+    // Clear form button
+    $('#clear-form-btn').on('click', function() {
+      resetForm();
+    });
+    
+    // Handle edit button clicks for previous submissions
+    $('.edit-submission').on('click', function() {
+      const submissionId = $(this).data('id');
+      const containerId = $(this).data('container');
+      const clientId = $(this).data('client');
+      
+      console.log("Edit button clicked. Submission ID:", submissionId, "Container ID:", containerId);
+      
+      if (containerId) {
+        // Set the container ID in both visible field and hidden field
+        $('#container_id').val(containerId);
+        $('#container_id_field').val(containerId);
+        
+        // Set edit mode flags
+        $('#is_editing').val('1');
+        $('#editing_record_id').val(submissionId);
+        
+        // Update form title
+        $('.form-title').text('Editing Receiving Record: Container ID ' + containerId);
+        
+        // First get original shipping data to get correct quantities shipped
+        $.ajax({
+          url: "{% url 'get_container_data' %}",
+          type: "GET",
+          data: { container_id: containerId },
+          success: function(shipmentData) {
+            // Create a lookup map for shipped quantities by client ID
+            const shippedQtyMap = {};
+            if (shipmentData.success && shipmentData.items) {
+              shipmentData.items.forEach(function(item) {
+                shippedQtyMap[item.client_id] = item.quantity;
+              });
+            }
+            
+            // Now fetch the received items for this container
+            $.ajax({
+              url: "{% url 'get_container_received_items' %}",
+              type: "GET",
+              data: { container_id: containerId },
+              success: function(receivedData) {
+                if (receivedData.success) {
+                  console.log("Received items data:", receivedData);
+                  
+                  // Clear the container items
+                  $('#container_items').empty();
+                  
+                  // Create table rows for each received item with actual values
+                  if (receivedData.items && receivedData.items.length > 0) {
+                    // Show the table when items exist
+                    $('#container_table_section').show();
+                    
+                    receivedData.items.forEach(function(item, index) {
+                      // Get the shipped quantity from our map, default to "N/A" if not found
+                      const shippedQty = shippedQtyMap[item.client_id] || "N/A";
+                      
+                      $('#container_items').append(
+                        '<tr>' +
+                          '<td class="client-item">' + item.client_id + '</td>' +
+                          '<td class="product-name">' + item.product_name + '</td>' +
+                          '<td class="qty-shipped">' + shippedQty + '</td>' +
+                          '<td>' +
+                            '<input type="number" class="form-control" name="received_qty_' + index + '" min="0" value="' + item.received_qty + '" required>' +
+                            '<input type="hidden" name="client_item_' + index + '" value="' + item.client_id + '">' +
+                            '<input type="hidden" name="record_id_' + index + '" value="' + item.id + '">' +
+                          '</td>' +
+                          '<td>' +
+                            '<input type="number" class="form-control" name="damaged_qty_' + index + '" min="0" value="' + item.damaged_qty + '">' +
+                          '</td>' +
+                        '</tr>'
+                      );
+                    });
+                    // Calculate total received quantity
+                    let totalReceived = 0;
+                    $('#container_items input[name^="received_qty_"]').each(function() {
+                      totalReceived += parseInt($(this).val()) || 0;
+                    });
+                    $('#total_items_box').val(totalReceived);
+                  } else {
+                    toastr.error("No received items found for this container");
+                  }
+                } else {
+                  toastr.error(receivedData.message || "Failed to load received items");
+                }
+              },
+              error: function() {
+                toastr.error("Error loading received items");
+              }
+            });
+          },
+          error: function() {
+            toastr.error("Error loading container shipping data");
+          }
+        });
+      } else {
+        toastr.error("Could not determine container ID from the table row.");
+      }
+    });
+
+    // Handle form submission
+    $('#receiving-form').on('submit', function(e) {
+      e.preventDefault();
+      
+      // Get the form data
+      const formData = new FormData(this);
+      
+      // Add edit mode flags to form data
+      formData.append('is_editing', $('#is_editing').val());
+      formData.append('editing_record_id', $('#editing_record_id').val());
+      
+      // Add container ID
+      formData.append('container_id', $('#container_id_field').val());
+      
+      // Add all received and damaged quantities
+      let productCount = 0;
+      $('#container_items tr').each(function(index) {
+        const receivedQty = $(this).find('input[name^="received_qty_"]').val();
+        const damagedQty = $(this).find('input[name^="damaged_qty_"]').val();
+        const clientItem = $(this).find('.client-item').text().trim();
+        
+        if (receivedQty && receivedQty !== "0") {
+          formData.append('received_qty_' + productCount, receivedQty);
+          formData.append('damaged_qty_' + productCount, damagedQty || "0");
+          formData.append('client_item_' + productCount, clientItem);
+          productCount++;
+        }
+      });
+      
+      // Add the product count
+      formData.append('product_count', productCount);
+      
+      // Add CSRF token
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      
+      console.log('Submitting form with data:', {
+        is_editing: $('#is_editing').val(),
+        editing_record_id: $('#editing_record_id').val(),
+        container_id: $('#container_id_field').val(),
+        product_count: productCount
+      });
+      
+      // Send AJAX request
+      $.ajax({
+        url: $(this).attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+          console.log('Server response:', response);
+          if (response.success) {
+            toastr.success(response.message || "Record updated successfully!");
+            // Reload the page after a short delay
+            setTimeout(function() {
+              window.location.reload();
+            }, 1500);
+          } else {
+            toastr.error(response.message || "Error updating record");
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error details:', {
+            status: status,
+            error: error,
+            response: xhr.responseText
+          });
+          
+          let errorMessage = "Failed to update record";
+          try {
+            const response = JSON.parse(xhr.responseText);
+            errorMessage = response.message || errorMessage;
+          } catch (e) {
+            errorMessage = xhr.responseText || errorMessage;
+          }
+          
+          toastr.error("Error: " + errorMessage);
+        }
+      });
+    });
+
+    // Toastr for Django messages
+    {% if messages %}
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "timeOut": "4000"
+    };
+    {% for message in messages %}
+      {% if message.tags == "success" %}
+        toastr.success("{{ message|escapejs }}");
+      {% elif message.tags == "error" %}
+        toastr.error("{{ message|escapejs }}");
+      {% endif %}
+    {% endfor %}
+    {% endif %}
+  });
+</script>
+{% endblock %}

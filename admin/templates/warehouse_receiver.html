@@ -1,0 +1,1000 @@
+{% extends "frontend_base.html" %}
+{% load static %}
+
+{% block title %}Warehouse Receiver{% endblock %}
+
+{% block content %}
+<style>
+  @media(max-width:768px) {
+    input[type='checkbox'] {
+      width: 25px;
+      height: 25px;
+    }
+    .product_item_class{
+      margin-top: 10px;
+    }
+    .form-label{
+      font-size: 16px;
+    }
+    .fw-bold{
+      font-size: 16px;
+    }
+    .container-lg {
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    .card-body {
+      padding: 10px 5px;
+    }
+    h3 {
+      font-size: 20px;
+    }
+    h4 {
+      font-size: 18px;
+    }
+    
+    /* Table optimizations for mobile */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    .table {
+      font-size: 12px;
+    }
+    .table th, .table td {
+      padding: 5px;
+    }
+    .table input {
+      padding: 4px;
+      font-size: 13px;
+      height: 32px;
+    }
+    
+    /* Button optimizations for mobile */
+    .btn {
+      padding: 6px 10px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      height: auto;
+      white-space: normal;
+    }
+    .btn-lg {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+    
+    /* Stack buttons on mobile */
+    .text-center .gap-3 {
+      flex-direction: column;
+      width: 100%;
+    }
+    .text-center .gap-3 .btn, 
+    .text-center .gap-3 a.btn {
+      width: 100%;
+      margin-bottom: 10px;
+      margin-right: 0 !important;
+      margin-left: 0 !important;
+    }
+  }
+
+  /* General responsive improvements */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  input.form-control, select.form-control {
+    height: 38px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Auto-search loading indicator styles */
+  .client-item.searching, #reference_id.searching {
+    background-image: url('data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==');
+    background-position: right 10px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding-right: 30px;
+  }
+</style>
+
+<!-- Ensure Bootstrap JS is loaded -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+
+<div class="container-lg my-5">
+  <!-- First Card: Receiving Form -->
+  <div class="card shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+      <h3 class="mb-2 text-center text-secondary py-4">Receiver at Hotel</h3>
+      <h4 class="mb-4 text-secondary">Received Shipment</h4>
+      
+      <form method="post" action="{% url 'warehouse_receiver' %}" id="warehouse-receiver-form">
+        {% csrf_token %}
+        
+        <!-- Hidden fields for edit mode -->
+        <input type="hidden" id="is_edit_mode" name="is_edit_mode" value="0">
+        <input type="hidden" id="original_reference_id" name="original_reference_id" value="">
+        <input type="hidden" id="receipt_id" name="receipt_id" value="">
+        <input type="hidden" id="delete_previous_items" name="delete_previous_items" value="0">
+        
+        <!-- Reference ID -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label class="form-label">Reference ID</label>
+            <div class="input-group">
+            <input type="text" class="form-control" name="reference_id" id="reference_id" placeholder="Enter Reference ID" required>
+              <button type="button" class="btn btn-secondary" id="load-items-btn">
+                <span class="material-icons">search</span>
+              </button>
+            </div>
+            <small class="form-text text-muted">Enter a Reference ID from Warehouse Shipment to automatically load items</small>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Total Items</label>
+            <input type="text" class="form-control bg-light" id="total_items_box" placeholder="Total Items" readonly>
+          </div>
+        </div>
+        
+        <!-- Received Date Row -->
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <label for="received_date" class="form-label">Received Date</label>
+            <input type="date" class="form-control" id="received_date" name="received_date" required>
+          </div>
+        </div>
+
+        <!-- Items Section -->
+            <h5 class="mb-3">Items</h5>
+            <div id="items-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Client Item #</th>
+                <th>Product Name</th>
+                <th>Shipped Qty</th>
+                <th>Good Received Qty</th>
+                <th>Damaged Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- First item row will be here -->
+              <tr class="item-row">
+                <td>
+                  <input type="text" class="form-control client-item" name="client_items[]" placeholder="Enter Client Item #" required readonly>
+                  <input type="hidden" class="item-id" name="item_ids[]" value="">
+                </td>
+                <td>
+                  <input type="text" class="form-control product-name" name="product_names[]" placeholder="Product Name" readonly>
+                </td>
+                <td>
+                  <input type="number" class="form-control shipped-qty" readonly>
+                </td>
+                <td>
+                  <input type="number" class="form-control received-qty" name="quantities[]" min="0" value="0" required>
+                </td>
+                <td>
+                  <input type="number" class="form-control damaged-qty" name="damaged_quantities[]" min="0" value="0" required>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="text-center mt-4">
+          <div class="d-inline-flex gap-3">
+            <button type="button" class="btn btn-outline-secondary mr-3" id="clear-form-btn">Cancel / Clear Form</button>
+            <button type="submit" class="btn btn-secondary btn-lg mr-3">Submit</button>
+            <a href="{% url 'issue_create' %}" class="btn btn-secondary btn-lg px-4">Report New Issue</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Second Card: Previous Receipts -->
+  <div class="card shadow-sm rounded-4">
+    <div class="card-body p-4">
+      <h4 class="mb-3">Previous Warehouse Receipts</h4>
+      
+      <!-- Lazy loading spinner - shown while loading -->
+      <div id="receipts-loading" class="text-center py-4">
+        <div class="spinner-border text-secondary" role="status">
+        </div>
+      </div>
+      
+      <!-- Content loaded via AJAX -->
+      <div id="receipts-container" class="d-none">
+        <div class="row">
+          <div class="col-12">
+            <div class="table-responsive">
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>Reference ID</th>
+                    <th>Received Date</th>
+                    <th>Items Count</th>
+                    <th>Total Quantity</th>
+                    <th>Received By</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="receipts-table-body">
+                  <!-- Will be populated via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <nav id="pagination-container" class="mt-3">
+              <ul class="pagination justify-content-center">
+                <!-- Will be populated via JavaScript -->
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Details Modal -->
+<div class="modal fade" id="receiptDetailsModal" tabindex="-1" aria-labelledby="receiptDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="receiptDetailsModalLabel">Receipt Details</h5>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p><strong>Reference ID:</strong> <span id="modal-reference-id"></span></p>
+            <p><strong>Received Date:</strong> <span id="modal-received-date"></span></p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>Received By:</strong> <span id="modal-received-by"></span></p>
+          </div>
+        </div>
+        
+        <h6 class="mt-4 mb-3">Items</h6>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered">
+            <thead>
+              <tr>
+                <th>Client Item #</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+              </tr>
+            </thead>
+            <tbody id="modal-items-list">
+              <!-- Items will be populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="$('#receiptDetailsModal').modal('hide');">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(document).ready(function() {
+    // Make sure Bootstrap JS is properly loaded and initialized
+    if (typeof bootstrap !== 'undefined') {
+      console.log('Bootstrap is loaded');
+    } else {
+      console.log('Bootstrap is not loaded properly');
+      // Load Bootstrap JS dynamically if not available
+      const bootstrapScript = document.createElement('script');
+      bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js';
+      document.head.appendChild(bootstrapScript);
+    }
+
+    // Add explicit handler for modal close button
+    $('.btn-close, [data-bs-dismiss="modal"]').on('click', function() {
+      $('#receiptDetailsModal').modal('hide');
+    });
+    
+    // Set today's date for the received date field
+    var today = new Date().toISOString().split('T')[0];
+    $('#received_date').val(today);
+
+    // Helper to update the total items box
+    function updateTotalItems() {
+      let total = 0;
+      $('#items-container .received-qty').each(function() {
+        total += parseInt($(this).val()) || 0;
+      });
+      $('#total_items_box').val(total);
+    }
+
+    // Enforce shipped/received/damaged constraints per row
+    function enforceConstraints(row) {
+      const shipped = parseInt(row.find('.shipped-qty').val() || row.find('.shipped-qty').text()) || 0;
+      const receivedInput = row.find('.received-qty');
+      const damagedInput = row.find('.damaged-qty');
+
+      // Set max attributes
+      receivedInput.attr('max', shipped);
+
+      let receivedVal = parseInt(receivedInput.val()) || 0;
+      if (receivedVal > shipped) {
+        toastr.warning('Received quantity cannot exceed shipped quantity. It has been adjusted.');
+        receivedVal = shipped;
+        receivedInput.val(receivedVal);
+      }
+
+      const maxDamaged = Math.max(shipped - receivedVal, 0);
+      damagedInput.attr('max', maxDamaged);
+
+      let damagedVal = parseInt(damagedInput.val()) || 0;
+      if (damagedVal > maxDamaged) {
+        toastr.warning('Damaged quantity cannot exceed (shipped - received). It has been adjusted.');
+        damagedVal = maxDamaged;
+        damagedInput.val(damagedVal);
+      }
+
+      updateTotalItems();
+    }
+
+    // Real-time listeners
+    $('#items-container').on('input', '.received-qty', function() {
+      const row = $(this).closest('.item-row');
+      enforceConstraints(row);
+    });
+
+    $('#items-container').on('input', '.damaged-qty', function() {
+      const row = $(this).closest('.item-row');
+      enforceConstraints(row);
+    });
+
+    // Load items from a reference ID
+    $('#load-items-btn').on('click', function() {
+      const reference_id = $('#reference_id').val().trim();
+      
+      if (!reference_id) {
+        toastr.error('Please enter a Reference ID');
+        return;
+      }
+      
+      // Store the original button HTML
+      const originalBtn = $(this).html();
+      
+      // Show loading indicator
+      $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+      $(this).prop('disabled', true);
+      
+      // First check if this is an existing warehouse receipt
+      $.ajax({
+        url: "{% url 'get_warehouse_receipt_details' %}",
+        method: 'GET',
+        data: { reference_id: reference_id },
+        success: function(data) {
+          // Always restore button state first
+          $('#load-items-btn').html(originalBtn);
+          $('#load-items-btn').prop('disabled', false);
+          
+          if (data.success && data.items && data.items.length > 0) {
+            // This is an existing warehouse receipt - load it directly
+            // Use the provided reference ID as is (server handles case insensitivity)
+            loadExistingReceipt(null, reference_id);
+          } else {
+            // Check if this is a warehouse shipment
+            checkWarehouseShipment(reference_id, originalBtn);
+          }
+        },
+        error: function(xhr, status, error) {
+          // Restore button state
+          $('#load-items-btn').html(originalBtn);
+          $('#load-items-btn').prop('disabled', false);
+          
+          // Show error
+          toastr.error('Error checking warehouse receipts: ' + error);
+          
+          // Try warehouse shipment as fallback
+          checkWarehouseShipment(reference_id, originalBtn);
+        }
+      });
+    });
+    
+    // Function to check if reference ID exists in warehouse shipments
+    function checkWarehouseShipment(reference_id, originalBtnHtml) {
+      console.log("Checking warehouse shipment for reference ID:", reference_id);
+      
+      // Show loading again if we're calling directly
+      if (!$('#load-items-btn').prop('disabled')) {
+        $('#load-items-btn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+        $('#load-items-btn').prop('disabled', true);
+      }
+      
+      $.ajax({
+        url: "{% url 'get_warehouse_shipment_items' %}",
+        method: 'GET',
+        data: { reference_id: reference_id },
+        success: function(data) {
+          // Always restore button state
+          $('#load-items-btn').html(originalBtnHtml || '<span class="material-icons">search</span>');
+          $('#load-items-btn').prop('disabled', false);
+          
+          console.log("Raw warehouse shipment data:", data);
+          
+          if (data.success && data.items && data.items.length > 0) {
+            console.log("Found " + data.items.length + " shipment items");
+            
+            // This is a warehouse shipment - create new receipt
+      $('#is_edit_mode').val('0');
+      $('#original_reference_id').val('');
+            $('#delete_previous_items').val('0');
+      $('#receipt_id').val('');
+            
+            // Clear existing rows
+            $('#items-container tbody').empty();
+            
+            // Add rows for each item
+            for (let i = 0; i < data.items.length; i++) {
+              const item = data.items[i];
+              console.log("Raw shipment item [" + i + "]:", item);
+              
+              // Create new row
+              const newRow = $('<tr class="item-row"></tr>');
+              
+              // Process item fields with explicit checks
+              let clientItem = '';
+              let productName = '';
+              let shippedQty = 0;
+              
+              // Client item field (from client_id in warehouse_shipment)
+              if (item.client_id !== undefined && item.client_id !== null) {
+                clientItem = item.client_id;
+              }
+              
+              // Product name field
+              if (item.product_name !== undefined && item.product_name !== null) {
+                productName = item.product_name;
+              }
+              
+              // Shipped quantity (from quantity in warehouse_shipment)
+              if (item.quantity !== undefined && item.quantity !== null && item.quantity !== '') {
+                shippedQty = parseInt(item.quantity) || 0;
+                console.log("Using quantity field:", item.quantity, "parsed as:", shippedQty);
+              } else if (item.ship_qty !== undefined && item.ship_qty !== null && item.ship_qty !== '') {
+                shippedQty = parseInt(item.ship_qty) || 0;
+                console.log("Using ship_qty field:", item.ship_qty, "parsed as:", shippedQty);
+              }
+              console.log("Final shippedQty value:", shippedQty);
+              
+              // For new shipments, default received to shipped qty and damaged to 0
+              const receivedQty = shippedQty || 0;
+              const damagedQty = 0;
+              
+              console.log("Setting receivedQty to:", receivedQty);
+              
+              console.log("Processed shipment item fields [" + i + "]:", {
+                clientItem,
+                productName,
+                shippedQty,
+                receivedQty,
+                damagedQty
+              });
+              
+              // Add cells with proper escaping for values
+              newRow.append(`
+                <td>
+                  <input type="text" class="form-control client-item" name="client_items[]" value="${clientItem}" required readonly>
+                  <input type="hidden" class="item-id" name="item_ids[]" value="">
+                </td>
+                <td>
+                  <input type="text" class="form-control product-name" name="product_names[]" value="${productName}" readonly>
+                </td>
+                <td>
+                  <input type="number" class="form-control shipped-qty" value="${shippedQty || 0}" readonly>
+                </td>
+                <td>
+                  <input type="number" class="form-control received-qty" name="quantities[]" min="0" value="${receivedQty}" required>
+                </td>
+                <td>
+                  <input type="number" class="form-control damaged-qty" name="damaged_quantities[]" min="0" value="${damagedQty}" required>
+                </td>
+              `);
+              
+              // Add row to table
+              $('#items-container tbody').append(newRow);
+              
+              // Look up product names if they're missing
+              if (!productName) {
+                fetchProductName(clientItem, newRow);
+              }
+            }
+            
+            // Update form button text
+            $('button[type="submit"]').text('Submit');
+            
+            updateTotalItems();
+            toastr.success('Items loaded from warehouse shipment');
+          } else {
+            // Reference ID not found anywhere
+            $('#items-container tbody').empty();
+            toastr.error('Reference ID not found in warehouse receipts or shipments');
+          }
+        },
+        error: function(xhr, status, error) {
+          toastr.error('Error checking reference ID: ' + error);
+        },
+        complete: function() {
+          // Restore button text
+          $('#load-items-btn').html($('#load-items-btn').data('original-text') || '<span class="material-icons">search</span>');
+          $('#load-items-btn').prop('disabled', false);
+        }
+      });
+    }
+    
+    // Function to fetch product name for a client item
+    function fetchProductName(clientItem, row) {
+      if (!clientItem) return;
+      
+            $.ajax({
+              url: "{% url 'get_product_item_num' %}",
+              type: "GET",
+              data: { room_number: clientItem },
+              success: function(data) {
+                if (data.success) {
+                  // Fill product name
+                  row.find('.product-name').val(data.product_name || data.room_type || '');
+                  
+                  // Use the correctly cased client_id returned from the server if available
+                  if (data.client_id) {
+                    row.find('.client-item').val(data.client_id);
+                  }
+                }
+              }
+            });
+          }
+
+    // Handle form submission
+    $('#warehouse-receiver-form').on('submit', function(e) {
+      // Add item IDs to form for edit mode
+      if ($('#is_edit_mode').val() === '1') {
+        console.log("Submitting in edit mode with receipt ID:", $('#receipt_id').val());
+        
+        // We need to preserve the edit mode and receipt ID during submission
+        const receiptId = $('#receipt_id').val();
+        const isEditMode = $('#is_edit_mode').val();
+        const originalReferenceId = $('#original_reference_id').val();
+        
+        // Check if we have a valid receipt ID for edit mode
+        if (!receiptId) {
+          e.preventDefault();
+          toastr.error("Cannot update: Receipt ID is missing");
+          return false;
+        }
+        
+        console.log("Form is being submitted in edit mode:", {
+          receiptId: receiptId,
+          isEditMode: isEditMode,
+          originalReferenceId: originalReferenceId
+        });
+      }
+    });
+
+    // Check reference ID when it loses focus
+    $('#reference_id').on('blur', function() {
+      const reference_id = $(this).val().trim();
+      if (reference_id) {
+        // Check if this is an existing warehouse receipt reference ID
+        $.ajax({
+          url: "{% url 'get_warehouse_receipt_details' %}",
+          method: 'GET',
+          data: { reference_id: reference_id },
+          success: function(data) {
+            if (data.success && data.items && data.items.length > 0) {
+              // Show notification that this is an existing reference ID
+              toastr.info('This reference ID exists. Click "Load Items" to edit it.');
+              
+              // Add a visual indicator
+              $('#reference_id').addClass('border-info');
+              
+              // Store the actual reference ID with correct case
+              if (data.receipt && data.receipt.reference_id) {
+                // Just keep the user's input - backend will handle case-insensitive matching
+                console.log("Found existing reference ID with original case:", data.receipt.reference_id);
+              }
+            } else {
+              // Remove visual indicator if it was previously set
+              $('#reference_id').removeClass('border-info');
+              
+              // Reset edit mode hidden fields
+              $('#is_edit_mode').val('0');
+              $('#original_reference_id').val('');
+              $('#delete_previous_items').val('0');
+              
+              // Reset form button text
+              $('button[type="submit"]').text('Submit');
+            }
+          }
+        });
+      }
+    });
+    
+    // Load previous receipts via AJAX
+    let currentPage = 1;
+    
+    function loadReceipts(page = 1) {
+      // Show loading indicator
+      $('#receipts-loading').removeClass('d-none');
+      $('#receipts-container').addClass('d-none');
+      
+      // Make AJAX request to get receipts
+      $.ajax({
+        url: "{% url 'get_warehouse_receipts' %}",
+        type: "GET",
+        data: { page: page },
+        success: function(data) {
+          if (data.success) {
+            // Update current page
+            currentPage = data.page;
+            
+            // Populate table with receipts
+            const tableBody = $('#receipts-table-body');
+            tableBody.empty();
+            
+            if (data.receipts.length === 0) {
+              tableBody.append(`
+                <tr>
+                  <td colspan="6" class="text-center">No previous receipts found.</td>
+                </tr>
+              `);
+            } else {
+              data.receipts.forEach(function(receipt) {
+                tableBody.append(`
+                  <tr>
+                    <td>${receipt.reference_id}</td>
+                    <td>${receipt.received_date}</td>
+                    <td>${receipt.items_count}</td>
+                    <td>${receipt.total_quantity}</td>
+                    <td>${receipt.received_by}</td>
+                    <td>
+                      <button type="button" class="btn btn-secondary btn-sm edit-receipt" data-reference-id="${receipt.reference_id}" data-receipt-id="${receipt.id}">Edit</button>
+                    </td>
+                  </tr>
+                `);
+              });
+            }
+            
+            // Update pagination
+            const paginationContainer = $('#pagination-container ul');
+            paginationContainer.empty();
+            
+            // Previous button
+            if (data.has_previous) {
+              paginationContainer.append(`
+                <li class="page-item">
+                  <a class="page-link page-nav" href="#" data-page="${data.previous_page}">Previous</a>
+                </li>
+              `);
+            }
+            
+            // Page numbers
+            for (let num = 1; num <= data.total_pages; num++) {
+              if (num === data.page) {
+                paginationContainer.append(`
+                  <li class="page-item active">
+                    <span class="page-link">${num}</span>
+                  </li>
+                `);
+              } else if (num <= 4 || num > data.total_pages - 3) {
+                paginationContainer.append(`
+                  <li class="page-item">
+                    <a class="page-link page-nav" href="#" data-page="${num}">${num}</a>
+                  </li>
+                `);
+              } else if (num === 5 && data.page > 7) {
+                paginationContainer.append(`
+                  <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
+                `);
+              } else if (num === data.total_pages - 4 && data.page < data.total_pages - 6) {
+                paginationContainer.append(`
+                  <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                  </li>
+                `);
+              }
+            }
+            
+            // Next button
+            if (data.has_next) {
+              paginationContainer.append(`
+                <li class="page-item">
+                  <a class="page-link page-nav" href="#" data-page="${data.next_page}">Next</a>
+                </li>
+              `);
+            }
+            
+            // Show receipts container, hide loading indicator
+            $('#receipts-loading').addClass('d-none');
+            $('#receipts-container').removeClass('d-none');
+            
+            // Set up edit buttons for previous receipts
+            $('.edit-receipt').on('click', function() {
+              const receiptId = $(this).data('receipt-id');
+              const referenceId = $(this).data('reference-id');
+              
+              console.log("Edit button clicked for receipt ID:", receiptId, "with reference ID:", referenceId);
+              
+              // Load receipt for editing
+              loadExistingReceipt(receiptId, referenceId);
+              
+              // Scroll to the top of the form
+              $('html, body').animate({
+                scrollTop: $("#warehouse-receiver-form").offset().top - 100
+              }, 500);
+            });
+          } else {
+            // Show error
+            toastr.error(data.message || 'Failed to load receipts');
+            $('#receipts-loading').addClass('d-none');
+          }
+        },
+        error: function() {
+          toastr.error('Error loading receipts');
+          $('#receipts-loading').addClass('d-none');
+        }
+      });
+    }
+    
+    // Handle pagination clicks
+    $(document).on('click', '.page-nav', function(e) {
+      e.preventDefault();
+      const page = $(this).data('page');
+      loadReceipts(page);
+    });
+    
+    // Removed loadReceiptForEdit function as it's replaced by loadExistingReceipt
+    
+    // Load receipts when page loads
+    loadReceipts();
+    
+    // We use JS-safe approach to handle Django template tags
+    var djangoMessages = [];
+    {% if messages %}
+      {% for message in messages %}
+        djangoMessages.push({
+          "tag": "{{ message.tags }}",
+          "text": "{{ message|escapejs }}"
+        });
+      {% endfor %}
+    {% endif %}
+    
+    // Process the messages with toastr
+    djangoMessages.forEach(function(msg) {
+      if (msg.tag === "success") {
+        toastr.success(msg.text);
+      } else if (msg.tag === "error") {
+        toastr.error(msg.text);
+      } else if (msg.tag === "warning") {
+        toastr.warning(msg.text);
+      } else {
+        toastr.info(msg.text);
+      }
+    });
+
+    // Clear form button
+    $('#clear-form-btn').on('click', function() {
+      // Reset the form
+      $('#warehouse-receiver-form')[0].reset();
+      
+      // Set today's date for the received date field
+      var today = new Date().toISOString().split('T')[0];
+      $('#received_date').val(today);
+      
+      // Clear existing rows except the first
+      const firstRow = $('#items-container .item-row').first();
+      $('#items-container .item-row').not(firstRow).remove();
+      
+      // Clear inputs in the first row
+      firstRow.find('input').val('');
+      firstRow.find('.received-qty').val('0');
+      firstRow.find('.damaged-qty').val('0');
+      
+      // Reset edit mode flags
+      $('#is_edit_mode').val('0');
+      $('#original_reference_id').val('');
+      $('#receipt_id').val('');
+      $('#delete_previous_items').val('0');
+
+      // Clear total items box
+      $('#total_items_box').val('');
+      
+      // Reset form button text
+      $('button[type="submit"]').text('Submit');
+      
+      toastr.info('Form has been cleared');
+    });
+    
+    // Function to load an existing warehouse receipt for editing
+    function loadExistingReceipt(receipt_id, reference_id) {
+      console.log("Loading receipt with ID:", receipt_id, "and reference ID:", reference_id);
+      
+      // Show loading indicator
+      $('#load-items-btn').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+      $('#load-items-btn').prop('disabled', true);
+      
+      // Create the API request params
+      const params = {};
+      if (receipt_id) {
+        params.receipt_id = receipt_id;
+      } 
+      if (reference_id) {
+        params.reference_id = reference_id;
+      }
+      
+      console.log("API request params:", params);
+      
+      // Make API call
+      $.ajax({
+        url: "{% url 'get_warehouse_receipt_details' %}",
+        method: 'GET',
+        data: params,
+        success: function(data) {
+          console.log("Raw API response:", data);
+          
+          // Check if we have valid data
+          if (data.success) {
+            // Clear form first
+            $('#clear-form-btn').click();
+            
+            // Set edit mode flags
+            $('#is_edit_mode').val('1');
+            $('#delete_previous_items').val('1');
+            
+            // Set reference ID and receipt ID from the data
+            if (data.receipt) {
+              $('#reference_id').val(data.receipt.reference_id || reference_id);
+              $('#original_reference_id').val(data.receipt.reference_id || reference_id);
+              $('#receipt_id').val(data.receipt.id || receipt_id);
+              
+              // Set received date if available
+              if (data.receipt.received_date) {
+                $('#received_date').val(data.receipt.received_date);
+              }
+            } else {
+              // Fall back to passed values
+              $('#reference_id').val(reference_id);
+              $('#original_reference_id').val(reference_id);
+              $('#receipt_id').val(receipt_id || '');
+            }
+            
+            // Check if we have items
+            if (data.items && data.items.length > 0) {
+              // Clear existing rows
+              $('#items-container tbody').empty();
+              
+              console.log("Found " + data.items.length + " items to display");
+              
+              // Process and add each item
+              for (let i = 0; i < data.items.length; i++) {
+                const item = data.items[i];
+                console.log("Raw item data [" + i + "]:", item);
+                
+                // Create new row
+                const newRow = $('<tr class="item-row"></tr>');
+                
+                // IMPORTANT: HotelWarehouse fields (for this context)
+                // - client_item: The client's item ID
+                // - quantity_received: Quantity received
+                // - damaged_qty: Damaged quantity
+                
+                // Build fields using basic checks and default values
+                let clientItem = '';
+                let itemId = '';
+                let productName = '';
+                let shippedQty = 0;
+                let receivedQty = 0;
+                let damagedQty = 0;
+                
+                // Handle client item field (client_item in hotel_warehouse)
+                if (item.client_item !== undefined && item.client_item !== null) {
+                  clientItem = item.client_item;
+                } else if (item.client_id !== undefined && item.client_id !== null) {
+                  clientItem = item.client_id;
+                }
+                
+                // Handle item ID field
+                if (item.id !== undefined && item.id !== null) {
+                  itemId = item.id;
+                }
+                
+                // Handle product name field
+                if (item.product_name !== undefined && item.product_name !== null) {
+                  productName = item.product_name;
+                }
+                
+                // Handle shipped quantity (from warehouse_shipment table as ship_qty)
+                if (item.ship_qty !== undefined && item.ship_qty !== null && item.ship_qty !== '') {
+                  shippedQty = parseInt(item.ship_qty) || 0;
+                  console.log("Existing receipt: Using ship_qty field:", item.ship_qty, "parsed as:", shippedQty);
+                } else if (item.quantity !== undefined && item.quantity !== null && item.quantity !== '') {
+                  shippedQty = parseInt(item.quantity) || 0;
+                  console.log("Existing receipt: Using quantity field:", item.quantity, "parsed as:", shippedQty);
+                }
+                console.log("Existing receipt: Final shippedQty value:", shippedQty);
+                
+                // Handle received quantity (from hotel_warehouse table as quantity_received)
+                if (item.quantity_received !== undefined && item.quantity_received !== null) {
+                  receivedQty = parseInt(item.quantity_received);
+                  console.log("Found quantity_received:", receivedQty);
+                }
+                
+                // Handle damaged quantity (from hotel_warehouse table as damaged_qty)
+                if (item.damaged_qty !== undefined && item.damaged_qty !== null) {
+                  damagedQty = parseInt(item.damaged_qty);
+                  console.log("Found damaged_qty:", damagedQty);
+                }
+                
+                console.log("Processed item fields [" + i + "]:", {
+                  clientItem,
+                  itemId, 
+                  productName, 
+                  shippedQty, 
+                  receivedQty, 
+                  damagedQty
+                });
+                
+                // Add cells with proper escaping for values
+                newRow.append(`
+                  <td>
+                    <input type="text" class="form-control client-item" name="client_items[]" value="${clientItem}" required readonly>
+                    <input type="hidden" class="item-id" name="item_ids[]" value="${itemId}">
+                  </td>
+                  <td>
+                    <input type="text" class="form-control product-name" name="product_names[]" value="${productName}" readonly>
+                  </td>
+                  <td>
+                    <input type="number" class="form-control shipped-qty" value="${shippedQty || 0}" readonly>
+                </td>
+                <td>
+                  <input type="number" class="form-control received-qty" name="quantities[]" min="0" value="${receivedQty || 0}" required>
+                  </td>
+                  <td>
+                    <input type="number" class="form-control damaged-qty" name="damaged_quantities[]" min="0" value="${damagedQty}" required>
+                  </td>
+                `);
+                
+                // Add row to table
+                $('#items-container tbody').append(newRow);
+                
+                // Look up product names if they're missing
+                if (!productName) {
+                  fetchProductName(clientItem, newRow);
+                }
+              }
+              
+              // Update form button text
+              $('button[type="submit"]').text('Update Receipt');
+              
+              updateTotalItems();
+              toastr.info('Loaded existing warehouse receipt for editing');
+            } else {
+              toastr.warning('No items found for this warehouse receipt');
+            }
+          } else {
+            toastr.error(data.message || 'Failed to load warehouse receipt data');
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error("API error:", error);
+          console.error("Response:", xhr.responseText);
+          toastr.error('Error loading warehouse receipt: ' + error);
+        },
+        complete: function() {
+          // Restore button state
+          $('#load-items-btn').html('<span class="material-icons">search</span>');
+          $('#load-items-btn').prop('disabled', false);
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,889 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Use the modern chat UI styles from chat.html, but ensure IDs/classes for advanced features are present */
+    .chat-container {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: #f8f9fa;
+        justify-content: flex-end;
+    }
+    @media (max-width: 991px) {
+        .chat-container {
+            width: 100%;
+            height: 100%;
+        }
+    }
+    .chat-header {
+        background: #f8f9fa;
+        color: #444;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    .chat-header h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 0;
+        color: #444;
+        letter-spacing: 1px;
+    }
+    .chat-messages {
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+    .message {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+    }
+    .message.user {
+        justify-content: flex-end;
+    }
+    .message-content {
+        max-width: 70%;
+        padding: 15px 20px 32px 20px; /* Add extra bottom padding for time */
+        border-radius: 20px;
+        position: relative;
+        word-wrap: break-word;
+    }
+    .message.user .message-content {
+        background: #dee2e6;
+        color: #222;
+        border-bottom-right-radius: 5px;
+    }
+    .message.bot .message-content {
+        background: white;
+        color: #333;
+        border: 1px solid #e9ecef;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .message-time {
+        font-size: 11px;
+        opacity: 0.7;
+        position: absolute;
+        bottom: 6px;
+        right: 16px;
+        margin: 0;
+        padding: 0;
+        text-align: right;
+        background: transparent;
+        width: auto;
+        min-width: 36px;
+        pointer-events: none;
+        /* Remove border, rely on padding for spacing */
+        box-sizing: border-box;
+    }
+    .message-content {
+        position: relative;
+    }
+    .typing-indicator {
+        display: none;
+        padding: 15px 20px;
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e9ecef;
+        border-bottom-left-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        max-width: 70%;
+        color: #aaa;
+        font-style: italic;
+        font-size: 15px;
+    }
+    .chat-input-container {
+        padding: 10px 20px 8px 20px;
+        background: white;
+        border-top: 1px solid #e9ecef;
+        margin-bottom: 0;
+    }
+    .chat-input-form {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+    }
+    .chat-input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 2px solid #e9ecef;
+        border-radius: 25px;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.3s ease;
+        resize: none;
+        min-height: 50px;
+        max-height: 120px;
+    }
+    .chat-input:focus {
+        border-color: #667eea;
+    }
+    .send-button {
+        background: #495057;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s ease;
+        font-size: 18px;
+    }
+    .send-button:hover {
+        transform: scale(1.05);
+    }
+    .send-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    .examples {
+        margin-top: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .example-button {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 15px;
+        padding: 8px 15px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: #667eea;
+    }
+    .example-button:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+    .status-bar {
+        display: none !important;
+    }
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #28a745;
+    }
+    .status-dot.disconnected {
+        background: #dc3545;
+    }
+    .new-session-btn {
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 15px;
+        padding: 5px 15px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+    .new-session-btn:hover {
+        background: #218838;
+    }
+    .inventory-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 14px;
+    }
+    .inventory-table th,
+    .inventory-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .inventory-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+    }
+    .inventory-table tr:hover {
+        background: #f8f9fa;
+    }
+    .code-block {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        overflow-x: auto;
+        margin: 10px 0;
+    }
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .thinking-content {
+        color: #6c757d !important;
+        font-style: italic;
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        border-left: none;
+        margin: 0;
+        opacity: 1;
+        transition: none;
+        display: inline;
+        word-break: break-word;
+    }
+    .thinking-content::before {
+        content: "";
+        margin-right: 0;
+    }
+    .reasoning-step {
+        margin: 8px 0;
+        padding: 8px 12px;
+        background: rgba(108, 117, 125, 0.1);
+        border-radius: 6px;
+        border-left: 3px solid #6c757d;
+    }
+    .reasoning-step strong {
+        color: #495057;
+        font-weight: 600;
+    }
+    .final-answer {
+        color: #333 !important;
+        font-style: normal;
+        background: white;
+        padding: 0;
+        border-radius: 0;
+        border-left: none;
+        margin: 0;
+    }
+    .final-answer::before {
+        content: "";
+    }
+    .llm-thinking-box.answer-box {
+        position: relative;
+        left: 0;
+        right: auto;
+        top: auto;
+        transform: none;
+        width: 320px;
+        max-width: 90vw;
+        max-height: 40vh;
+        background: rgba(255,255,255,0.97);
+        border: 1.5px solid #6c757d;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        pointer-events: auto;
+        margin: 10px 0 10px 0;
+        overflow-y: auto;
+    }
+    .llm-thinking-header {
+        font-weight: bold;
+        color: #6c757d;
+        padding: 10px 14px 6px 14px;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 15px;
+        background: #f8f9fa;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .llm-thinking-content {
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #444;
+        font-family: 'Fira Mono', 'Consolas', monospace;
+        white-space: pre-wrap;
+        background: none;
+        word-break: break-word;
+        max-width: 100%;
+        box-sizing: border-box;
+        display: block;
+    }
+    .llm-thinking-toggle {
+        margin-left: 10px;
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: #888;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h1>PK Spaces Chatbot</h1>
+    </div>
+    <div id="session-error" style="display:none;color:#b71c1c;background:#ffeaea;padding:10px 20px;margin:10px 20px 0 20px;border-radius:6px;text-align:center;font-weight:500;"></div>
+    <div class="chat-messages" id="chat-messages">
+        <div class="message bot">
+            <div class="message-content">
+                👋 Hello! I'm your inventory management assistant. I can help you with:
+                <br><br>
+                • <strong>Room Inventory:</strong> "Show me all rooms on floor 2."
+                <br>
+                • <strong>Product Quantity:</strong> "How many of item P123 are currently in the hotel warehouse?"
+                <br>
+                • <strong>Warehouse Status:</strong> "What items have been received at hotel warehouse recently?"
+                <br>
+                • <strong>Container Tracking:</strong> "What's in container Container_1?"
+                <br><br>
+                Start by creating a session and asking your question!
+                <div class="message-time" id="welcome-time"></div>
+            </div>
+        </div>
+    </div>
+    <div class="typing-indicator" id="typing-indicator">
+        <span style="color:#aaa;">Thinking...</span>
+    </div>
+    <div class="chat-input-container">
+        <form class="chat-input-form" id="chat-form">
+            <textarea 
+                class="chat-input" 
+                id="chat-input" 
+                placeholder="Ask about inventory, rooms, products, containers..."
+                rows="1"
+            ></textarea>
+            <button type="button" class="voice-button" id="voice-button" title="Speak your question" style="background:#495057;color:#fff;border:none;border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;margin-right:4px;transition:background 0.2s;">
+                <span id="voice-icon">
+                  <!-- SVG Microphone Icon -->
+                  <svg id="mic-svg" xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg>
+                </span>
+            </button>
+            <button type="submit" class="send-button" id="send-button">
+                <span id="send-icon">➤</span>
+                <div class="loading" id="send-loading" style="display: none;"></div>
+            </button>
+        </form>
+    </div>
+    <div class="status-bar">
+        <div class="status-indicator">
+            <div class="status-dot" id="status-dot"></div>
+            <span id="status-text">Ready</span>
+        </div>
+        <button class="new-session-btn" onclick="createNewSession()">New Session</button>
+    </div>
+</div>
+
+<script>
+
+let currentSessionId = null;
+let isStreaming = false;
+let currentThinkingBox = null;
+let currentThinkingContentDiv = null;
+let isFinal = false;
+
+// --- Voice Assistant Integration ---
+let recognition = null;
+let recognizing = false;
+const synth = window.speechSynthesis;
+let lastInputWasVoice = false; // Track if last input was via speech
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('welcome-time').textContent = new Date().toLocaleTimeString();
+    createNewSession();
+    setupEventListeners();
+    setupVoiceAssistant();
+});
+
+function setupEventListeners() {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const voiceBtn = document.getElementById('voice-button');
+
+    form.addEventListener('submit', handleSubmit);
+    
+    // Auto-resize textarea
+    input.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Handle Enter key
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSubmit(e);
+        }
+    });
+
+    // Voice button click
+    if (voiceBtn) {
+        voiceBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (!recognition) return;
+            if (recognizing) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+    }
+}
+
+function setupVoiceAssistant() {
+    // Speech Recognition (Web Speech API)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        document.getElementById('voice-button').style.display = 'none';
+        return;
+    }
+    recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = function() {
+        recognizing = true;
+        // Change SVG mic to red when recording
+        const micSvg = document.getElementById('mic-svg');
+        if (micSvg) {
+            micSvg.setAttribute('stroke', '#dc3545');
+        }
+        document.getElementById('voice-button').style.background = '#222';
+    };
+    recognition.onend = function() {
+        recognizing = false;
+        // Restore SVG mic to default color
+        const micSvg = document.getElementById('mic-svg');
+        if (micSvg) {
+            micSvg.setAttribute('stroke', 'currentColor');
+        }
+        document.getElementById('voice-button').style.background = '#495057';
+    };
+    recognition.onerror = function(event) {
+        recognizing = false;
+        const micSvg = document.getElementById('mic-svg');
+        if (micSvg) {
+            micSvg.setAttribute('stroke', 'currentColor');
+        }
+        document.getElementById('voice-button').style.background = '#495057';
+    };
+    recognition.onresult = function(event) {
+        const spokenText = event.results[0][0].transcript;
+        const input = document.getElementById('chat-input');
+        input.value = spokenText;
+        lastInputWasVoice = true; // Mark that next output should be spoken
+        // Optionally auto-send after speaking:
+        document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+    };
+}
+
+async function createNewSession() {
+    try {
+        updateStatus('Creating session...', 'connecting');
+        const response = await fetch('/api/session/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_name: 'Web User'
+            })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            currentSessionId = data.session_id;
+            updateStatus('Connected', 'connected');
+            hideTypingIndicator();
+            addMessage('Session created successfully! You can now start asking questions.', 'bot');
+            document.getElementById('session-error').style.display = 'none';
+        } else {
+            throw new Error(data.error || 'Failed to create session');
+        }
+    } catch (error) {
+        console.error('Error creating session:', error);
+        updateStatus('Connection failed', 'disconnected');
+        addMessage('Failed to create session. Please refresh the page.', 'bot');
+        document.getElementById('session-error').textContent = error.message || 'Failed to create session.';
+        document.getElementById('session-error').style.display = 'block';
+    }
+}
+
+function createCombinedReasoningThinkingBox() {
+    const box = document.createElement('div');
+    box.className = 'llm-thinking-box answer-box';
+    box.innerHTML = `
+        <div class="llm-thinking-header">
+            <span> Reasoning & Thinking</span>
+            <button class="llm-thinking-toggle" style="float:right;background:none;border:none;font-size:16px;cursor:pointer;color:#888;">▼</button>
+        </div>
+        <div class="llm-thinking-content"></div>
+    `;
+    const contentDiv = box.querySelector('.llm-thinking-content');
+    const toggleBtn = box.querySelector('.llm-thinking-toggle');
+    let expanded = true;
+    function setExpanded(exp) {
+        expanded = exp;
+        if (expanded) {
+            contentDiv.style.display = '';
+            toggleBtn.textContent = '▼';
+        } else {
+            contentDiv.style.display = 'none';
+            toggleBtn.textContent = '▲';
+        }
+    }
+    toggleBtn.onclick = function() {
+        setExpanded(!expanded);
+    };
+    setExpanded(true);
+    return { box, contentDiv };
+}
+
+async function handleSubmit(e) {
+    e.preventDefault();
+    const input = document.getElementById('chat-input');
+    const question = input.value.trim();
+    if (!question || isStreaming) return;
+    if (!currentSessionId) {
+        addMessage('Please wait for session to be created...', 'bot');
+        return;
+    }
+    // Add user message
+    addMessage(question, 'user');
+    // If not voice input, ensure output is not spoken
+    if (!lastInputWasVoice) {
+        lastInputWasVoice = false;
+    }
+    input.value = '';
+    input.style.height = 'auto';
+    showTypingIndicator();
+    // Create a new combined reasoning/thinking box for this answer
+    const chatMessages = document.getElementById('chat-messages');
+    const userMessages = chatMessages.querySelectorAll('.message.user');
+    const { box, contentDiv } = createCombinedReasoningThinkingBox();
+    currentThinkingBox = box;
+    currentThinkingContentDiv = contentDiv;
+    isFinal = false;
+    // Insert above the latest user message
+    if (userMessages.length > 0) {
+        chatMessages.insertBefore(box, userMessages[userMessages.length - 1].nextSibling);
+    } else {
+        chatMessages.appendChild(box);
+    }
+    scrollToBottom(); // Scroll after inserting the reasoning box
+    // Scroll to show the box
+    setTimeout(() => {
+        chatMessages.scrollTop = box.offsetTop - 20;
+        scrollToBottom();
+    }, 100);
+    await streamResponse(question);
+}
+
+async function streamResponse(question) {
+    isStreaming = true;
+    updateSendButton(true);
+    try {
+        updateStatus('Processing...', 'connecting');
+        const response = await fetch('/api/chat/stream/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                question: question,
+                session_id: currentSessionId
+            })
+        });
+        if (!response.body) throw new Error('No response body');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunk = decoder.decode(value, { stream: true });
+            chunk.split('\n\n').forEach(part => {
+                if (part.startsWith('data:')) {
+                    const data = JSON.parse(part.replace('data:', '').trim());
+                    if ((data.type === 'reasoning_step' || data.type === 'thinking') && !isFinal) {
+                        if (currentThinkingContentDiv) {
+                            // For thinking tokens, append to a single span; for reasoning_step, append as a block
+                            if (data.type === 'thinking') {
+                                let span = currentThinkingContentDiv.querySelector('.thinking-content');
+                                if (!span) {
+                                    span = document.createElement('span');
+                                    span.className = 'thinking-content';
+                                    currentThinkingContentDiv.appendChild(span);
+                                }
+                                span.innerHTML += data.content;
+                            } else if (data.type === 'reasoning_step') {
+                                let div = document.createElement('div');
+                                div.className = 'reasoning-step';
+                                div.innerHTML = data.content;
+                                currentThinkingContentDiv.appendChild(div);
+                            }
+                            currentThinkingBox.style.display = 'block';
+                            setTimeout(() => {
+                                currentThinkingContentDiv.scrollTop = currentThinkingContentDiv.scrollHeight;
+                                // Always scroll chat to bottom as box fills
+                                requestAnimationFrame(scrollToBottom);
+                            }, 50);
+                            requestAnimationFrame(scrollToBottom);
+                        }
+                    } else if (data.type === 'final') {
+                        isFinal = true;
+                        // Collapse the box after a short delay
+                        setTimeout(() => {
+                            if (currentThinkingContentDiv) {
+                                currentThinkingContentDiv.style.display = 'none';
+                                currentThinkingBox.querySelector('.llm-thinking-toggle').textContent = '▲';
+                            }
+                        }, 1200);
+                        // Show the final answer
+                        const finalMsg = addMessage('', 'bot', true);
+                        showFinalAnswerLetterByLetter(finalMsg, data.content);
+                        requestAnimationFrame(scrollToBottom);
+                    } else if (data.type === 'end') {
+                        hideTypingIndicator();
+                    } else if (data.type === 'error') {
+                        addMessage(`❌ Error: ${data.error}`, 'bot');
+                        hideTypingIndicator();
+                    }
+                }
+            });
+        }
+        updateStatus('Connected', 'connected');
+    } catch (error) {
+        updateStatus('Connection error', 'disconnected');
+        addMessage(`Error: ${error.message}`, 'bot');
+    } finally {
+        isStreaming = false;
+        updateSendButton(false);
+    }
+}
+
+
+function showFinalAnswerLetterByLetter(msgElement, content) {
+    // Remove the thinking styling and show the answer letter by letter
+    const messageContent = msgElement.querySelector('.message-content');
+    messageContent.innerHTML = '';
+    // Format the content to HTML for animation
+    const formattedContent = formatMessage(content);
+    // Animate letter by letter (HTML-aware)
+    animateHtmlContent(formattedContent, messageContent, () => {
+        // Add the time to the bot response as well
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const timeStr = `${hours}:${minutes}`;
+        const messageTime = document.createElement('div');
+        messageTime.className = 'message-time';
+        messageTime.textContent = timeStr;
+        messageContent.appendChild(messageTime);
+    // --- Voice output: speak the bot's response only if last input was via voice ---
+    if (lastInputWasVoice) {
+        speakBotResponse(stripHtml(formattedContent));
+        lastInputWasVoice = false; // Reset after speaking
+    }
+    });
+}
+
+// Animate HTML content letter by letter (preserves tags)
+function animateHtmlContent(html, container, onComplete) {
+    // Parse HTML into nodes
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const nodes = Array.from(tempDiv.childNodes);
+    let nodeIdx = 0;
+    function animateNode() {
+        if (nodeIdx >= nodes.length) {
+            if (onComplete) onComplete();
+            return;
+        }
+        const node = nodes[nodeIdx++];
+        if (node.nodeType === Node.TEXT_NODE) {
+            animateText(node.textContent, container, animateNode);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const el = node.cloneNode(false);
+            container.appendChild(el);
+            animateHtmlContent(node.innerHTML, el, animateNode);
+        } else {
+            animateNode();
+        }
+    }
+    animateNode();
+}
+
+function animateText(text, container, onComplete) {
+    let i = 0;
+    function step() {
+        if (i < text.length) {
+            container.appendChild(document.createTextNode(text[i++]));
+            setTimeout(step, 12); // speed: 12ms per letter
+        } else {
+            if (onComplete) onComplete();
+        }
+    }
+    step();
+}
+
+function speakBotResponse(text) {
+    if (!('speechSynthesis' in window)) return;
+    if (!text || text.length > 1000) return; // avoid reading huge responses
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+}
+
+function stripHtml(html) {
+    // Remove HTML tags for clean speech output
+    let tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+
+function addMessage(content, sender, isStreaming = false) {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.innerHTML = isStreaming ? '' : formatMessage(content);
+    // Format time as HH:MM (24-hour, no seconds)
+    const now = new Date();
+    const hours = now.getHours().toString().padStart(2, '0');
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const timeStr = `${hours}:${minutes}`;
+    const messageTime = document.createElement('div');
+    messageTime.className = 'message-time';
+    messageTime.textContent = timeStr;
+    messageContent.appendChild(messageTime);
+    messageDiv.appendChild(messageContent);
+    messagesContainer.appendChild(messageDiv);
+    scrollToBottom(); // Always scroll after adding a message
+    return messageDiv;
+}
+
+function formatMessage(content) {
+    // Convert markdown-like formatting
+    let formatted = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code>$1</code>')
+        .replace(/\n/g, '<br>');
+    
+    // Handle tables (simple CSV-like format)
+    if (content.includes('|') && content.includes('\n')) {
+        formatted = formatTable(content);
+    }
+    
+    return formatted;
+}
+
+function formatTable(content) {
+    const lines = content.split('\n');
+    let tableHtml = '<table class="inventory-table">';
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.includes('|')) {
+            const cells = line.split('|').map(cell => cell.trim()).filter(cell => cell);
+            
+            if (i === 0) {
+                // Header row
+                tableHtml += '<thead><tr>';
+                cells.forEach(cell => {
+                    tableHtml += `<th>${cell}</th>`;
+                });
+                tableHtml += '</tr></thead><tbody>';
+            } else {
+                // Data row
+                tableHtml += '<tr>';
+                cells.forEach(cell => {
+                    tableHtml += `<td>${cell}</td>`;
+                });
+                tableHtml += '</tr>';
+            }
+        } else if (line) {
+            // Non-table line, add as regular text
+            tableHtml += `</tbody></table><br>${line}<br>`;
+            tableHtml += '<table class="inventory-table">';
+        }
+    }
+    
+    tableHtml += '</tbody></table>';
+    return tableHtml;
+}
+
+function showTypingIndicator() {
+    document.getElementById('typing-indicator').style.display = 'block';
+    scrollToBottom();
+}
+
+function hideTypingIndicator() {
+    document.getElementById('typing-indicator').style.display = 'none';
+}
+
+function updateSendButton(loading) {
+    const button = document.getElementById('send-button');
+    const icon = document.getElementById('send-icon');
+    const loadingSpinner = document.getElementById('send-loading');
+    
+    if (loading) {
+        button.disabled = true;
+        icon.style.display = 'none';
+        loadingSpinner.style.display = 'block';
+    } else {
+        button.disabled = false;
+        icon.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+    }
+}
+
+function updateStatus(text, status) {
+    document.getElementById('status-text').textContent = text;
+    const dot = document.getElementById('status-dot');
+    dot.className = `status-dot ${status}`;
+}
+
+function scrollToBottom() {
+    const messagesContainer = document.getElementById('chat-messages');
+    if (messagesContainer) {
+        // Use requestAnimationFrame to ensure DOM is updated before scrolling
+        requestAnimationFrame(() => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        });
+    }
+}
+
+function askExample(question) {
+    document.getElementById('chat-input').value = question;
+    document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+}
+
+</script>
+
+{% endblock %}
+ 

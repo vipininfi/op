@@ -1,0 +1,122 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2">User Form</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'add_users_roles' %}" id="userForm">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="name">Name:</label>
+                                <input type="text" id="name" name="name" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Role:</label>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="roleDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Select Role
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="roleDropdown">
+                                        <label class="dropdown-item">
+                                            <input type="checkbox" class="role-checkbox" data-role="inventory"> Inventory
+                                            <span class="tick-mark">✔</span>
+                                        </label>
+                                        <label class="dropdown-item">
+                                            <input type="checkbox" class="role-checkbox" data-role="installation"> Installation
+                                            <span class="tick-mark">✔</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="role" id="selectedRoles">
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Status:</label>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="statusDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Select Status
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="statusDropdown">
+                                        <label class="dropdown-item">
+                                            <input type="radio" name="status" value="active" class="status-radio"> Active
+                                        </label>
+                                        <label class="dropdown-item">
+                                            <input type="radio" name="status" value="inactive" class="status-radio"> Inactive
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+    .tick-mark {
+        display: none;
+        font-size: 16px;
+        font-weight: bold;
+        color: green;
+    }
+    .dropdown-item input:checked + .tick-mark {
+        display: inline-block;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let selectedRolesInput = document.getElementById("selectedRoles");
+        let checkboxes = document.querySelectorAll(".role-checkbox");
+        let roleDropdownButton = document.getElementById("roleDropdown");
+        let statusDropdownButton = document.getElementById("statusDropdown");
+        let statusRadios = document.querySelectorAll(".status-radio");
+
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener("change", function() {
+                updateSelectedRoles();
+            });
+        });
+
+        function updateSelectedRoles() {
+            let selectedRoles = [];
+            document.querySelectorAll(".role-checkbox:checked").forEach(function(input) {
+                selectedRoles.push(input.getAttribute("data-role"));
+            });
+            selectedRolesInput.value = selectedRoles.join(", ");
+            roleDropdownButton.textContent = selectedRoles.length > 0 ? selectedRoles.join(", ") : "Select Role";
+        }
+
+        statusRadios.forEach(function(radio) {
+            radio.addEventListener("change", function() {
+                statusDropdownButton.textContent = this.value.charAt(0).toUpperCase() + this.value.slice(1);
+            });
+        });
+    });
+</script>
+
+{% endblock %}

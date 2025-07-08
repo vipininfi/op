@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% load static %}
+  
+  <div class="limiter">
+    <div class="container-login100">
+      <div class="wrap-login100">
+        <div class="login_logo">
+          <img src="{% static 'img/LOGO.png' %}" alt="logo" class="img-fluid">
+        </div>
+
+        {% include 'common/messages.html' %}
+        <div class="login100-form-title" style="background-image: url('http://127.0.0.1:8000/static/img/bg-01.jpg');">
+          <span class="login100-form-title-1">
+            Admin Sign In
+          </span>
+        </div>
+
+        <form class="login100-form" method="post">
+          {% csrf_token %}
+          {% if form.errors %}
+            <div class="alert alert-danger text-center d-none1" role="alert">
+              Invalid Credentials. Please try again!
+            </div>
+          {% endif %}
+          <div class="wrap-input100 validate-input m-b-26">
+            {{ form.username|as_crispy_field }}
+          </div>
+
+          <div class="wrap-input100 validate-input m-b-18">
+            {{ form.password|as_crispy_field }}
+          </div>
+
+          <div class="container-login100-form-btn">
+            <button class="login100-form-btn">
+              Login
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+{% endblock %}

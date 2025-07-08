@@ -1,0 +1,513 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    #roomModelTable tbody tr {
+        height: 60px;
+    }
+    #roomModelTable th, #roomModelTable td {
+        white-space: nowrap;
+        padding: 15px;
+    }
+    th.sorting::after {
+        content: "\2195";
+        margin-left: 5px;
+    }
+    th.sorting_asc::after {
+        content: "\2191";
+    }
+    th.sorting_desc::after {
+        content: "\2193";
+    }
+    th.sorting, th.sorting_asc, th.sorting_desc {
+        cursor: pointer;
+    }
+    .edit-button {
+    background-color: #999999;
+    border-color: #999999;
+    color: #fff;
+}
+
+
+    /* Custom styles for modal form elements */
+    #editInstallModal .form-check-input, #createInstallModal .form-check-input {
+        width: 1.25rem;
+        height: 1.25rem;
+        opacity: 1;
+        z-index: 1;
+    }
+    #editInstallModal .form-control-sm, #createInstallModal .form-control-sm {
+        font-size: 0.875rem; /* Smaller font for modal inputs */
+    }
+    .install-modal .form-check, .install-modal label {
+        color: #6b6b6b;
+    }
+    .dataTables_filter{
+        margin-bottom: 0;
+    }
+    
+
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="card-title pt-2 text-dark mb-0">Installation Records</h4>
+                            <button class="btn btn-success btn-sm" id="createNewInstallBtn">
+                                <i class="material-icons">add</i> Create New Installation
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3">
+                                <label for="floorFilter" class="form-label">Filter by Floor:</label>
+                                <select id="floorFilter" class="form-select form-select-sm">
+                                    <option value="">All Floors</option>
+                                    {% for floor_num in all_floors %}
+                                        <option value="{{ floor_num }}" {% if selected_floor == floor_num|stringformat:"s" %}selected{% endif %}>Floor {{ floor_num }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="roomModelTable" class="table table-striped" style="width:100%;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Room</th>
+                                        <th>Floor</th>
+                                        <th>Product Available</th>
+                                        <th>Prework</th>
+                                        <th>Install</th>
+                                        <th>Post Work</th>
+                                        <th>Retouching</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for installation in install %}
+                                    <tr>
+                                        <td>{{ installation.id }}</td>
+                                        <td>{{ installation.room }}</td>
+                                        <td>{{ installation.floor|default:"N/A" }}</td>
+                                        <td>{{ installation.product_arrived_at_floor }}</td>
+                                        <td>{{ installation.prework }}</td>
+                                        <td>{{ installation.install }}</td>
+                                        <td>{{ installation.post_work }}</td>
+                                        <td>{{ installation.retouching }}</td>
+                                       <td>
+                                            <button class="btn btn-sm edit-button edit-install-btn"
+                                                    data-install-id="{{ installation.id }}"
+                                                    data-room-number="{{ installation.room }}">
+                                                Edit
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<div class="modal fade install-modal" id="editInstallModal" tabindex="-1" aria-labelledby="editInstallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editInstallModalLabel">Edit Installation for Room <span id="modal_room_number"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInstallForm">
+                    {% csrf_token %} 
+                    <input type="hidden" name="installation_id" id="modal_installation_id">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Room #:</label>
+                            <input type="text" class="form-control form-control-sm pl-2" id="modal_display_room_number" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Room Type:</label>
+                            <input type="text" class="form-control form-control-sm pl-2" id="modal_room_type" readonly>
+                        </div>
+                    </div>
+                    <div id="modal-check-items-wrapper">
+                        {/* Dynamic checklist items will be rendered here */}
+                        <div class="text-center p-3">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            Loading checklist...
+                        </div>
+                    </div>
+                    <hr class="my-3">
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade install-modal" id="createInstallModal" tabindex="-1" aria-labelledby="createInstallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createInstallModalLabel">Create New Installation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createInstallForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="installation_id" id="create_modal_installation_id">
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <label for="create_modal_room_number_input" class="form-label">Room # <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-sm pl-2" name="room_number" id="create_modal_room_number_input" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="create_modal_room_type" class="form-label">Room Type</label>
+                            <input type="text" class="form-control form-control-sm  pl-2" id="create_modal_room_type" readonly>
+                        </div>
+                        <div class="col-md-3 align-self-end">
+                            <button type="button" class="btn btn-success btn-sm w-100" id="loadRoomDetailsBtn_create">
+                                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="loadRoomDetailsSpinner_create"></span>
+                                Load Details
+                            </button>
+                        </div>
+                    </div>
+                    <div id="create-modal-check-items-wrapper">
+                        <p class="text-muted text-center">Enter a room number and click "Load Details".</p>
+                    </div>
+                    <hr class="my-3">
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" id="saveCreateInstallBtn" disabled>Save Installation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var table = $('#roomModelTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            order: [[0, 'asc']],
+            pageLength: 10,
+            lengthMenu: [5, 10, 15, 20],
+            dom : 'Bfr<"row pt-5"<"col-sm-12"t>><"row pt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+			buttons : [{
+	            extend: 'excel',
+	            text: 'Export To Excel',
+                className:'custom-download-btn'
+	        }]
+        });
+
+        // Handle Floor Filter change
+        $('#floorFilter').on('change', function(){
+            var selectedFloor = $(this).val();
+            var currentUrl = new URL(window.location.href);
+            if (selectedFloor) {
+                currentUrl.searchParams.set('floor', selectedFloor);
+            } else {
+                currentUrl.searchParams.delete('floor');
+            }
+            window.location.href = currentUrl.toString();
+        });
+
+        // Handle Edit button click
+        $('#roomModelTable tbody').on('click', '.edit-install-btn', function () {
+            const installId = $(this).data('install-id');
+            const roomNumber = $(this).data('room-number');
+
+            $('#modal_installation_id').val(installId);
+            $('#modal_room_number').text(roomNumber); // For modal title
+            $('#modal_display_room_number').val(roomNumber); // For readonly input in modal
+
+            // Show loading spinner in modal body
+            $('#modal-check-items-wrapper').html('<div class="text-center p-3"><span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading checklist...</div>');
+            $('#editInstallModal').modal('show');
+
+            // AJAX call to get installation details
+            $.ajax({
+                url: "{% url 'admin_get_installation_details' %}", // Placeholder for actual URL
+                type: "GET",
+                data: { installation_id: installId },
+                success: function (data) {
+                    if (data.success) {
+                        $('#modal_room_type').val(data.room_type);
+                        adminRenderCheckItems(data.check_items, data.saved_items, data.current_user_name);
+                    } else {
+                        toastr.error(data.message || "Failed to load installation details.");
+                        $('#modal-check-items-wrapper').html('<p class="text-danger">Error loading details.</p>');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Error fetching installation details: " + error);
+                    $('#modal-check-items-wrapper').html('<p class="text-danger">Error loading details.</p>');
+                }
+            });
+        });
+
+        // Modified adminRenderCheckItems to accept a target wrapper selector
+        function adminRenderCheckItems(items, savedItems = [], currentUserName = "superadmin", targetWrapperSelector = '#modal-check-items-wrapper') {
+            const wrapper = $(targetWrapperSelector);
+            wrapper.html(''); // Clear previous content
+            console.log(`Rendering items for: ${targetWrapperSelector}`, items, savedItems);
+
+            if (!items || items.length === 0) {
+                wrapper.html('<p class="text-center text-muted">No checklist items found for this room type or category.</p>');
+                return;
+            }
+            
+            const isCreateMode = targetWrapperSelector === '#create-modal-check-items-wrapper';
+            const savedItemsMap = {};
+            
+            if (!isCreateMode) { // Only populate savedItemsMap if not in create mode
+                (savedItems || []).forEach(item => {
+                    if (item.install_id !== undefined) { // Assuming 'detail' items have install_id
+                        savedItemsMap[`detail-${item.install_id}`] = item;
+                    }
+                });
+            }
+
+            items.forEach(item => {
+                const key = `${item.type}-${item.id}`; 
+                let isChecked = false;
+                let installedBy = "";
+                let installedOn = "";
+
+                if (isCreateMode) {
+                    // For create mode, all items start unchecked
+                    isChecked = false;
+                    installedBy = ""; // Will be filled by JS if checked
+                    installedOn = ""; // Will be filled by JS if checked
+                } else { // This is edit mode (targetWrapperSelector is #modal-check-items-wrapper)
+                    if (item.type === "installation") { 
+                        isChecked = item.status === "YES";
+                        installedBy = item.checked_by || "";
+                        installedOn = item.check_on ? item.check_on.split("T")[0] : "";
+                    } else if (item.type === "detail") { 
+                        const savedDetail = savedItemsMap[key];
+                        if (savedDetail) {
+                            isChecked = savedDetail.status === "YES";
+                            installedBy = savedDetail.installed_by || "";
+                            installedOn = savedDetail.installed_on ? savedDetail.installed_on.split("T")[0] : "";
+                        }
+                        // If no savedDetail for an item in edit mode, it implies it's a product
+                        // from the room model that doesn't have an InstallDetail entry yet. Render unchecked.
+                    }
+                }
+                
+                const id_prefix = isCreateMode ? 'create_' : 'modal_';
+                const uniqueId = `${id_prefix}step_${item.type}_${item.id}`;
+                const stepName = `step_${item.type}_${item.id}`; // Ensure this is consistent
+                const dateName = `date_${item.type}_${item.id}`;
+                const checkedByName = `checked_by_${item.type}_${item.id}`;
+
+                const html = `
+                    <div class="form-group row align-items-center mb-2 border border-light rounded p-2">
+                        <div class="col-md-5">
+                            <div class="form-check">
+                                <input type="hidden" name="${stepName}" value="off"> 
+                                <input class="form-check-input modal-check-item" type="checkbox"
+                                       name="${stepName}" id="${uniqueId}"
+                                       value="on" ${isChecked ? 'checked' : ''}
+                                       data-type="${item.type}" data-id="${item.id}">
+                                <label class="form-check-label" for="${uniqueId}">
+                                    ${item.label  || 'Unnamed Item'}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="date" class="form-control form-control-sm"
+                                   name="${dateName}"
+                                   value="${installedOn}">
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control form-control-sm"
+                                   name="${checkedByName}"
+                                   value="${installedBy}" placeholder="Checked by">
+                        </div>
+                    </div>
+                `;
+                wrapper.append(html);
+            });
+        }
+
+        // Handle checkbox change in modal
+        $(document).on("change", ".modal-check-item", function () {
+            const checkbox = $(this);
+            const type = checkbox.data("type");
+            const id = checkbox.data("id");
+            const isChecked = checkbox.is(":checked");
+            const currentDate = new Date().toISOString().split("T")[0];
+            
+            // Get current admin user name - this should be passed from the view ideally or use a global JS var if set
+            const currentAdminName = "{{ request.user.name|escapejs }}"; // Assuming InvitedUser is request.user or similar
+
+
+            if (isChecked) {
+                $(`input[name="date_${type}_${id}"]`).val(currentDate);
+                $(`input[name="checked_by_${type}_${id}"]`).val(currentAdminName || "superadmin"); // Fallback if user name not found
+            } else {
+                // Optionally clear if unchecked, or leave as is for manual override.
+                // For now, let's clear them similar to frontend form.
+                $(`input[name="date_${type}_${id}"]`).val("");
+                $(`input[name="checked_by_${type}_${id}"]`).val("");
+            }
+        });
+
+        // Handle Modal Form Submission
+        $('#editInstallForm').on('submit', function (e) {
+            e.preventDefault();
+            const formData = $(this).serialize(); // Includes CSRF token and installation_id
+            const installId = $('#modal_installation_id').val();
+
+            // Add installation_id to formData if not already captured by serialize (e.g. if it's not a form field)
+            // let params = new URLSearchParams(formData);
+            // if (!params.has('installation_id')) {
+            //     formData += `&installation_id=${installId}`;
+            // }
+            
+            $.ajax({
+                url: "{% url 'admin_save_installation_details' %}", // Placeholder for actual URL
+                type: "POST",
+                data: formData,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message || "Installation updated successfully!");
+                        $('#editInstallModal').modal('hide');
+                        // Option 1: Reload the whole page to see changes
+                        // window.location.reload(); 
+                        // Option 2: More sophisticated - update DataTable row if possible, or just re-draw
+                        table.draw(false); // Re-draw current page
+                    } else {
+                        toastr.error(data.message || "Failed to update installation.");
+                    }
+                },
+                error: function (xhr) {
+                    let errorMsg = "An error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMsg = "Please correct the following errors: ";
+                        let errors = xhr.responseJSON.errors;
+                        for (const field in errors) {
+                            errorMsg += `${field}: ${errors[field].join(', ')} `;
+                        }
+                    }
+                    toastr.error(errorMsg);
+                }
+            });
+        });
+
+        // Handle Create New Installation button click
+        $('#createNewInstallBtn').on('click', function() {
+            $('#createInstallForm')[0].reset(); // Reset form fields
+            $('#create-modal-check-items-wrapper').html('<p class="text-muted text-center">Enter a room number and click \"Load Details\".</p>');
+            $('#saveCreateInstallBtn').prop('disabled', true); // Disable save until details are loaded
+            $('#createInstallModal').modal('show');
+        });
+
+        // Handle Load Room Details for Create Modal
+        $('#loadRoomDetailsBtn_create').on('click', function() {
+            const roomNumber = $('#create_modal_room_number_input').val();
+            if (!roomNumber) {
+                toastr.error("Please enter a Room Number.");
+                return;
+            }
+
+            $(this).find('#loadRoomDetailsSpinner_create').removeClass('d-none');
+            $(this).prop('disabled', true);
+
+            $.ajax({
+                url: "{% url 'admin_get_installation_details' %}", // Reusing the same endpoint
+                type: "GET",
+                data: { room_number: roomNumber }, // No installation_id for create
+                success: function (data) {
+                    if (data.success) {
+                        $('#create_modal_room_type').val(data.room_type);
+                        $('#create_modal_installation_id').val(data.installation_id);
+                        // Use the same adminRenderCheckItems function, but target the create modal wrapper
+                        adminRenderCheckItems(data.check_items, [], data.current_user_name, '#create-modal-check-items-wrapper');
+                        $('#saveCreateInstallBtn').prop('disabled', false); // Enable save button
+                    } else {
+                        toastr.error(data.message || "Failed to load room details.");
+                        $('#create-modal-check-items-wrapper').html('<p class="text-danger text-center">Error: ' + (data.message || "Could not load details.") + '</p>');
+                        $('#saveCreateInstallBtn').prop('disabled', true);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error("Error fetching room details: " + error);
+                    $('#create-modal-check-items-wrapper').html('<p class="text-danger text-center">Error loading details.</p>');
+                    $('#saveCreateInstallBtn').prop('disabled', true);
+                },
+                complete: function () {
+                    $('#loadRoomDetailsBtn_create').find('#loadRoomDetailsSpinner_create').addClass('d-none');
+                    $('#loadRoomDetailsBtn_create').prop('disabled', false);
+                }
+            });
+        });
+
+        // Handle Create Modal Form Submission
+        $('#createInstallForm').on('submit', function(e) {
+            e.preventDefault();
+            const formData = $(this).serialize(); // Includes CSRF, and room_number. No installation_id.
+            
+            // Ensure room_number is included (it should be from the input field)
+            // let params = new URLSearchParams(formData);
+            // if (!params.has('room_number') || !params.get('room_number')) {
+            //     toastr.error("Room number is missing in submission.");
+            //     return;
+            // }
+
+            $.ajax({
+                url: "{% url 'admin_save_installation_details' %}", // Same save endpoint
+                type: "POST",
+                data: formData,
+                success: function (data) {
+                    if (data.success) {
+                        toastr.success(data.message || "Installation created successfully!");
+                        $('#createInstallModal').modal('hide');
+                        table.draw(false); // Refresh DataTable
+                    } else {
+                        toastr.error(data.message || "Failed to create installation.");
+                    }
+                },
+                error: function (xhr) {
+                    let errorMsg = "An error occurred during creation.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMsg = "Please correct the following errors: ";
+                        let errors = xhr.responseJSON.errors;
+                        for (const field in errors) {
+                            errorMsg += `${field}: ${errors[field].join(', ')} `;
+                        }
+                    }
+                    toastr.error(errorMsg);
+                }
+            });
+        });
+
+    });
+</script>
+{% endblock %}

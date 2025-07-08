@@ -1,0 +1,249 @@
+tables:
+
+- name: room_data
+  description: 'Stores configuration for each room (floor, type, model).'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: Unique room ID.
+  - name: room
+    type: integer # Changed from text if numeric
+    description: 'Room number. Joins with `install.room`.'
+  - name: floor
+    type: integer
+    description: 'Floor number. Joins with `schedule.floor`.'
+  - name: king
+    type: text
+    description: Indicator if king bed present (e.g., 'yes', 'no').
+  - name: double
+    type: text
+    description: Indicator for double bed (e.g., 'yes', 'no').
+  - name: exec_king
+    type: text
+    description: Indicator for executive king (e.g., 'yes', 'no').
+  - name: bath_screen
+    type: text
+    description: Indicator for bath screen (e.g., 'yes', 'no').
+  - name: room_model # Kept for reference, but join via room_model_id
+    type: text
+    description: 'Name of associated room model (human-readable, use `room_model.room_model` via JOIN).'
+  - name: left_desk
+    type: text
+    description: Flag/description of left-side desk.
+  - name: right_desk
+    type: text
+    description: Flag/description of right-side desk.
+  - name: to_be_renovated
+    type: text
+    description: Renovation status (e.g., 'yes', 'no').
+  - name: description
+    type: text
+    description: Any notes or additional description for the room.
+  - name: room_model_id
+    type: integer
+    description: 'Foreign key to `room_model.id`. Use this for joining.'
+  # Explicitly defining FK relationship for clarity
+  foreign_keys:
+   - column: room_model_id
+     references: room_model(id)
+  example: # Example uses room_model_id: 3
+  - {id: 2, room: 1609, floor: 16, king: 'NO', double: 'YES', exec_king: 'NO', bath_screen: 'YES', room_model: 'A LO', left_desk: 'YES', right_desk: 'NO', to_be_renovated: 'YES', description: 'Double, Long desk, w screen...', room_model_id: 3}
+  - {id: 3, room: 1611, floor: 16, king: 'YES', double: 'NO', exec_king: 'NO', bath_screen: 'YES', room_model: 'A COL', left_desk: 'YES', right_desk: 'NO', to_be_renovated: 'YES', description: 'King, Long desk, w screen...', room_model_id: 2}
+
+- name: room_model
+  description: 'Master list of room templates/models.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: 'Unique ID for each room model. Used as FK target by `product_room_model` and `room_data`.'
+  - name: room_model
+    type: text
+    description: Name or code for the room model (human-readable).
+  - name: total
+    type: integer
+    description: Total number of rooms with this model.
+  example:
+  - {id: 2, room_model: A COL, total: 72}
+  - {id: 3, room_model: A LO, total: 36}
+  Avaliable room models data we have in row:
+    -'A COL', 'A LO', 'A LO DR', 'B', 'C PN', 'C+', 'CURVA 24', 'CURVA', 'CURVA - DIS', 'D', 'DLX', 'STC', 'SUITE A', 'SUITE B', 'SUITE C', 'SUITE MINI', 'CURVA 35', 'PRESIDENTIAL SUITE', 'Test Room'
+
+- name: product_data
+  description: 'Catalog data about products (name, etc.), linked by client_id.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: 'Unique product ID. Used as FK in `product_room_model.product_id`.'
+  - name: item
+    type: text
+    description: Product code/SKU (use `description` for name).
+  - name: client_id
+    type: text
+    description: 'Client identifier (text). JOIN key with `inventory.client_id`.'
+  - name: description
+    type: text
+    description: Product name (human-readable). Use this for display.
+  - name: client_selected
+    type: text # Consider boolean if appropriate
+    description: Indicates if the client has selected this product (e.g., '1', '0', 'yes', 'no').
+  - name: supplier
+    type: text # Consider boolean if appropriate
+    description: Supplier of the product (e.g., 'PK SPACES BRASIL ', 'PK SPACES ASIA').
+  example:
+  - {id: 3, item: KS-JVM-715-SABC, client_id: P120, description: Sofa SUITE A, B, C, qty_ordered: 9, client_selected: '1'}
+  - {id: 4, item: KS-JVM-715-CURVADIS, client_id: P121, description: Sofa CURVA DIS, qty_ordered: 2, client_selected: '1'}
+
+- name: product_room_model
+  description: 'Maps products to room models, defining quantity needed per model.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: Unique mapping ID.
+  - name: product_id
+    type: integer
+    constraints: [NOT NULL] # Removed FK constraint text to avoid confusion, describe below
+    description: 'Foreign key to `product_data.id`.'
+  - name: room_model_id
+    type: integer
+    constraints: [NOT NULL] # Removed FK constraint text
+    description: 'Foreign key to `room_model.id`.'
+  - name: quantity
+    type: integer
+    constraints: [NOT NULL]
+    description: Number of units required for this room model.
+  # Explicitly defining FK relationships for clarity to the LLM
+  foreign_keys:
+    - column: product_id
+      references: product_data(id)
+    - column: room_model_id
+      references: room_model(id)
+  example:
+  - {id: 2, product_id: 1, room_model_id: 2, quantity: 1}
+  - {id: 3, product_id: 1, room_model_id: 3, quantity: 1}
+
+- name: inventory
+  description: 'Tracks ordered, received, available, and installed quantities for products, linked by client_id.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: Unique ID for each inventory entry.
+  - name: client_id
+    type: text
+    description: ''
+  - name: qty_ordered
+    type: integer
+    description: Total quantity ordered.
+  - name: qty_received
+    type: integer
+    description: Quantity received so far.
+  - name: quantity_installed
+    type: integer
+    description: Quantity already installed.
+  - name: quantity_available
+    type: integer
+    description: Quantity currently available for installation.
+  example:
+  - {id: 1, item: KS-JWM-113, client_id: P125, qty_ordered: 320, qty_received: 0, quantity_installed: 0, quantity_available: 0}
+  - {id: 2, item: KS-JWM-702A, client_id: P123, qty_ordered: 176, qty_received: 0, quantity_installed: 0, quantity_available: 0}
+
+- name: schedule
+  description: 'Detailed project timeline schedule per floor. Provides dates for various stages like shipping and installation.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: Unique ID for the schedule entry.
+  - name: phase
+    type: integer
+    description: Project phase number. Medium priority
+  - name: floor
+    type: integer
+    description: 'Floor number. Joins with `room_data.floor` to link schedule to rooms.'
+  - name: production_starts
+    type: DateField
+    description: Production start date. low priority
+  - name: production_ends
+    type: DateField
+    description: Production end date. low priority
+  - name: shipping_depature # Typo 'depature' kept as likely reflects DB
+    type: DateField
+    description: Shipment departure date. Medium priority
+  - name: shipping_arrival
+    type: DateField
+    description: Estimated or actual shipment arrival date. Medium priority
+  - name: custom_clearing_starts
+    type: DateField
+    description: Customs clearance start date. low priority
+  - name: custom_clearing_ends
+    type: DateField
+    description: Customs clearance end date. low priority
+  - name: arrive_on_site
+    type: DateField
+    description: Date furniture arrives on site. High priority
+  - name: pre_work_starts
+    type: DateField
+    description: Pre-installation work start date. High priority
+  - name: pre_work_ends
+    type: DateField
+    description: Pre-installation work end date. Medium priority
+  - name: install_starts
+    type: DateField
+    description: Installation start date. High priority
+  - name: install_ends
+    type: DateField
+    description: Installation end date. High priority
+  - name: post_work_starts
+    type: DateField
+    description: Post-installation work start date.
+  - name: post_work_ends
+    type: DateField
+    description: Post-installation work end date. High priority
+  - name: floor_completed
+    type: DateField
+    description: Date floor work is completed. High priority
+  - name: floor_closes
+    type: DateField
+    description: Date floor closes for work. Medium priority
+  - name: floor_opens
+    type: DateField
+    description: Date floor reopens after work. Medium priority
+  example: # Example uses floor: 17
+  - {id: 2, phase: 1, floor: 17, production_starts: '2025-03-10T18:30:00+00:00', production_ends: '2025-06-18T18:30:00+00:00', shipping_depature: '2025-06-19T18:30:00+00:00', shipping_arrival: '2025-08-03T18:30:00+00:00', custom_clearing_starts: '2025-08-03T18:30:00+00:00', custom_clearing_ends: '2025-08-09T18:30:00+00:00', arrive_on_site: '2025-08-10T18:30:00+00:00', pre_work_starts: '2025-07-27T18:30:00+00:00', pre_work_ends: '2025-08-10T18:30:00+00:00', install_starts: '2025-08-10T18:30:00+00:00', install_ends: '2025-08-24T18:30:00+00:00', post_work_starts: '2025-08-24T18:30:00+00:00', post_work_ends: '2025-08-31T18:30:00+00:00', floor_completed: '2025-08-31T18:30:00+00:00', floor_closes: '2025-07-27T18:30:00+00:00', floor_opens: '2025-08-31T18:30:00+00:00'}
+  - {id: 3, phase: 1, floor: 18, production_starts: '2025-03-10T18:30:00+00:00', production_ends: '2025-06-18T18:30:00+00:00', shipping_depature: '2025-06-19T18:30:00+00:00', shipping_arrival: '2025-08-03T18:30:00+00:00', custom_clearing_starts: '2025-08-03T18:30:00+00:00', custom_clearing_ends: '2025-08-09T18:30:00+00:00', arrive_on_site: '2025-08-10T18:30:00+00:00', pre_work_starts: '2025-08-10T18:30:00+00:00', pre_work_ends: '2025-08-24T18:30:00+00:00', install_starts: '2025-08-24T18:30:00+00:00', install_ends: '2025-09-07T18:30:00+00:00', post_work_starts: '2025-09-07T18:30:00+00:00', post_work_ends: '2025-09-14T18:30:00+00:00', floor_completed: '2025-09-14T18:30:00+00:00', floor_closes: '2025-08-10T18:30:00+00:00', floor_opens: '2025-09-14T18:30:00+00:00'}
+
+- name: install
+  description: 'Tracks installation progress for a specific room.'
+  columns:
+  - name: id
+    type: integer
+    constraints: [primary key, auto-increment]
+    description: Unique ID for the installation record.
+  - name: room
+    type: integer # Changed from text to integer if room numbers are numeric
+    description: 'Room number being worked on. Joins with `room_data.room`.'
+  - name: product_available
+    type: text
+    description: Status of product availability (e.g., YES, NO).
+  - name: prework
+    type: text
+    description: Notes/status for pre-installation tasks.
+  - name: install
+    type: text
+    description: Notes/status during the installation phase.
+  - name: post_work
+    type: text
+    description: Notes/status for post-installation tasks.
+  - name: day_install_began
+    type: timestamp with time zone
+    description: Start timestamp for installation.
+  - name: day_install_complete # Typo 'instal' kept as likely reflects DB
+    type: timestamp with time zone
+    description: Completion timestamp for installation.
+  example:
+  - {id: 1, room: 1607, product_available: 'NO', prework: 'NO', install: 'NO', post_work: 'NO', day_install_began: null, day_install_complete: null}
+  - {id: 2, room: 1608, product_available: 'NO', prework: 'NO', install: 'NO', post_work: 'NO', day_install_began: null, day_install_complete: null}

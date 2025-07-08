@@ -1,0 +1,206 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Loader -->
+<div class="ajax-loader" id="permissionsLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Prompts</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="permissions_table" class="table" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                       
+                                        <th>Prompt Number</th>
+                                        <th>Description</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for prompt in prompts %}
+                                    <tr>
+                                        
+                                        <td>{{ prompt.prompt_number }}</td>
+                                        <td>{{ prompt.description }}</td>
+                                        <td>
+                                            <button class="btn btn-sm edit-btn"
+                                                data-id="{{ prompt.id }}"
+                                                data-number="{{ prompt.prompt_number }}"
+                                                data-description="{{ prompt.description }}">
+                                                Edit
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay (for background effect) -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- Modal for Editing Prompt -->
+<div id="editPermissionModal" class="modal">
+    <div class="modal-content mx-auto">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Edit Prompt</h2>
+        <input type="hidden" id="edit_prompt_id">
+        <label for="edit_prompt_number">Prompt Number:</label>
+        <input type="text" id="edit_prompt_number" class="form-control">
+        <label for="edit_prompt_description">Description:</label>
+        <textarea id="edit_prompt_description" rows="20" class="form-control"></textarea>
+        <button id="update_prompt" class="btn mt-2">Update</button>
+    </div>
+</div>
+
+<!-- Custom Styles -->
+<style>
+    /* Ensure modal is centered */
+    .modal {
+        position: fixed;
+        z-index: 1001;
+        width: 100%;
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .modal-content {
+        position: relative;
+        text-align: center;
+        width: 60%;
+    }
+
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    #edit_prompt_number,
+    #edit_prompt_description {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Prevent long modal issue */
+    .modal-content {
+        max-height: 90vh;
+        width: 42%;
+        overflow-y: auto;
+        padding: 20px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+
+    /* Overlay effect when modal is open */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: none;
+    }
+    .main-panel{
+    position: sticky;
+    right: 0;
+    }
+    @media (max-width: 768px) {
+        .main-panel{
+        position: absolute;
+        right: 0;
+        }
+    }
+</style>
+
+<!-- JavaScript -->
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#permissionsLoader').hide();
+        $('#permissions_table').show();
+
+        // Open edit modal with data
+        $('.edit-btn').click(function () {
+            let promptId = $(this).data('id');
+            let promptNumber = $(this).data('number');
+            let promptDescription = $(this).data('description');
+
+            $('#edit_prompt_id').val(promptId);
+            $('#edit_prompt_number').val(promptNumber);
+            $('#edit_prompt_description').val(promptDescription);
+
+            $('.modal-overlay').fadeIn();
+            $('#editPermissionModal').fadeIn();
+        });
+
+        // Close modal when clicking close button
+        $('#closeModal, .modal-overlay').click(function () {
+            $('.modal-overlay').fadeOut();
+            $('#editPermissionModal').fadeOut();
+        });
+
+        // Save updated prompt (API Call)
+        $('#update_prompt').click(function () {
+            let promptId = $('#edit_prompt_id').val();
+            let promptNumber = $('#edit_prompt_number').val();
+            let promptDescription = $('#edit_prompt_description').val();
+
+            if (promptNumber && promptDescription) {
+                $.ajax({
+                    url: '/update_prompt/',  // API endpoint
+                    type: 'POST',
+                    data: {
+                        'prompt_id': promptId,
+                        'prompt_number': promptNumber,
+                        'prompt_description': promptDescription,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}' // Required for Django POST request
+                    },
+                    success: function (response) {
+                        alert("Prompt Updated Successfully!");
+                        $('.modal-overlay').fadeOut();
+                        $('#editPermissionModal').fadeOut();
+                        location.reload(); // Refresh table
+                    },
+                    error: function (xhr) {
+                        alert("Error updating prompt. Please try again.");
+                    }
+                });
+            } else {
+                alert("Please fill in all fields");
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+
+

@@ -1,0 +1,58 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+#chatSessionTable tbody tr {
+    height: 60px;
+}
+#chatSessionTable th, #chatSessionTable td {
+    white-space: nowrap;
+    padding: 15px;
+}
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary d-flex justify-content-between">
+                        <h4 class="card-title pt-2 text-dark">Chat Sessions</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="chatSessionTable" class="table table-striped">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>Session ID</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in sessions %}
+                                    <tr>
+                                        <td>{{ session.id }}</td>
+                                        <td>{{ session.created_at }}</td>
+                                        <td>
+                                            <a href="{% url 'view_chat_history' session.id %}" class="btn">View</a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3">No chat sessions found.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

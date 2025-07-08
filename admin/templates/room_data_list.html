@@ -1,0 +1,412 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Increase height of table rows */
+    #room_table tbody tr {
+        height: 60px;  /* Adjust row height (you can tweak this value as needed) */
+    }
+
+    /* Increase the width of columns */
+    #room_table th, #room_table td {
+        white-space: nowrap; /* Prevent text wrapping to keep content in one line */
+        padding: 15px; /* Add more padding for better spacing */
+    }
+
+    /* Specifically for the description column, allow it to expand */
+    #room_table td:nth-child(8) {
+        max-width: 250px; /* Limit width for description */
+        overflow: hidden; /* Hide text overflow */
+        text-overflow: ellipsis; /* Display ellipsis (...) when the text is too long */
+        word-wrap: break-word; /* Allow text to break into multiple lines if needed */
+    }
+
+    /* Add extra padding to the description column for better readability */
+    #room_table td:nth-child(8) {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    th.sorting::after {
+        content: "\2195"; /* Arrow icon: ↕ */
+        margin-left: 5px;
+    }
+
+    th.sorting_asc::after {
+        content: "\2191"; /* Up arrow: ↑ */
+    }
+
+    th.sorting_desc::after {
+        content: "\2193"; /* Down arrow: ↓ */
+    }
+
+    /* Optional: Adding cursor to indicate the column is sortable */
+    th.sorting, th.sorting_asc, th.sorting_desc {
+        cursor: pointer;
+    }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        padding: 20px;
+        border-radius: 5px;
+        border: 2ox solid green;
+    }
+    .modal-content {
+        width: 42%;
+        height: 74vh;
+        overflow: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .form-group {
+        padding: 10px;
+        position: relative;
+        margin: 20px 0 0;
+    }
+
+</style>
+
+<!-- Loader -->
+<div class="ajax-loader" id="permissionsLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Room Data</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="addRoomBtn" class="btn">Add New Room</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="room_table" class="table table-striped" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>Room</th>
+                                        <th>Floor</th>
+                                        <th>Bed</th>
+                                        <th>Bath Screen</th>
+                                        <th>Room Model</th>
+                                        <th>Description</th>
+                                        <th>Left Desk</th>
+                                        <th>Right Desk</th>
+                                        <th>To Be Renovated</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for room in rooms %}
+                                    <tr>
+                                        <td>{{ room.room }}</td>
+                                        <td>{{ room.floor }}</td>
+                                        <td>{{ room.bed }}</td>
+                                        <td>{{ room.bath_screen }}</td>
+                                        <td>{{ room.room_model }}</td>
+                                        <td>{{ room.description }}</td>
+                                        <td>{{ room.left_desk }}</td>
+                                        <td>{{ room.right_desk }}</td>
+                                        <td>{{ room.to_be_renovated }}</td>
+                                        <td>
+                                            <button class="btn editRoomBtn" 
+                                                    data-id="{{ room.id }}" 
+                                                    data-room-no="{{ room.room }}" 
+                                                    data-floor="{{ room.floor }}" 
+                                                    data-bed="{{ room.bed }}" 
+                                                    data-bath_screen="{{ room.bath_screen }}" 
+                                                    data-room_model="{{ room.room_model_id.id }}" 
+                                                    data-description="{{ room.description }}" 
+                                                    data-left_desk="{{ room.left_desk }}" 
+                                                    data-right_desk="{{ room.right_desk }}" 
+                                                    data-to_be_renovated="{{ room.to_be_renovated }}">
+                                                Edit
+                                            </button>
+                                            <!-- <button class="btn deleteRoomBtn" data-id="{{ room.id }}">
+                                                Delete
+                                            </button>                                             -->
+                                        </td>
+                                        
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay for Adding Room -->
+<div class="modal-overlay" id="modalOverlay"></div>
+
+<!-- Add New Room Modal -->
+<!-- Room Modal Form -->
+<div id="roomModal" class="modal">
+    <div class="modal-content mx-auto p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 id="modalTitle">Add Room</h2>
+            <span class="close" id="closeModal">×</span>
+        </div>
+        <!-- Room Modal Form -->
+        <form id="roomForm" method="POST" action="{% url 'add_room' %}">
+            {% csrf_token %}
+            <input type="hidden" id="room-id" name="room_id"> <!-- Hidden input for room ID -->
+            <div class="form-group">
+                <label for="room-no">Room Number:</label>
+                <input type="text" id="room-no" name="room" class="form-control" required>
+            </div>
+            <!-- Description Field -->
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" class="form-control" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="floor">Floor:</label>
+                <input type="text" id="floor" name="floor" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="bed">Bed Type:</label>
+                <select id="bed" name="bed" class="form-control" required>
+                    <option value="">Select Bed Type</option>
+                    <option value="king">King</option>
+                    <option value="double">Double</option>
+                    <option value="exec_king">Executive King</option>
+                    <option value="grand_suite_double">Grand Suite Double</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bath_screen">Bath Screen:</label>
+                <select id="bath_screen" name="bath_screen" class="form-control" required>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                </select>
+            </div>
+
+            <!-- New Fields (YES/NO) -->
+            <div class="form-group">
+                <label for="left_desk">Left Desk:</label>
+                <select id="left_desk" name="left_desk" class="form-control" required>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="right_desk">Right Desk:</label>
+                <select id="right_desk" name="right_desk" class="form-control" required>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="to_be_renovated">To Be Renovated:</label>
+                <select id="to_be_renovated" name="to_be_renovated" class="form-control" required>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="room_model">Room Model:</label>
+                <select id="room_model" name="room_model" class="form-control" required>
+                    <!-- Room model options will be populated dynamically -->
+                </select>
+            </div>
+            <button type="submit" class="btn float-right" id="saveRoom">Save Room</button>
+        </form>
+
+    </div>
+</div>
+
+  
+
+<script>
+    $(document).ready(function() {
+        $('#permissionsLoader').hide();
+        $('#room_table').show();
+
+        // Initialize DataTable with custom options
+        $('#room_table').DataTable({
+            paging: true,      // Enable pagination
+            searching: true,   // Enable search
+            ordering: true,    // Enable sorting
+            info: true,        // Show info about records
+            order: [[0, 'desc']],  // Default sort by the first column (Room) in descending order
+            pageLength: 10,    // Set default number of rows per page
+            lengthMenu: [5, 10, 15, 20], // Allow different rows per page
+            dom : 'Bfr<"row pt-5"<"col-sm-12"t>><"row pt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+			buttons : [{
+	            extend: 'excel',
+	            text: 'Export To Excel',
+                className:'custom-download-btn'
+	        }]
+        });
+
+        // Open Add Room modal
+        $('#addRoomBtn').click(function() {
+
+             // Set form action for adding a new room
+            $('#roomForm').attr('action', '{% url "add_room" %}');
+            $('#modalTitle').text("Add New Room");
+            $('#room-no').prop('readonly', false)
+            $('#room-no').val("");
+            $('#floor').val("");
+            $('#bed').val("");
+            $('#bath_screen').val("");
+            $('#room_model').val("");
+            $('#description').val("");
+            $('#left_desk').val("");
+            $('#right_desk').val("");
+            $('#to_be_renovated').val("");
+            $('#roomModal').fadeIn();
+            $('#modalOverlay').fadeIn();
+        });
+
+        $(document).on('click', '.deleteRoomBtn', function () {
+            var roomId = $(this).data('id'); // Get Room ID
+            console.log("Delete button clicked for room:", roomId); // Debugging
+
+            // Show confirmation dialog
+            if (confirm("Are you sure you want to delete this room?")) {
+                // If user clicks "OK", send AJAX request to delete the room
+                $.ajax({
+                    url: '/delete-room/',  // Ensure this URL matches your Django URL pattern
+                    type: 'POST',
+                    data: { 
+                        'room_id': roomId, 
+                        'csrfmiddlewaretoken': '{{ csrf_token }}' // CSRF Token
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success("Room deleted successfully!");
+                            location.reload(); // Refresh page after deletion
+                        } else {
+                            alert("Error: " + response.error);
+                        }
+                    },
+                    error: function (xhr) {
+                        alert("Error: " + xhr.responseText);
+                    }
+                });
+            } else {
+                console.log("User canceled deletion"); // Debugging
+            }
+        });
+
+        // Open Edit Room modal and populate the form
+        $(document).on('click', '.editRoomBtn', function () {
+            var roomId = $(this).data('id');
+            var roomNo = $(this).data('room-no');
+            var roomModelId = $(this).data('room_model');
+
+            // Set form action for editing
+            $('#roomForm').attr('action', '{% url "edit_room" %}');
+
+            // Populate the modal fields
+            $('#room-id').val(roomId);
+            $('#room-no').val(roomNo.toString()).trigger('change');
+            $('#room-no').prop('readonly', true);
+            $('#floor').val($(this).data('floor'));
+            $('#bed').val($(this).data('bed'));
+            $('#bath_screen').val($(this).data('bath_screen'));
+            $('#description').val($(this).data('description'));
+            $('#left_desk').val($(this).data('left_desk'));
+            $('#right_desk').val($(this).data('right_desk'));
+            $('#to_be_renovated').val($(this).data('to_be_renovated'));
+
+            // Set Room Model dropdown
+            $('#room_model').val(roomModelId).change();
+
+            // Show the modal
+            $('#roomModal').fadeIn();
+            $('#modalOverlay').fadeIn();
+        });
+
+        // Fetch Room Models and populate the dropdown
+        $.ajax({
+            url: '{% url "get_room_models" %}',  
+            type: 'GET',
+            success: function(response) {
+                var roomModelSelect = $('#room_model');
+                roomModelSelect.empty();
+                roomModelSelect.append('<option value="" selected>Select Room Model</option>');
+                
+                response.room_models.forEach(function(roomModel) {
+                    roomModelSelect.append('<option value="' + roomModel.id + '">' + roomModel.name + '</option>');
+                });
+
+                // Ensure the correct room model is selected after options are populated
+                var roomModelId = $('.editRoomBtn').data('room_model');
+                roomModelSelect.val(roomModelId).change();
+            },
+            error: function(xhr, status, error) {
+                toastr.error('Failed to load room models!');
+            }
+        });
+
+
+        // Submit the form with AJAX for edit
+        $('#roomForm').submit(function (e) {
+            e.preventDefault();
+
+            var formData = $(this).serialize();
+            var formAction = $(this).attr('action');
+
+            $.ajax({
+                url: formAction,
+                type: 'POST',
+                data: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                success: function (response) {
+                    if (response.success) {
+                        toastr.success(response.success);
+                        $('#roomModal').fadeOut();
+                        location.reload();
+                    } else {
+                        toastr.error(response.error || 'Something went wrong!');
+                    }
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        });
+        // Close modal
+        $('#closeModal, #modalOverlay').click(function () {
+            $('#roomModal').fadeOut();
+            $('#modalOverlay').fadeOut();
+        });
+    });
+</script>
+<div>
+    {% include "chat_widget.html" %}
+</div>
+{% endblock %}

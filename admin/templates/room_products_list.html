@@ -1,0 +1,129 @@
+{% extends 'frontend_base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+#productTable tbody tr {
+    height: 60px;
+}
+#productTable th, #productTable td {
+    white-space: nowrap;
+    padding: 15px;
+}
+
+/* Fix form responsiveness */
+@media (max-width: 755px) {
+    .form-group input {
+        min-width: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+}
+
+.details_product {
+    margin-bottom: 30px;
+}
+
+/* Table container scrolling */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <h4 class="card-title text-dark mt-2">Room Number Products Lookup</h4>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- ✅ Responsive Form -->
+                        <form method="GET" action="" class="mb-4">
+                            <div class="form-row">
+                                <!-- Input Field -->
+                                <div class="form-group col-12 col-sm-6 col-md-4 mb-2">
+                                    <label for="room_number">Enter Room Number:</label>
+                                    <input type="text" class="form-control" id="room_number" name="room_number"
+                                           value="{{ room_number|default:'' }}" placeholder="e.g., 101" required>
+                                </div>
+
+                                <!-- Submit Button -->
+                                <div class="form-group col-6 col-md-2 d-flex align-items-end mb-2">
+                                    <button type="submit" class="btn btn-secondary btn-md w-100">Search</button>
+                                </div>
+
+                                <!-- Download Button -->
+                                {% if product_list and room_number and found_room.room_model_id %}
+                                <div class="form-group col-6 col-md-2 d-flex align-items-end mb-2">
+                                    <a href="?room_number={{ room_number }}&download=xls" class="btn btn-success w-100" style="min-width: 100px;">
+                                        Download XLS
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </form>
+
+                        <!-- Error Handling -->
+                        {% if error_message %}
+                            <div class="alert alert-danger">{{ error_message }}</div>
+                        {% endif %}
+
+                        <!-- Product Results -->
+                        {% if product_list %}
+                            <h5 class="details_product">Products for Room: {{ room_number }} (Model: {{ room_model_name }})</h5>
+
+                            <!-- ✅ Mobile View (Cards) -->
+                            <div class="d-block d-md-none">
+                                {% for product in product_list %}
+                                    <div class="card mb-3">
+                                        <div class="card-body p-3">
+                                            <p><strong>Client ID:</strong> {{ product.client_id|default:"N/A" }}</p>
+                                            <p><strong>Description:</strong> {{ product.description|default:"N/A" }}</p>
+                                            <p><strong>Needed per Room:</strong> {{ product.quantity_needed_per_room|default:"0" }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- ✅ Desktop View (Table) -->
+                            <div class="table-responsive d-none d-md-block">
+                                <table id="productTable" class="table table-striped" style="width:100%;">
+                                    <thead class="text-secondary">
+                                        <tr>
+                                            <th>Client ID</th>
+                                            <th>Description</th>
+                                            <th>Needed per Room</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in product_list %}
+                                        <tr>
+                                            <td>{{ product.client_id|default:"N/A" }}</td>
+                                            <td title="{{ product.description|default:"N/A" }}">{{ product.description|default:"N/A"|truncatechars:20 }}</td>
+                                            <td>{{ product.quantity_needed_per_room|default:"0" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        {% elif room_number and not error_message %}
+                            <div class="alert alert-info">No products found or configured for room number '{{ room_number }}'.</div>
+                        {% elif not room_number %}
+                            <p class="text-muted">Please enter a room number and click Search.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

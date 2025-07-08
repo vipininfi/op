@@ -1,0 +1,247 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    #roomModelTable tbody tr {
+        height: 60px;
+    }
+    #roomModelTable th, #roomModelTable td {
+        white-space: nowrap;
+        padding: 15px;
+    }
+    th.sorting::after {
+        content: "\2195";
+        margin-left: 5px;
+    }
+    th.sorting_asc::after {
+        content: "\2191";
+    }
+    th.sorting_desc::after {
+        content: "\2193";
+    }
+    th.sorting, th.sorting_asc, th.sorting_desc {
+        cursor: pointer;
+    }
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+        padding: 20px;
+        border-radius: 5px;
+    }
+    .modal-content {
+        width: 42%;
+        height: 74vh;
+        overflow: auto;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .form-group {
+        padding: 10px;
+        position: relative;
+        margin: 20px 0 0;
+    }
+</style>
+
+<!-- Loader -->
+<div class="ajax-loader" id="modelLoader">
+    <div class="spinner"></div>
+</div>
+
+<div class="content" id="modal-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include 'common/messages.html' %}
+                <div class="card">
+                    <div class="card-header card-header-primary">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4 class="card-title pt-2 text-dark">Room Models</h4>
+                            </div>
+                            <div class="col-md-6 text-right">
+                                <button id="addModelBtn" class="btn">Add Room Model</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="roomModelTable" class="table table-striped" style="width:100%; display: none;">
+                                <thead class="text-secondary">
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Total</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for model in room_models %}
+                                    <tr>
+                                        <td>{{ model.room_model }}</td>
+                                        <td>{{ model.total }}</td>
+                                        <td>
+                                            <button class="btn editModelBtn"
+                                                    data-id="{{ model.id }}"
+                                                    data-name="{{ model.room_model }}">
+                                                Edit
+                                            </button>
+                                            <button class="btn deleteModelBtn" data-id="{{ model.id }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="modelModalOverlay"></div>
+
+<!-- Add/Edit Room Model Modal -->
+<div id="modelModal" class="modal">
+    <div class="modal-content mx-auto p-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2 id="modelModalTitle">Add Room Model</h2>
+            <span class="close" id="closeModelModal">×</span>
+        </div>
+        <form id="modelForm" method="POST" action="{% url 'save_room_model' %}">
+            {% csrf_token %}
+            <input type="hidden" id="model-id" name="model_id">
+            <div class="form-group">
+                <label for="model-name">Model Name:</label>
+                <input type="text" id="model-name" name="name" class="form-control" required>
+            </div>
+            <button type="submit" class="btn float-right">Save Model</button>
+        </form>        
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+    $('#modelLoader').hide();
+    $('#roomModelTable').show();
+
+    $('#roomModelTable').DataTable({
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        order: [[0, 'asc']],
+        pageLength: 10,
+        lengthMenu: [5, 10, 15, 20],
+        dom : 'Bfr<"row pt-5"<"col-sm-12"t>><"row pt-3"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+			buttons : [{
+	            extend: 'excel',
+	            text: 'Export To Excel',
+                className:'custom-download-btn'
+	        }]
+    });
+
+    $('#addModelBtn').click(function () {
+        $('#modelModalTitle').text("Add Room Model");
+        $('#model-id').val("");
+        $('#model-name').val("");
+        $('#modelModal').fadeIn();
+        $('#modelModalOverlay').fadeIn();
+    });
+
+
+    $(document).on('click', '.editModelBtn', function () {
+        const id = $(this).data('id');
+        const name = $(this).data('name');
+
+        $('#modelModalTitle').text("Edit Room Model");
+        $('#model-id').val(id);
+        $('#model-name').val(name);
+        $('#modelModal').fadeIn();
+        $('#modelModalOverlay').fadeIn();
+    });
+
+    $(document).on('click', '.deleteModelBtn', function () {
+        const modelId = $(this).data('id');
+        if (confirm("Are you sure you want to delete this model?")) {
+            $.ajax({
+                url: '{% url "delete_room_model" %}',
+                type: 'POST',
+                data: {
+                    model_id: modelId,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                    toastr.success("Room model deleted successfully!");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+
+                },
+                error: function (xhr) {
+                    toastr.error('Error: ' + xhr.responseText);
+                }
+            });
+        }
+    });
+
+    $('#modelForm').submit(function (e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        const formAction = $(this).attr('action');
+
+        $.ajax({
+            url: formAction,
+            type: 'POST',
+            data: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            success: function (response) {
+            if (response.success) {
+                $('#modelModal').fadeOut();
+                $('#modelModalOverlay').fadeOut();
+
+                if ($('#model-id').val()) {
+                    toastr.success("Room model updated successfully!");
+                } else {
+                    toastr.success("Room model added successfully!");
+                }
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                toastr.error(response.error || 'Something went wrong!');
+            }
+        }
+
+        });
+    });
+
+    $('#closeModelModal, #modelModalOverlay').click(function () {
+        $('#modelModal').fadeOut();
+        $('#modelModalOverlay').fadeOut();
+    });
+});
+</script>
+
+{% endblock %}

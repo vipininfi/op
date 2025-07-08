@@ -1,0 +1,48 @@
+{% load static %}
+<div class="table-responsive">
+    <table id="{{ table_id }}" class="table table-hover table-striped" style="width:100%">
+        <thead class="text-primary">
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Created By</th>
+                <th>Assignee</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for issue in issues %}
+            <tr>
+                <td>{{ issue.id }}</td>
+                <td>
+                    <a href="{% url 'admin_dashboard:admin_issue_detail' issue_id=issue.id %}">{{ issue.title }}</a>
+                </td>
+                <td>{{ issue.get_type_display }}</td>
+                <td>
+                    {% if issue.status == 'OPEN' %}<span class="badge badge-danger">{{ issue.get_status_display }}</span>
+                    {% elif issue.status == 'WORKING' %}<span class="badge badge-warning">{{ issue.get_status_display }}</span>
+                    {% elif issue.status == 'PENDING' %}<span class="badge badge-info">{{ issue.get_status_display }}</span>
+                    {% elif issue.status == 'CLOSE' %}<span class="badge badge-success">{{ issue.get_status_display }}</span>
+                    {% else %}<span class="badge badge-secondary">{{ issue.get_status_display }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ issue.created_by.name|default:"N/A" }}</td>
+                <td>{{ issue.assignee.name|default:"N/A" }}</td>
+                <td>{{ issue.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'admin_dashboard:admin_issue_detail' issue_id=issue.id %}" class="btn btn-sm btn-info" title="View Details">
+                        <i class="material-icons">visibility</i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No issues found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div> 

@@ -1,0 +1,167 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<section>
+
+	<div class="container py-5 h-100">
+		{% include 'common/messages.html' %}
+		<div class="row justify-content-center align-items-center h-100">
+
+			<div class="col-12 col-lg-9 col-xl-7">
+				<div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
+					<div class="card-body p-4 p-md-5 ">
+						<div class="d-flex justify-content-around flex-row-reverse">
+							{% if email %}
+								<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Edit Users </h3>
+							{% else %}
+								<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Add Users </h3>
+							{% endif %}
+							<div> 
+								<a  href="{% url 'admin_users'  %}" class="btn  btn-primary btn-sm" > View Users</a>
+							</div>
+						</div>
+						<form method="POST"  action ="{% url 'add_user'  %}" id="custom_user_form">
+							{% csrf_token %}
+							<div class="row">
+								<div class="col-md-6 mb-4">
+									{% if email is not None %}
+                                        <input type="hidden" name="admin_id" value="{{email}}">
+                                    {% endif %}
+									<div class="form-outline">
+										<input type="text" name="custom_firstName" id="firstName" class="form-control form-control-lg" value="{{first_name}}" autoComplete required/>
+										<label class="form-label" for="firstName">First Name</label>
+									</div>
+								</div>
+								<div class="col-md-6 mb-4">
+
+									<div class="form-outline">
+										<input type="text" name="custom_lastName" id="lastName" class="form-control form-control-lg" value="{{last_name}}" autoComplete required value="{{user_obj.lastName}}"/>
+										<label class="form-label" for="lastName">Last Name</label>
+									</div>
+
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-4 pb-2">
+									<div class="form-outline">
+										{% if email is not None %}
+											<input type="Email" name="custom_user_email" id="custom_user_email" class="form-control form-control-lg" value="{{email}}" required/>
+										{% else %}
+											<input type="Email" name="custom_user_email" id="custom_user_email" class="form-control form-control-lg" value="" required/>
+										{% endif %}
+											<label class="form-label" for="custom_user_email">Email</label>
+									</div>
+								</div>
+								<div class="col-md-6 mb-4">
+									<div class="form-outline">
+										<select name="custom_user_role" id="custom_user_role" class="form-control form-control-md">
+											{% for roles in admin_roles %}
+												<option value="{{roles.role}}">{{roles.role}}</option>
+											{% endfor %}                        
+											</select>
+										<label class="form-label" for="custom__confirm_user_pass">Roles</label>
+									</div>
+
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-6 mb-4">
+
+									<div class="form-outline">
+										<input type="text" name="custom_username" id="custom_username" class="form-control form-control-lg" value="{{user_name}}"  required/>
+										<label class="form-label" for="custom_username">User name</label>
+									</div>
+								</div>
+								<div class="col-md-6 mb-4">
+									<div class="form-outline">
+										<input type="tel" name="custom_phone" pattern="\+?\d*-?\d+" id="phone" class="form-control form-control-lg" value="{{phone}}" required
+											minlength="8" maxlength="10" title="Phone number contains only digits [min = 8, max = 10]"/>
+										<label class="form-label" for="custom_phone">Phone</label>
+									</div>
+								</div>
+							</div>
+							<div class="mt-4 pt-2">
+								<input class="btn btn-primary btn-sm" type="submit" value="Save" />
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>
+<script src="{% static 'js/core/jquery.min.js' %}"></script>
+<script type="text/javascript">
+	const phoneInputField = document.querySelector("#phone");
+	const phoneInput = window.intlTelInput(phoneInputField, {
+		utilsScript:"https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+		formatOnDisplay:false,
+		preferredCountries: ["us", "in"]
+	});
+	// 
+	$("#custom_confirm_user_pass").keypress(()=>{
+		$("#custom_confirm_user_pass").removeClass("error")
+	})
+	$("#custom_confirm_user_pass").change((e)=>{
+		$("#custom_confirm_user_pass").removeClass("error")
+		let conf_pass_value = event.target.value
+		let pass_value = $("#custom_user_pass").val()
+		
+		if(conf_pass_value != ''){
+			if (conf_pass_value == ''){
+				$("#custom_confirm_user_pass").removeClass("error")
+			}
+			if (pass_value != conf_pass_value){
+				$("#conf_pass_label").html(()=>{
+					return "<p class='errorColor'>Passwords and confirm password does not match</p>"
+				})
+				$("#custom_confirm_user_pass").addClass("error")
+			}
+			else{
+				$("#custom_confirm_user_pass").removeClass("error")
+				$("#conf_pass_label").html(()=>{
+					return "<label class='form-label' for='custom_user_pass'>Confirm Password</label>"
+				})
+			}
+		}
+	})
+	$("#custom_user_form").submit((e)=>{
+		event.preventDefault()
+		const country_code = phoneInput.getSelectedCountryData().dialCode;
+		console.log(phoneInput.getSelectedCountryData())
+        const phone = $("#phone").val();
+        $("#phone").val('+' + country_code + '-' + $("#phone").val());
+		$("#custom_user_form").submit()
+
+	})
+	if ("{{phone}}"){
+        let phone_no = '{{phone}}'
+        let phone_arr = phone_no.split('-');
+        if (phone_arr.length > 1){ 
+            $('#phone').val(phone_arr[1]);
+        }
+        else{
+            $('#phone').val(phone_arr[0]);
+        }
+    }
+	if ("{{email}}" !== 'None'){
+        document.getElementById('firstName').setAttribute("readonly","");
+        document.getElementById('lastName').setAttribute("readonly","");
+		document.getElementById('custom_user_email').setAttribute("readonly","");
+        document.getElementById('custom_user_role').setAttribute("disabled","");
+		document.getElementById('custom_username').setAttribute("readonly","");
+		document.getElementById('custom_user_role').value = '{{role}}';
+		document.getElementById('custom_user_role').style.backgroundColor = '#e9ecef';
+    }
+</script>
+<!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script> -->
+		
+{% endblock %}

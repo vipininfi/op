@@ -1,0 +1,791 @@
+{% extends "frontend_base.html" %}
+{% load static %}
+
+{% block title %}Inventory Pull Form{% endblock %}
+
+{% block content %}
+<!-- Hidden element to store Django messages as JSON -->
+<div id="django-messages" style="display: none;">
+  [
+    {% if messages %}
+      {% for message in messages %}
+        {
+          "tag": "{{ message.tags }}",
+          "text": "{{ message|escapejs }}"
+        }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    {% endif %}
+  ]
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    input[type='checkbox'] {
+      width: 25px;
+      height: 25px;
+    }
+    .form-label{
+      font-size: 14px;
+      margin-bottom: 0.25rem;
+    }
+    .fw-bold{
+      font-size: 16px;
+    }
+    .container-lg {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .card-body {
+      padding: 15px 10px;
+    }
+    h3 {
+      font-size: 20px;
+    }
+    h4 {
+      font-size: 18px;
+    }
+    
+    /* Table optimizations for mobile */
+    .table-responsive {
+      overflow-x: auto;
+    }
+    .table {
+      font-size: 12px;
+    }
+    .table th, .table td {
+      padding: 5px;
+    }
+    .table input {
+      padding: 4px;
+      font-size: 13px;
+      height: 32px;
+    }
+    
+    /* Button optimizations for mobile */
+    .btn {
+      padding: 8px 12px;
+      font-size: 14px;
+      margin-bottom: 8px;
+      height: auto;
+      white-space: normal;
+    }
+    .btn-lg {
+      padding: 10px 15px;
+      font-size: 16px;
+    }
+    
+    /* Stack buttons on mobile */
+    .text-center .gap-3 {
+      flex-direction: column;
+      width: 100%;
+    }
+    .text-center .gap-3 .btn, 
+    .text-center .gap-3 a.btn {
+      width: 100%;
+      margin-bottom: 10px;
+      margin-right: 0 !important;
+      margin-left: 0 !important;
+    }
+    
+    /* Product row improvements for mobile */
+    .product-row {
+      padding: 10px;
+      margin-bottom: 15px !important;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .form-check-label {
+      font-size: 14px;
+      margin-left: 5px;
+      line-height: 1.3;
+    }
+    
+    .form-check-input {
+      margin-top: 3px;
+    }
+    
+    /* Tab styling for mobile */
+    .nav-tabs .nav-link {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+  }
+
+  /* General responsive improvements */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  input.form-control, select.form-control {
+    height: 38px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+  
+  input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+  }
+  
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Tab styling */
+  .nav-tabs .nav-link {
+    color: #6c757d;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+  
+  .nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
+  }
+</style>
+
+<div class="container-lg my-5">
+  <div class="card shadow-sm rounded-4">
+    <div class="card-body p-4">
+    <h3 class="mb-4 text-center text-secondary py-4">Inventory Pull Form</h3>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="row mb-4">
+        <div class="col-md-6 col-lg-4">
+          <label class="form-label fw-bold">Floor Number</label>
+          <div class="input-group">
+            <input type="text" class="form-control rounded-start" name="floor_number" id="floor_number" required>
+            <button type="button" class="btn btn-secondary rounded-end" id="search_floor">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true" id="search_spinner"></span>
+              <span id="search_text">Search</span>
+            </button>
+          </div>
+          <small class="text-muted mt-1 d-block">Enter the floor number to search for available products</small>
+        </div>
+      </div>
+
+        <!-- Common date and checked by fields -->
+        <div class="row mb-4" id="common-fields">
+          <div class="col-md-6 col-sm-6 mb-2 mb-md-0">
+            <label class="form-label fw-bold">Date</label>
+            <div class="input-group">
+              <span class="input-group-text"><span class="material-icons">calendar_today</span></span>
+              <input type="date" class="form-control" id="common-date" name="common_date" readonly>
+            </div>
+          </div>
+          <div class="col-md-6 col-sm-6 mb-2 mb-md-0">
+            <label class="form-label fw-bold">Checked By</label>
+            <div class="input-group">
+              <span class="input-group-text"><span class="material-icons">person</span></span>
+              <input type="text" class="form-control" id="common-checked-by" name="common_checked_by" value="{{ user_name }}" readonly>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+        <!-- Tabs navigation - initially hidden -->
+        <div id="tabs-section" style="display: none;">
+          <ul class="nav nav-tabs mb-4 nav-fill" id="pullTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active d-flex justify-content-center align-items-center" id="requested-tab" data-bs-toggle="tab" data-bs-target="#requested" 
+                      type="button" role="tab" aria-controls="requested" aria-selected="true">
+                <span class="material-icons me-1 d-none d-sm-inline">add_shopping_cart</span>
+                Requested
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link d-flex justify-content-center align-items-center" id="received-tab" data-bs-toggle="tab" data-bs-target="#received" 
+                      type="button" role="tab" aria-controls="received" aria-selected="false">
+                <span class="material-icons me-1 d-none d-sm-inline">check_circle</span>
+                Received
+              </button>
+            </li>
+          </ul>
+
+          <!-- Tab content -->
+          <div class="tab-content" id="pullTabContent">
+            <div class="tab-pane fade show active" id="requested" role="tabpanel" aria-labelledby="requested-tab">
+      <!-- Dynamic Product List Render Here -->
+      <div id="products-wrapper"></div>
+            </div>
+            <div class="tab-pane fade" id="received" role="tabpanel" aria-labelledby="received-tab">
+              <!-- This will contain the same content but with different editability -->
+              <div id="products-wrapper-received"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Message for no products or before search -->
+        <div id="no-products-message" class="text-center py-5">
+          <div class="text-muted">
+            <span class="material-icons" style="font-size: 48px;">search</span>
+            <p class="mt-3">Enter a floor number and click search to view available products</p>
+          </div>
+        </div>
+
+      <hr class="my-4">
+
+      <div class="text-center mt-4">
+        <div class="row justify-content-center">
+          <div class="col-md-4 col-12 mb-2">
+            <button type="button" class="btn btn-outline-secondary w-100" id="clear-form-btn">
+              <span class="material-icons align-middle me-1">clear</span>
+              Cancel / Clear Form
+            </button>
+          </div>
+          <div class="col-md-4 col-12 mb-2">
+            <button type="submit" class="btn btn-secondary btn-lg w-100 shadow-sm">
+              <span class="material-icons align-middle me-1">save</span>
+              Submit
+            </button>
+          </div>
+          <div class="col-md-4 col-12 mb-2">
+            <a href="{% url 'issue_create' %}" class="btn btn-secondary btn-lg w-100 shadow-sm">
+              <span class="material-icons align-middle me-1">error_outline</span>
+              Report Issue
+            </a>
+          </div>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+        <!-- Previous Submissions Card -->
+<div class="container-lg my-5">
+  <div class="card shadow-sm rounded-4">
+    <div class="card-body p-4">
+    <div class="card mt-5 shadow-sm rounded-4">
+      <div class="card-body">
+        <h4 class="mb-3 text-secondary">Previous Submissions</h4>
+        {% if previous_submissions %}
+        <div class="table-responsive">
+          <table class="table table-bordered table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Floor Number</th>
+                <th>Client Item</th>
+                <th>Quantity Requested</th>
+                <th>Quantity Received</th>
+                <th>Requested By</th>
+                <th>Received By</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for req in previous_submissions %}
+              <tr>
+                <td>{{ req.floor_number }}</td>
+                <td>{{ req.client_item }}</td>
+                <td>{{ req.quantity_requested }}</td>
+                <td>{{ req.quantity_received }}</td>
+                <td>
+                  {% if req.requested_by %}
+                    {{ req.requested_by.name }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+                <td>
+                  {% if req.received_by %}
+                   {{ req.received_by.name }}
+                  {% else %}
+                    -
+                   {% endif %}
+              </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-0">
+          No previous submissions found.
+        </div>
+        {% endif %}
+        </div>
+      </div>
+      </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Make sure Bootstrap JS is included for tabs -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" defer></script>
+<script>
+  $(document).ready(function () {
+    const currentDate = new Date();
+    const userName = "{{ user_name }}";
+    const isoDate = currentDate.toISOString().split('T')[0];
+
+    // Set the common date field
+    $('#common-date').val(isoDate);
+    
+    // Hide common fields and tabs initially until products are loaded
+    $('#common-fields').hide();
+    $('#tabs-section').hide();
+    $('#no-products-message').show();
+
+    // Handle Enter key press in floor number input
+    $('#floor_number').on('keypress', function(e) {
+      if (e.which === 13) { // Enter key
+        e.preventDefault();
+        $('#search_floor').click(); // Trigger search button click
+      }
+    });
+
+    function renderProducts(products, data) {
+      // Show common fields and tabs section when products are loaded
+      $('#common-fields').show();
+      $('#tabs-section').show();
+      $('#no-products-message').hide();
+      
+      // Clear both wrappers
+      const requestedWrapper = $('#products-wrapper');
+      const receivedWrapper = $('#products-wrapper-received');
+      requestedWrapper.html('');
+      receivedWrapper.html('');
+      
+      // First render the requested tab (keep this as is)
+      products.forEach(product => {
+        // Create template for requested tab
+        const requestedHtml = `
+          <div class="form-group row align-items-center mb-3 product-row" data-product-id="${product.id}">
+            <div class="col-md-4 mb-2 mb-md-0">
+              <div class="form-check">
+                <input type="hidden" name="product_${product.id}" value="off">
+                <input class="form-check-input product-checkbox ms-2" type="checkbox" 
+                       name="product_${product.id}" 
+                       id="product_${product.id}" 
+                       data-product-id="${product.id}"
+                       data-available-qty="${product.hotel_warehouse_quantity}"
+                       data-required-qty="${product.quantity}"
+                       value="on">
+                <label class="form-check-label" for="product_${product.id}">
+                  <strong>(${product.client_id})</strong> - ${product.description}
+                  <br>
+                  <small class="text-muted">
+                    Required: ${product.quantity}, 
+                    Warehouse Available: ${product.hotel_warehouse_quantity},
+                    Already Pulled: ${product.pulled_quantity}
+                  </small>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4 col-6 mb-2 mb-md-0">
+              <label class="form-label">Requested</label>
+              <input type="number" class="form-control requested-qty" 
+                     name="requested_qty_${product.id}" 
+                     min="1" 
+                     max="${Math.min(product.hotel_warehouse_quantity, product.quantity)}"
+                     value="${Math.min(product.hotel_warehouse_quantity, product.quantity)}"
+                     data-product-id="${product.id}"
+                     placeholder="Requested Qty">
+              <small class="text-danger requested-error-${product.id}" style="display: none;">
+                Cannot exceed available/required quantity
+              </small>
+            </div>
+            <div class="col-md-4 col-6 mb-2 mb-md-0">
+              <label class="form-label">Received</label>
+              <input type="number" class="form-control received-qty" 
+                     name="received_qty_${product.id}" 
+                     min="0" 
+                     max="${Math.min(product.hotel_warehouse_quantity, product.quantity)}"
+                     value="0"
+                     data-product-id="${product.id}"
+                     placeholder="Received Qty"
+                     disabled>
+              <small class="text-danger received-error-${product.id}" style="display: none;">
+                Cannot exceed requested quantity
+              </small>
+            </div>
+          </div>
+        `;
+        
+        requestedWrapper.append(requestedHtml);
+      });
+      
+      // Render received tab - SIMPLIFIED VERSION
+      // Check if we have warehouse requests in the data
+      if (data && data.all_warehouse_requests && data.all_warehouse_requests.length > 0) {
+        console.log("Rendering received tab with warehouse requests:", data.all_warehouse_requests);
+        
+        // Use the direct list of all warehouse requests
+        data.all_warehouse_requests.forEach(request => {
+          // Log each request data
+          console.log(`Request ${request.id}: ${request.client_item}, received=${request.quantity_received}, requested=${request.quantity_requested}`);
+          
+          const receivedHtml = `
+            <div class="form-group row align-items-center mb-3 product-row" data-product-id="${request.product_id || 'unknown'}" data-request-id="${request.id}">
+              <div class="col-md-4 mb-2 mb-md-0">
+                <div class="form-check">
+                  <input class="form-check-input product-checkbox-received ms-2" type="checkbox" 
+                         name="product_received_${request.id}" 
+                         id="product_received_${request.id}"
+                         data-product-id="${request.product_id || 'unknown'}"
+                         data-request-id="${request.id}"
+                         value="on">
+                  <label class="form-check-label" for="product_received_${request.id}">
+                    <strong>(${request.client_item})</strong> - ${request.description}
+                    <br>
+                    <small class="text-muted">
+                      Requested By: ${request.requested_by},
+                      Request ID: ${request.id}
+                    </small>
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-4 col-6 mb-2 mb-md-0">
+                <label class="form-label">Requested</label>
+                <input type="number" class="form-control requested-qty-readonly" 
+                       name="requested_qty_ro_${request.id}" 
+                       value="${request.quantity_requested}"
+                       data-product-id="${request.product_id || 'unknown'}"
+                       data-request-id="${request.id}"
+                       readonly>
+              </div>
+              <div class="col-md-4 col-6 mb-2 mb-md-0">
+                <label class="form-label">Received</label>
+                <input type="number" class="form-control received-qty-edit" 
+                       name="received_qty_${request.id}" 
+                       min="0" 
+                       max="${request.quantity_requested}"
+                       value="${request.quantity_received || 0}"
+                       data-product-id="${request.product_id || 'unknown'}"
+                       data-request-id="${request.id}"
+                       placeholder="Received Qty"
+                       disabled>
+                <small class="text-danger received-edit-error-${request.id}" style="display: none;">
+                  Cannot exceed requested quantity
+                </small>
+              </div>
+            </div>
+          `;
+          
+          receivedWrapper.append(receivedHtml);
+      });
+      } else {
+        receivedWrapper.html('<div class="alert alert-info">No pending warehouse requests found for this floor. Use the Requested tab to create new requests.</div>');
+      }
+
+      // Add event listeners for checkboxes in requested tab
+      $('.product-checkbox').on('change', function() {
+        const productId = $(this).data('product-id');
+        const row = $(this).closest('.product-row');
+        const requestedInput = row.find('.requested-qty');
+        const receivedInput = row.find('.received-qty');
+        
+        if ($(this).is(':checked')) {
+          requestedInput.prop('disabled', false);
+          
+          // Also check the same product in received tab, but don't enable editing yet
+          $(`#product_received_${productId}`).prop('checked', true);
+        } else {
+          requestedInput.prop('disabled', true);
+          receivedInput.prop('disabled', true);
+          
+          // Uncheck in received tab too
+          $(`#product_received_${productId}`).prop('checked', false);
+          $(`[name="received_qty_${productId}"]`).prop('disabled', true);
+        }
+      });
+      
+      // Add event listeners for checkboxes in received tab
+      $('.product-checkbox-received').on('change', function() {
+        const requestId = $(this).data('request-id');
+        const receivedInput = $(this).closest('.product-row').find('.received-qty-edit');
+        
+        console.log(`Checkbox changed for request ${requestId}, checked: ${$(this).is(':checked')}`);
+        console.log(`Found received input: ${receivedInput.attr('name')}`);
+        
+        if ($(this).is(':checked')) {
+          receivedInput.prop('disabled', false);
+          console.log(`Enabled input field for request ${requestId}`);
+        } else {
+          receivedInput.prop('disabled', true);
+          console.log(`Disabled input field for request ${requestId}`);
+        }
+      });
+      
+                // Add validation for requested quantities
+      $('.requested-qty').on('input', function() {
+        const productId = $(this).data('product-id');
+        const productRow = $(this).closest('.product-row');
+        const warehouseQty = parseInt(productRow.find('.product-checkbox').data('available-qty'));
+        const requiredQty = parseInt(productRow.find('.product-checkbox').data('required-qty'));
+        const maxQty = Math.min(warehouseQty, requiredQty);
+        const requestedValue = parseInt($(this).val()) || 0;
+        
+        // Update max attribute in case it was changed dynamically
+        $(this).attr('max', maxQty);
+        
+        // Validate and show error message
+        if (requestedValue > maxQty) {
+          $(this).val(maxQty);
+          $(`.requested-error-${productId}`).show().fadeOut(3000);
+        }
+      });
+      
+      // Add validation for received quantities
+      $('.received-qty-edit').on('input', function() {
+        const requestId = $(this).data('request-id');
+        const requestedQty = parseInt($(`[name="requested_qty_ro_${requestId}"]`).val()) || 0;
+        const receivedValue = parseInt($(this).val()) || 0;
+        
+        // Update max attribute
+        $(this).attr('max', requestedQty);
+        
+        // Validate and show error message
+        if (receivedValue > requestedQty) {
+          $(this).val(requestedQty);
+          $(`.received-edit-error-${requestId}`).show().fadeOut(3000);
+        }
+        
+        // Log for debugging
+        console.log(`Updated received quantity for request ${requestId}: ${receivedValue}`);
+      });
+      
+      // Initially disable all quantity inputs
+      $('.requested-qty, .received-qty, .received-qty-edit').prop('disabled', true);
+        }
+
+    // Make sure all received quantities are properly collected on form submission
+    $('form').on('submit', function(e) {
+      // Prevent default submission
+      e.preventDefault();
+      
+      // Create hidden fields for the actual form submission
+      const productsWrapper = $('#products-wrapper');
+      const hiddenFields = [];
+      
+      // Check if there are any products selected
+      let hasSelectedProducts = false;
+      
+      // Determine which tab is active
+      const isReceivedTabActive = $('#received-tab').hasClass('active');
+      
+      // Enable all fields before collecting values to ensure disabled fields don't prevent values from being submitted
+      if (isReceivedTabActive) {
+        $('.product-checkbox-received:checked').each(function() {
+          const receivedInput = $(this).closest('.product-row').find('.received-qty-edit');
+          receivedInput.prop('disabled', false);
+        });
+      }
+      
+      // Add a hidden field to indicate which tab is active
+      hiddenFields.push(`<input type="hidden" name="active_tab" value="${isReceivedTabActive ? 'received' : 'requested'}">`);
+      
+      if (isReceivedTabActive) {
+        // Handle received tab - collect checked warehouse request items
+        $('.product-checkbox-received:checked').each(function() {
+          hasSelectedProducts = true;
+          const productId = $(this).data('product-id');
+          const requestId = $(this).data('request-id');
+          const productClientId = $(this).closest('.product-row').find('.form-check-label').text().trim().match(/\(([^)]+)\)/)[1];
+          const requestedQty = $(`[name="requested_qty_ro_${requestId}"]`).val();
+          
+          // Make sure we're getting the correct received quantity input
+          const receivedInput = $(this).closest('.product-row').find('.received-qty-edit');
+          const receivedQty = receivedInput.val();
+          
+          console.log(`Submitting warehouse request: ID=${requestId}, client_item=${productClientId}, requested=${requestedQty}, received=${receivedQty}`);
+          console.log(`Received input: ${receivedInput.attr('name')}, value: ${receivedInput.val()}, disabled: ${receivedInput.prop('disabled')}`);
+          
+          // Store request IDs and quantities
+          hiddenFields.push(`<input type="hidden" name="selected_request_ids" value="${requestId}">`);
+          hiddenFields.push(`<input type="hidden" name="selected_product_ids" value="${productId}">`);
+          hiddenFields.push(`<input type="hidden" name="client_item_ids" value="${productClientId}">`);
+          hiddenFields.push(`<input type="hidden" name="requested_quantities" value="${requestedQty}">`);
+          hiddenFields.push(`<input type="hidden" name="received_quantities" value="${receivedQty}">`);
+        });
+      } else {
+        // Handle requested tab - collect newly requested items
+        $('.product-checkbox:checked').each(function() {
+          hasSelectedProducts = true;
+          const productId = $(this).data('product-id');
+          const productClientId = $(this).closest('.product-row').find('.form-check-label').text().trim().match(/\(([^)]+)\)/)[1];
+          const requestedQty = $(`[name="requested_qty_${productId}"]`).val();
+          const receivedQty = $(`[name="received_qty_${productId}"]`).val();
+          let pulledBefore = 0;
+          
+          // Try to extract the already pulled quantity, but don't fail if the format changes
+          try {
+            pulledBefore = $(this).closest('.product-row').find('.text-muted').text().match(/Already Pulled: (\d+)/)[1];
+          } catch (e) {
+            console.log("Couldn't extract pulled quantity", e);
+          }
+          
+          // Store product IDs and quantities
+          hiddenFields.push(`<input type="hidden" name="selected_product_ids" value="${productId}">`);
+          hiddenFields.push(`<input type="hidden" name="client_item_ids" value="${productClientId}">`);
+          hiddenFields.push(`<input type="hidden" name="requested_quantities" value="${requestedQty}">`);
+          hiddenFields.push(`<input type="hidden" name="received_quantities" value="${receivedQty}">`);
+          hiddenFields.push(`<input type="hidden" name="previous_pulled_quantities" value="${pulledBefore}">`);
+        });
+      }
+      
+      if (!hasSelectedProducts) {
+        toastr.error("Please select at least one product");
+        return false;
+      }
+      
+      // Add the common fields
+      hiddenFields.push(`<input type="hidden" name="common_date" value="${$('#common-date').val()}">`);
+      hiddenFields.push(`<input type="hidden" name="common_checked_by" value="${$('#common-checked-by').val()}">`);
+      hiddenFields.push(`<input type="hidden" name="floor_number" value="${$('#floor_number').val()}">`);
+      
+      // Append all hidden fields
+      productsWrapper.append(hiddenFields.join(''));
+      
+      // Submit the form
+      this.submit();
+    });
+
+    // Switch tab handling
+    $('#pullTabs button').on('click', function (e) {
+      e.preventDefault();
+      $(this).tab('show');
+    });
+
+    // Clear form functionality
+    $('#clear-form-btn').on('click', function() {
+      $('#floor_number').val('');
+      $('#products-wrapper, #products-wrapper-received').html('');
+      $('#common-fields').hide();
+      $('#tabs-section').hide();
+      $('#no-products-message').show();
+    });
+    
+    // Function to handle loading state
+    function setLoading(action, isLoading) {
+      if (action === 'search_floor') {
+        if (isLoading) {
+          $('#search_spinner').removeClass('d-none');
+          $('#search_text').text('Searching...');
+          $('#search_floor').prop('disabled', true);
+        } else {
+          $('#search_spinner').addClass('d-none');
+          $('#search_text').text('Search');
+          $('#search_floor').prop('disabled', false);
+        }
+      }
+    }
+
+    $('#search_floor').on('click', function () {
+      const floorNumber = $('#floor_number').val();
+      if (!floorNumber) {
+        toastr.error("Please enter a floor number");
+        return;
+      }
+
+      setLoading('search_floor', true);
+
+      $.ajax({
+        url: "{% url 'get_floor_products' %}",
+        type: "GET",
+        data: { floor_number: floorNumber },
+        success: function (data) {
+          setLoading('search_floor', false);
+          
+          // Add debug output
+          console.log("Complete API response:", data);
+          
+          if (data.success) {
+            // Debug info
+            console.log("Received products data:", data.products);
+            
+            // Check if any products were found
+            if (data.products.length === 0 && (!data.all_warehouse_requests || data.all_warehouse_requests.length === 0)) {
+              // No products found - show message and hide tabs
+              $('#tabs-section').hide();
+              $('#no-products-message').show();
+              $('#common-fields').hide();
+              toastr.warning('No products or pending requests found for this floor.');
+              return;
+            }
+            
+            // Count warehouse requests for debugging
+            let totalRequests = 0;
+            if (data.all_warehouse_requests && data.all_warehouse_requests.length > 0) {
+              totalRequests = data.all_warehouse_requests.length;
+            } else {
+              data.products.forEach(product => {
+                if (product.warehouse_requests && product.warehouse_requests.length > 0) {
+                  console.log(`Product ${product.client_id} has ${product.warehouse_requests.length} warehouse requests`);
+                  totalRequests += product.warehouse_requests.length;
+                }
+              });
+            }
+            console.log(`Total warehouse requests: ${totalRequests}`);
+            
+            // Show notification to user about warehouse requests
+            if (data.all_warehouse_requests && data.all_warehouse_requests.length > 0) {
+              toastr.info(`Found ${data.all_warehouse_requests.length} pending warehouse requests for this floor.`);
+              // Auto-switch to received tab if we have pending requests
+              if (data.all_warehouse_requests.length > 0) {
+                $('#received-tab').tab('show');
+              }
+              console.log("All warehouse requests:", data.all_warehouse_requests);
+            } else if (totalRequests > 0) {
+              toastr.info(`Found ${totalRequests} pending warehouse requests for this floor.`);
+            } else {
+              toastr.warning('No pending warehouse requests found for this floor. Use the Requested tab to create new requests.');
+              // Auto-switch to requested tab if no pending requests
+              $('#requested-tab').tab('show');
+            }
+            
+            renderProducts(data.products, data);
+          } else {
+            toastr.error(data.error || "Error fetching floor products");
+          }
+        },
+        error: function (xhr, status, error) {
+          setLoading('search_floor', false);
+          console.error("AJAX Error:", error);
+          console.error("Status:", status);
+          console.error("Response:", xhr.responseText);
+          toastr.error("Error fetching floor products: " + error);
+        }
+      });
+    });
+
+    // Process Django messages with toastr
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "timeOut": "4000"
+    };
+    
+    // Handle Django messages
+    function processMessages() {
+      const messages = JSON.parse(document.getElementById('django-messages').textContent || '[]');
+      messages.forEach(function(msg) {
+        if (msg.tag === "success") {
+          toastr.success(msg.text);
+        } else if (msg.tag === "error") {
+          toastr.error(msg.text);
+        } else if (msg.tag === "warning") {
+          toastr.warning(msg.text);
+        } else if (msg.tag === "info") {
+          toastr.info(msg.text);
+        }
+      });
+    }
+    
+    // Call the function to process messages
+    processMessages();
+  });
+</script>
+{% endblock %}

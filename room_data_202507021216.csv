@@ -1,0 +1,321 @@
+"id","room","floor","bath_screen","room_model","left_desk","right_desk","to_be_renovated","description","room_model_id","bed"
+22,1717,17,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+42,1810,18,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+39,1819,18,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+59,1910,19,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,DOUBLE
+64,1920,19,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+76,2008,20,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+70,2013,20,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+80,2016,20,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+95,2110,21,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+91,2119,21,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+104,2209,22,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+116,2216,22,YES,A COL,NO,YES,NO,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+111,2223,22,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+131,2310,23,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+128,2321,23,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,KING
+129,2323,23,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+153,2416,24,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+157,2424,24,YES,DLX,NO,YES,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+171,2512,25,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+165,2519,25,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,KING
+178,2526,25,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+189,2608,26,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+192,2614,26,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+187,2623,26,NO,STC,YES,NO,YES,"King, small desk, of screen, custom smiling and closet",14,King
+201,2711,27,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+216,2722,27,YES,A LO DR,NO,YES,YES,"Double, short desk, w screen, custom ceiling and closet wall covering",4,Double/Double
+220,2809,28,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+235,2820,28,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+238,2826,28,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+242,2913,29,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+255,2920,29,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+260,3009,30,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+275,3020,30,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+280,3109,31,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+293,3116,31,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+286,3121,31,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+297,3124,31,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+301,3211,32,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,KING
+315,3220,32,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+318,3226,32,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+328,3325,33,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+345,3419,34,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+9,1608,16,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+2,1609,16,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+10,1610,16,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+3,1611,16,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+11,1612,16,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+12,1614,16,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,DOUBLE
+5,1615,16,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+13,1616,16,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+6,1617,16,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+14,1618,16,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+7,1619,16,NO,D,YES,NO,YES,"King, of screen, custom desk, custom ceiling and closet wall covering",11,King
+15,1620,16,NO,D,NO,YES,YES,"King, of screen, custom desk, custom ceiling and closet wall covering",11,King
+8,1621,16,NO,CURVA - DIS,YES,NO,YES,"King Executive suite, of screen, straight sofa, custom desk and of console, custom ceiling and closet",10,King
+16,1622,16,NO,CURVA - DIS,NO,YES,YES,"King Executive suite, of screen, straight sofa, custom desk and of console, custom ceiling and closet",10,King
+17,1707,17,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+18,1709,17,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+19,1711,17,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+21,1715,17,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+26,1710,17,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+27,1712,17,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+28,1714,17,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+23,1719,17,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+31,1720,17,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+24,1721,17,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+32,1722,17,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+33,1807,18,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+41,1808,18,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+34,1809,18,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+35,1811,18,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,KING
+36,1813,18,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+44,1814,18,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+45,1816,18,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+38,1817,18,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+46,1818,18,YES,C+,NO,YES,NO,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+47,1820,18,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+40,1821,18,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+48,1822,18,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+49,1907,19,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+58,1908,19,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+50,1909,19,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+51,1911,19,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+60,1912,19,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,KING
+61,1914,19,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+62,1916,19,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+54,1917,19,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+63,1918,19,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+55,1919,19,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+56,1921,19,YES,DLX,YES,NO,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+65,1922,19,YES,DLX,NO,YES,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+57,1923,19,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+66,1924,19,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+67,2007,20,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+68,2009,20,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+69,2011,20,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+73,2019,20,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+74,2021,20,YES,DLX,YES,NO,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+77,2010,20,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,DOUBLE
+78,2012,20,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+79,2014,20,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+82,2020,20,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+83,2022,20,YES,DLX,NO,YES,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+75,2023,20,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+84,2024,20,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+85,2107,21,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+94,2108,21,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+86,2109,21,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+87,2111,21,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+96,2112,21,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+88,2113,21,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+89,2115,21,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+98,2116,21,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+90,2117,21,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+99,2118,21,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,KING
+100,2120,21,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+92,2121,21,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+101,2122,21,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+93,2123,21,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+102,2124,21,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+103,2207,22,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+112,2208,22,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+113,2210,22,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+105,2211,22,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+114,2212,22,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+106,2213,22,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+115,2214,22,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+107,2215,22,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+108,2217,22,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+117,2218,22,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+109,2219,22,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+118,2220,22,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+110,2221,22,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+119,2222,22,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,KING
+120,2224,22,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+121,2307,23,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+122,2309,23,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+123,2311,23,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+124,2313,23,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+125,2315,23,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+126,2317,23,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+127,2319,23,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,KING
+132,2312,23,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+135,2318,23,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+136,2320,23,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+137,2322,23,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+139,2407,24,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+140,2409,24,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+141,2411,24,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+151,2412,24,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+142,2413,24,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+152,2414,24,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+143,2415,24,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+144,2417,24,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+154,2418,24,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+145,2419,24,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+155,2420,24,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+146,2421,24,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+156,2422,24,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+147,2423,24,YES,DLX,YES,NO,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+148,2425,24,NO,CURVA 24,YES,NO,YES,"King Executive suite, of screen, straight sofa, custom desk and of console, custom ceiling and closet",8,King
+158,2426,24,NO,CURVA 24,NO,YES,YES,"King Executive suite, of screen, straight sofa, custom desk and of console, custom ceiling and closet",8,King
+159,2507,25,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+169,2508,25,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+160,2509,25,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+170,2510,25,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+161,2511,25,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+162,2513,25,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+172,2514,25,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+163,2515,25,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+173,2516,25,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+164,2517,25,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+174,2518,25,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+175,2520,25,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+166,2521,25,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+176,2522,25,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+167,2523,25,YES,DLX,YES,NO,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,King
+177,2524,25,YES,DLX,NO,YES,YES,"King, w screen, custom desk, custom ceiling and closet wall covering",12,KING
+168,2525,25,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+179,2607,26,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+180,2609,26,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+181,2611,26,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+182,2613,26,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+190,2610,26,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,DOUBLE
+191,2612,26,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+183,2615,26,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+193,2616,26,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+184,2617,26,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+194,2618,26,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+185,2619,26,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+195,2620,26,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+186,2621,26,YES,A LO DR,YES,NO,YES,"Double, short desk, w screen, custom ceiling and closet wall covering",4,Double/Double
+188,2625,26,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+198,2626,26,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+209,2708,27,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+200,2709,27,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+210,2710,27,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+211,2712,27,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+202,2713,27,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+212,2714,27,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+203,2715,27,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+213,2716,27,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+205,2719,27,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+215,2720,27,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+207,2723,27,NO,STC,YES,NO,YES,"King, small desk, of screen, custom smiling and closet",14,King
+217,2724,27,NO,STC,NO,YES,YES,"King, small desk, of screen, custom smiling and closet",14,King
+208,2725,27,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+218,2726,27,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,King
+219,2807,28,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+229,2808,28,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+230,2810,28,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+221,2811,28,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+222,2813,28,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+232,2814,28,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,DOUBLE
+223,2815,28,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+224,2817,28,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+225,2819,28,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+227,2823,28,NO,STC,YES,NO,YES,"King, small desk, of screen, custom smiling and closet",14,King
+237,2824,28,NO,STC,NO,YES,YES,"King, small desk, of screen, custom smiling and closet",14,King
+228,2825,28,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+239,2907,29,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+249,2908,29,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+240,2909,29,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+241,2911,29,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+252,2914,29,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+243,2915,29,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+253,2916,29,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+244,2917,29,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+254,2918,29,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+245,2919,29,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+256,2922,29,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+247,2923,29,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+248,2925,29,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+258,2926,29,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+259,3007,30,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+269,3008,30,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+270,3010,30,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+271,3012,30,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+272,3014,30,YES,A,NO,YES,NO,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+273,3016,30,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+264,3017,30,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+274,3018,30,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+265,3019,30,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+266,3021,30,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+276,3022,30,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+267,3023,30,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,KING
+268,3025,30,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+278,3026,30,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+279,3107,31,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+289,3108,31,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+290,3110,31,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+281,3111,31,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+291,3112,31,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+282,3113,31,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+283,3115,31,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+285,3119,31,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,KING
+287,3123,31,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+288,3125,31,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+294,3118,31,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+295,3120,31,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+296,3122,31,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+298,3126,31,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+299,3207,32,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,Executive King
+309,3208,32,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+300,3209,32,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+310,3210,32,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+311,3212,32,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+302,3213,32,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+312,3214,32,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+303,3215,32,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+313,3216,32,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+304,3217,32,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+305,3219,32,NO,C PN,YES,NO,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+306,3221,32,YES,C+,YES,NO,NO,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+316,3222,32,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+307,3223,32,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+317,3224,32,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+308,3225,32,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+319,3307,33,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+329,3308,33,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,King
+320,3309,33,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+330,3310,33,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+321,3311,33,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+322,3313,33,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+323,3315,33,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+326,3321,33,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+349,3408,34,YES,B,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,KING
+350,3410,34,YES,A LO,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+351,3412,34,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+352,3414,34,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+343,3415,34,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+353,3416,34,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+344,3417,34,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+354,3418,34,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+356,3422,34,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+347,3423,34,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+357,3424,34,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+348,3425,34,NO,CURVA,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+369,3524,35,NO,PRESIDENTIAL SUITE,NO,YES,YES,"Need clarification, assuming King with standard curve sofa, dining, to, minimal, custom ceiling and closet",13,King
+362,3519,35,NO,SUITE C,YES,NO,YES,"Double w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",17,Double
+1,1607,16,YES,B,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",5,king
+332,3314,33,YES,A,NO,YES,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+333,3316,33,YES,A COL,NO,YES,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+324,3317,33,YES,C+,YES,NO,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+334,3318,33,YES,C+,NO,YES,YES,"King,  medium desk, w screen, custom ceiling and closet wall covering",7,King
+335,3320,33,NO,C PN,NO,YES,YES,"King, Long desk, no screen, custom ceiling and closet wall covering",6,King
+338,3326,33,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+340,3409,34,YES,A LO,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",3,Double/Double
+341,3411,34,YES,A COL,YES,NO,YES,"King, Long desk, w screen, custom ceiling and closet wall covering",2,King
+342,3413,34,YES,A,YES,NO,YES,"Double, Long desk, w screen, custom ceiling and closet wall covering",1,Double/Double
+358,3426,34,NO,CURVA,NO,YES,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",9,Executive King
+359,3507,35,NO,SUITE B,YES,NO,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",16,king
+365,3508,35,NO,SUITE B,NO,YES,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",16,king
+360,3511,35,NO,SUITE A,YES,NO,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",15,king
+366,3512,35,NO,SUITE A,NO,YES,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",15,Grand Suite King
+361,3515,35,NO,SUITE A,YES,NO,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",15,king
+367,3516,35,NO,SUITE A,NO,YES,YES,"King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",15,king
+368,3520,35,NO,SUITE C,NO,YES,YES,"Double w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",17,Grand Suite Double
+363,3523,35,NO,SUITE MINI,YES,NO,YES,"Assuming similar configuration as Quite A: King, w screen, medium desk, large of console, straight sofa, dining and custom closet and ceiling",18,Executive King
+364,3525,35,NO,CURVA 35,YES,NO,YES,"King Executive suite, of screen, standard Oxen Desk, Curve sofa, custom ceiling and closet",19,Executive King

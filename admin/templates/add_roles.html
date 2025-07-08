@@ -1,0 +1,286 @@
+{% extends 'dashboard_layout.html' %}
+{% load static %}
+{% block content %}
+
+<link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="https://www.jqueryscript.net/demo/Country-Calling-Code-Picker-jQuery-Ccpicker/css/jquery.ccpicker.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script>
+
+
+<section>
+
+	<div class="container py-5 h-100">
+		{% include 'common/messages.html' %}
+		<div class="row justify-content-center align-items-center h-100">
+
+			<div class="col-12 col-lg-12 col-xl-12">
+				<div class="card shadow-2-strong card-registration" style="border-radius: 15px;">
+					<div class="card-body p-4 p-md-5 ">
+						<div class="d-flex justify-content-around flex-row-reverse">
+								<h3 class="mb-4 pb-2 pb-md-0 mb-md-5">Add Role </h3>
+							<div> 
+								<a  href="{% url 'all_roles'  %}" class="btn  btn-primary btn-sm" > View Roles</a>
+							</div>
+						</div>
+						<form method="POST"  id="role_form">
+							{% csrf_token %}
+							<div class="row">
+								<div class="col-md-12 mb-4 ">
+
+									<div class="form-outline">
+										<input type="text" name="adminRoleName" value="{{role_obj.role}}" id="adminRoleName" class="form-control form-control-lg"  required/>
+										<label class="form-label" for="adminRoleName">Role Name</label>
+									</div>
+								</div>
+							</div>
+							{% for section in section_permissions  %}
+							<div class="row sectionClass">
+								<div class="col-md-12 mb-4 pb-2 d-flex b-bottom">
+										<div class="form-outline col-6 ">
+											<p class="headingName">{{section.sectionDisplayName}}</p>
+										</div>
+											<div class="col-6">
+												<label class="switch float-right">
+												  {% if role_obj.sectionPermissions_views %}
+												  		{% if section.sectionType in role_obj.sectionPermissions_views.keys %}
+												  			<input type="checkbox" class="sectionRadioBtn js-radio-btn"  data-radio-btn-name="{{section.sectionDisplayName}}" data-radion-btn-type="{{section.sectionType}}"  checked/>
+												  		{% else %}
+												  			<input type="checkbox" class="sectionRadioBtn js-radio-btn"  data-radio-btn-name="{{section.sectionDisplayName}}" data-radion-btn-type="{{section.sectionType}}" />
+												  		{% endif %}
+												  	{% else %}
+												  		<input type="checkbox" class="sectionRadioBtn js-radio-btn" data-radion-btn-type="{{section.sectionType}}"  data-radio-btn-name="{{section.sectionDisplayName}}" checked/>
+												  {% endif %}
+												  <span class="slider round"></span>
+												</label>
+											</div>
+
+								</div>
+									<div class="col-md-12 mb-4 pb-2 checkBoxContainer">
+										{% for permission in section.permissions  %}
+										<div class=" col-4 mb-2 float-left">
+											<div class="form-inline {{section.sectionDisplayName}}_radio_section">
+												{% if permission.type == 'listView' or permission.type == 'edit' and section.sectionType == 'change_password' %}
+
+													<input type="checkbox"  class="checkBoxes" id="{{permission.type}}_{{section.sectionDisplayName}}" data-permission-name="{{permission.displayName}}"  data-permission-type="{{permission.type}}" data-section-name="{{section.sectionType}}" data-section-display-name="{{section.sectionDisplayName}}"  checked disabled/>
+													<label class="form-label font-size-13px pl-3" for="{{permission.type}}_{{section.sectionDisplayName}}">{{permission.displayName}}</label>
+												{% else %}
+													<input type="checkbox"  class="checkBoxes" id="{{permission.type}}_{{section.sectionDisplayName}}" data-permission-name="{{permission.displayName}}" data-permission-type="{{permission.type}}" data-section-name="{{section.sectionType}}" data-section-display-name="{{section.sectionDisplayName}}"  />
+													<label class="form-label font-size-13px pl-3" for="{{permission.type}}_{{section.sectionDisplayName}}">{{permission.displayName}}</label>
+												{% endif %}
+
+
+											</div>
+										</div>    
+										{% endfor %}         
+									</div>
+							</div>
+							{% endfor  %}
+							<div class="mt-4 pt-2">
+								<input class="btn btn-primary btn-sm" type="submit" value="Save" />
+							</div>
+
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</section>
+
+<script src="{% static 'js/core/jquery.min.js' %}"></script>
+<script type="text/javascript">
+	//
+	$(function(){
+		let static = 'static'
+		let radionBtns = $(".sectionRadioBtn")
+		let checkBoxes = $(".checkBoxes")
+		let role_id = "{{role_obj.id}}"
+		let editable = false
+		if(role_id){
+			editable = true
+			fetchCheckBoxData(role_id)
+		}
+		$("body").on('click','.js-radio-btn',function(){
+			let containerName = $(this).attr("data-radio-btn-name")
+			let enabled = $(this).is(":checked")
+			let checkBoxes = $(".checkBoxes")
+			let containerType = $(this).attr("data-radion-btn-type")
+			for(var index in checkBoxes){
+				let checkBox = checkBoxes[index]
+				
+				if(enabled){
+					try{
+						if (checkBox.getAttribute("data-section-name") == containerType){
+							let isListBox = checkBox.getAttribute("data-permission-type")  === 'listView' ? true :false
+							let isPasswordEdit = containerType === 'change_password' && checkBox.getAttribute("data-permission-type")  === 'edit'  ? true :false
+							if(isListBox || isPasswordEdit){
+								checkBox.disabled = true
+								checkBox.checked = true
+							}
+							else{
+								checkBox.disabled = false
+								checkBox.checked = false
+							}
+						}
+					}
+					catch(err){}
+				}
+				else{
+					try{
+						if (checkBox.getAttribute("data-section-name") == containerType){
+						checkBox.disabled = true
+						checkBox.checked = false
+						}
+					}
+					catch(err){}
+				}
+				
+				
+			}
+		})
+		function handleFormData(){
+			try{
+				let formData = {}
+				let checkBoxes = $(".checkBoxes")
+				let radionBtns = $(".sectionRadioBtn")
+				for(var index in checkBoxes){
+					let checkBox = checkBoxes[index]
+					try{
+						if(checkBox){
+							try{	
+								if(checkBox.checked && checkBox.checked != undefined){
+									let temp = {}
+									temp['displayName'] = checkBox.getAttribute("data-permission-name")
+									temp['type'] = checkBox.getAttribute("data-permission-type")
+									formData[checkBox.getAttribute("data-section-name")]['permissions'].push(temp)
+								}
+							}
+							catch(err){
+								// data-section-display-name
+								formData[checkBox.getAttribute("data-section-name")] = {"permissions":[],"sectionAllowed":true,"section":checkBox.getAttribute("data-section-display-name")}
+								if(checkBox.checked && checkBox.checked != undefined){
+									let temp = {}
+									temp['displayName'] = checkBox.getAttribute("data-permission-name")
+									temp['type'] = checkBox.getAttribute("data-permission-type")
+									formData[checkBox.getAttribute("data-section-name")]['permissions'].push(temp)
+								}
+							}
+							
+						}
+					}
+					catch(err){}
+				}
+				for(let index in radionBtns){
+					try{
+						if(radionBtns[index].checked){
+							formData[radionBtns[index].getAttribute("data-radio-btn-type")]['sectionAllowed'] = true 
+						}
+						else{
+							formData[radionBtns[index].getAttribute("data-radio-btn-type")]['sectionAllowed'] = false 
+						}
+					}
+					catch(err){
+						try{
+							formData[radionBtns[index].getAttribute("data-radio-btn-type")] = {"permissions":[],"sectionAllowed":false,"section":radionBtns[index].getAttribute("data-radio-btn-name")}
+							if(radionBtns[index].checked){
+								formData[radionBtns[index].getAttribute("data-radio-btn-type")]['sectionAllowed'] = true 
+							}
+							else{
+								formData[radionBtns[index].getAttribute("data-radio-btn-type")]['sectionAllowed'] = false 
+							}
+
+						}
+						catch(err){}
+					}
+				}
+				return formData
+			}
+			catch(err){
+				return null
+			}
+		}
+		function handleCheckboxes(data){
+			try{
+				let checkBoxes = $(".checkBoxes")
+				for(var index in checkBoxes){
+					let checkBox = checkBoxes[index]
+					try{
+						let dataToFetchKey = checkBox.getAttribute("data-section-name")
+						let permissionNameOfCheck = checkBox.getAttribute("data-permission-type")
+						console.log("data :::::::;;",data)
+						if(Object.keys(data).includes(dataToFetchKey)){
+							if (data[dataToFetchKey].includes(permissionNameOfCheck) ){
+								checkBox.checked = true
+							}
+						}
+						else{
+							checkBox.checked = false
+							checkBox.disabled = true
+						}
+					}
+					catch(err){}
+				}
+			}
+			catch(err){}
+		}
+		
+		function fetchCheckBoxData(id){
+			let roleId = id
+			let link = "{% url 'get_role_api' %}"
+			try{
+				$.ajax({
+					type:"POST",
+					url:link,
+					data : {csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,'pk':roleId},
+					success:function(data){
+						if(data.success){
+							handleCheckboxes(data.checkBoxData)
+						}else{
+							toastr.error(data.message)
+						}
+					}
+				})
+			}
+			catch(err){
+				console.log("error in fetchCheckBoxData ::::::: ",err)
+			}
+		}
+		function sendFormToBackend(data){
+			let role = $("#adminRoleName").val()
+			let link = "{% url 'add_roles_api'  %}"
+			let csrf = "{{csrf_token}}"
+			try{
+				$.ajax({
+					type:"POST",
+					url:link,
+					data : {csrfmiddlewaretoken: document.getElementsByName('csrfmiddlewaretoken')[0].value,'formData':JSON.stringify(data),'role':role,'queryDecider':JSON.stringify({"editable":editable,"role_id":role_id})},
+					success:function(data){
+						if(data.success){
+							toastr.success(data.message)
+							window.location.href = "/all-roles"
+						}else{
+							toastr.error(data.message)
+						}
+					}
+				})
+			}
+			catch(err){
+				console.log("error in sendFormToBackend ::::::: ",err)
+			}
+		}
+
+
+		$("#role_form").submit((e)=>{
+			event.preventDefault()
+			let formData = handleFormData()
+			if (formData != null){
+				sendFormToBackend(formData)
+			}
+		})
+	})
+</script>
+<!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script> -->
+		
+{% endblock %}

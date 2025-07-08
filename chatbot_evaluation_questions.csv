@@ -1,0 +1,642 @@
+No.,Category,Question,ChatbotResponse
+1,Installation Tracking,Are we behind on installation overall?,"We are not behind on installation overall, as there are no delayed installations out of a total of 28 installations."
+2,Installation Tracking,Are we behind on installation for floor 3?,We are not behind on installation for floor 3.
+3,Installation Tracking,How many days are we delayed on floor 2?,There are no days of delay for installations on floor 2.
+4,Installation Tracking,Which rooms still have items not installed?,"The rooms that still have items not installed are rooms with IDs 122, 49, 358, and 338."
+5,Installation Tracking,List all rooms where installation is complete.,"The rooms where installation is complete are rooms with IDs 338, 1, 358, and 122."
+6,Installation Tracking,Show the latest installed_on date per floor.,"The latest `installed_on` date per floor is as follows:
+- Floor 16: 2025-07-02
+- Floor 23: 2025-07-02
+- Floor 33: 2025-07-02
+- Floor 34: 2025-07-02"
+7,Installation Tracking,How many items have been installed so far?,28 items have been installed so far.
+8,Installation Tracking,What products are most frequently installed?,"The most frequently installed products are:
+
+1. Electrical self-contained outlets with 3 installations
+2. Exec Coffee table with 2 installations
+3. Ottoman with 2 installations
+4. King Bed Base with 1 installation
+5. SHEER CURTAIN with 1 installation"
+9,Installation Tracking,How many products were installed yesterday?,0 products were installed yesterday.
+10,Installation Tracking,Show install progress for each room on floor 4.,There is no installation data available for rooms on floor 4. It seems installations might not have started or data is not recorded for this floor.
+11,Installation Tracking,How many products are still pending installation in floor 2?,There are 0 products still pending installation on floor 2.
+12,Installation Tracking,Which rooms had installations in the last 7 days?,"Rooms 2309, 1607, 3326, and 3426 had installations in the last 7 days."
+13,Installation Tracking,List all items installed in room 101.,There are no recorded installations for room 101.
+14,Installation Tracking,What’s the installation timeline for floor 5?,"There is no recorded installation timeline for any rooms on floor 5. It seems that installations have not started for this floor, or the data has not been recorded."
+15,Installation Tracking,Who installed the most products?,"The installer who installed the most products is Vipin, with a total of 28 installations."
+16,Installation Tracking,What’s the earliest install_starts date across all floors?,"The earliest install_starts date across all floors is August 4, 2025."
+17,Installation Tracking,Which room has the most installed products?,"Room 338 has the most installed products, with a total of 25 installations."
+18,Installation Tracking,Show all products with status NO in install_detail.,"There are 89 products with a status of ""NO"" in the `install_detail` table. The details of these products include various furniture items and installations across different rooms, but none of them have been installed yet, as indicated by the `installed_on` column being `None`."
+19,Installation Tracking,Which floors have installation status delayed?,"There are no floors with an installation status of ""delayed"" in the current dataset."
+20,Installation Tracking,Are any floors finished before the planned install_end date?,No floors were finished before their planned install_end date according to the current dataset.
+21,Inventory,Show current central inventory of item 'P123'.,The current central inventory for item 'P123' is 0.
+22,Inventory,How many 'Chairs' are available in the hotel warehouse?,There are no 'Chairs' available in the hotel warehouse.
+23,Inventory,List all items where quantity_available is 0.,"The items where `quantity_available` is 0 are: P012, P043, P035, P127, P131, P061, P067, P114M, P123, P068, P010, P097, P002M, P096M, P112, P145, P062, P141, P095, P036, P093M, P066, P040, P113M, P091, P008, P069, P016, P122, P142, P119, P113, P039, P115, P103, P143, P129, P125, P116, P070, P105, P143M, P063, P128, P115M, P104, P130, P120, P102, P096, P046, P007, P015, P094, P099, P146, P117, P098, INSTALL KIT 2, P071, P140, P107, INSTALL KIT, P110, P124, P099M, P047, P114, P015-P016-P017 PARTS, P118, P042, P108, P093, P065, P144, P054, P106, P147, P015-016-017 PARTS, TAG, P060, P017, P059, P126."
+24,Inventory,What’s the total quantity received for client_id 'XYZ'?,There is no recorded quantity received for client_id 'XYZ' in the current dataset.
+25,Inventory,What products have been damaged the most?,"The product that has been damaged the most is product P005, with a total of 36 damages."
+26,Inventory,Show all items with qty_ordered more than 100.,"The items with `qty_ordered` more than 100 are:
+
+- P012 with 320
+- P043 with 153
+- P035 with 103
+- P061 with 120
+- P114M with 142
+- P123 with 176
+- P010 with 142
+- P097 with 394
+- P096M with 318
+- P095 with 240
+- P036 with 186
+- P040 with 140
+- P091 with 109
+- P008 with 249
+- P006 with 267
+- P119 with 271
+- P113 with 119
+- P005 with 534
+- P115 with 643
+- P009 with 324
+- P129 with 332
+- P125 with 320
+- P116 with 332
+- P105 with 139
+- P115M with 498
+- P004 with 213
+- P130 with 1200
+- P096 with 353
+- P015 with 349
+- P094 with 317
+- P117 with 142
+- P098 with 320
+- P003 with 1063
+- P124 with 308
+- P114 with 187
+- P015-P016-P017 PARTS with 369
+- P118 with 321
+- P002 with 147
+- P106 with 166
+- P015-016-017 PARTS with 369
+- TAG with 1402
+- P059 with 108
+- P001 with 346"
+27,Inventory,Which items were received yesterday?,No items were received yesterday.
+28,Inventory,How many units of 'AC Unit' have been installed?,There have been 0 units of 'AC Unit' installed.
+29,Inventory,Which item has the most quantity_available?,"The item with the most quantity available is P005, with a quantity of 300."
+30,Inventory,What is the difference between ordered and shipped quantities for item 'P001'?,The difference between ordered and shipped quantities for item 'P001' is 246 units.
+31,Inventory,What is the hotel_warehouse_quantity for item 'P002'?,The hotel_warehouse_quantity for item 'P002' is 61 units.
+32,Inventory,List all products shipped but not received yet.,"The products shipped but not yet received are: P043, P035, P127, P131, P061, P067, P114M, P068, P097, P002M, P096M, P112, P062, P095, P036, P093M, P066, P040, P113M, P091, P069, P016, P006, P142, P119, P113, P005, P039, P115, P103, P143, P009, P129, P116, P070, P105, P143M, P063, P128, P115M, P004, P104, P130, P102, P096, P046, P015, P094, P099, P146, P117, P098, INSTALL KIT 2, P071, P107, P003, INSTALL KIT, P110, P124, P099M, P047, P114, P015-P016-P017 PARTS, P118, P042, P108, P093, P065, P002, P054, P106, P147, TAG, P060, P017, P059, P126, P001."
+33,Inventory,Which items have received more than 10 damaged units?,"The items that have received more than 10 damaged units are P005, P003, and P002."
+34,Inventory,List items pulled to floor 2 recently.,There are no recent records of items being pulled to floor '2'.
+35,Inventory,Show quantity_installed vs floor_quantity for each item.,"Here is the comparison of `quantity_installed` vs `floor_quantity` for each item:
+
+- P006: 10 installed, 20 on floor
+- P005: 20 installed, 30 on floor
+- P009: 1 installed, 0 on floor
+- P004: 10 installed, 10 on floor
+- P003: 11 installed, 11 on floor
+- P002: 2 installed, 2 on floor
+- P001: 3 installed, 2 on floor
+
+All other items have 0 for both `quantity_installed` and `floor_quantity`."
+36,Inventory,List items where qty_ordered ≠ quantity_received.,"The items where the quantity ordered is not equal to the quantity received are: P012, P043, P035, P127, P131, P061, P067, P114M, P123, P068, P010, P097, P002M, P096M, P112, P145, P062, P141, P095, P036, P093M, P066, P040, P113M, P091, P008, P069, P016, P122, P006, P142, P119, P113, P005, P039, P115, P103, P143, P009, P129, P125, P116, P070, P105, P143M, P063, P128, P115M, P004, P104, P130, P120, P102, P096, P046, P007, P015, P094, P099, P146, P117, P098, INSTALL KIT 2, P071, P140, P107, P003, INSTALL KIT, P110, P124, P099M, P047, P114, P015-P016-P017 PARTS, P118, P042, P108, P093, P065, P002, P144, P054, P106, INSTALL KIT 1B, P147, P015-016-017 PARTS, TAG, P060, P017, P059, P126, P001."
+37,Inventory,How much stock is available at the hotel for item 'P123'?,There is no stock available at the hotel for item 'P123'.
+38,Inventory,Show available_qty after latest pull for item 'P999'.,"There is no available quantity for item 'P999' after the latest pull, as there are no records for this item."
+39,Inventory,Which items are yet to be pulled for floor 3?,"There are no items yet to be pulled for floor 3, as there are no records indicating zero pull quantity for that floor."
+40,Inventory,Which items are only in central inventory but not in hotel?,"The items that are only in central inventory and not in the hotel are: P006, P005, P009, P004, and INSTALL KIT 1B."
+41,Shipping & Logistics,What was received in Container 1?,There are no records of items received in Container 1 in the database.
+42,Shipping & Logistics,"Who checked the shipment in Container ""Truck 1""?","There are no records of a shipment in Container ""Truck 1"", so we cannot determine who checked it."
+43,Shipping & Logistics,List all items sent to floor 2 from the warehouse.,There are no records of items sent from the warehouse to floor 2 in the database.
+44,Shipping & Logistics,What is the total quantity shipped for item 'P100'?,The total quantity shipped for item 'P100' is zero.
+45,Shipping & Logistics,Show all containers that arrived last week.,"The containers that arrived last week are: truck1, truck2, and truck3."
+46,Shipping & Logistics,Which user checked the most shipments?,"The user with ID 1 checked the most shipments, with a total of 3 shipments."
+47,Shipping & Logistics,What items are present in hotel_warehouse but not in inventory?,There are no items present in the hotel_warehouse that are not in the inventory.
+48,Shipping & Logistics,Show reference IDs where ship_qty > 50.,The reference ID where the shipped quantity (ship_qty) is greater than 50 is truck2.
+49,Shipping & Logistics,Show items received from supplier 'ABC Ltd'.,There are no items recorded as received from the supplier 'ABC Ltd' in the database.
+50,Shipping & Logistics,What is the total quantity sent vs received per floor?,"The total quantity sent and received per floor is as follows:
+- Floor 16: Sent 4, Received 4
+- Floor 17: Sent 4, Received 4
+- Floor 24: Sent 20, Received 15"
+51,Room & Renovation Tracking,List all rooms on floor 3.,There are no rooms listed on floor 3 in the database.
+52,Room & Renovation Tracking,Which rooms are pending renovation?,"The rooms pending renovation are:
+
+- Floor 16: Rooms 1607, 1608, 1609, 1610, 1611, 1612, 1614, 1615, 1616, 1617, 1618, 1619, 1620, 1621, 1622
+- Floor 17: Rooms 1707, 1709, 1710, 1711, 1712, 1714, 1715, 1717, 1719, 1720, 1721, 1722
+- Floor 18: Rooms 1807, 1808, 1809, 1810, 1811, 1813, 1814, 1816, 1817, 1819, 1820, 1821, 1822
+- Floor 19: Rooms 1907, 1908, 1909, 1910, 1911, 1912, 1914, 1916, 1917, 1918, 1919, 1920, 1921, 1922, 1923, 1924
+- Floor 20: Rooms 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2016, 2019, 2020, 2021, 2022, 2023, 2024
+- Floor 21: Rooms 2107, 2108, 2109, 2110, 2111, 2112, 2113, 2115, 2116, 2117, 2118, 2119, 2120, 2121, 2122, 2123, 2124
+- Floor 22: Rooms 2207, 2208, 2209, 2210, 2211, 2212, 2213, 2214, 2215, 2217, 2218, 2219"
+53,Room & Renovation Tracking,What are the room models present in floor 4?,There are no room models present on floor 4 in the database.
+54,Room & Renovation Tracking,List all room models and how many rooms each has.,"The room models and the number of rooms each has are as follows:
+
+- SUITE B: 2 rooms
+- SUITE C: 2 rooms
+- CURVA 24: 2 rooms
+- B: 33 rooms
+- DLX: 8 rooms
+- A LO DR: 2 rooms
+- D: 2 rooms
+- CURVA 35: 1 room
+- SUITE A: 4 rooms
+- CURVA - DIS: 2 rooms
+- C+: 49 rooms
+- CURVA: 33 rooms
+- A COL: 72 rooms
+- PRESIDENTIAL SUITE: 1 room
+- SUITE MINI: 1 room
+- A: 31 rooms
+- C PN: 34 rooms
+- STC: 5 rooms
+- A LO: 36 rooms"
+55,Room & Renovation Tracking,Show all rooms with bed type 'King'.,"The rooms with bed type 'King' are as follows:
+
+- 1717
+- 1819
+- 1920
+- 2008
+- 2016
+- 2119
+- 2216
+- 2321
+- 2416
+- 2424
+- 2512
+- 2519
+- 2526
+- 2608
+- 2623
+- 2711
+- 2820
+- 2920
+- 3020
+- 3116
+- 3121
+- 3124
+- 3211
+- 3220
+- 3419
+- 1608
+- 1611
+- 1612
+- 1615
+- 1616
+- 1617
+- 1618
+- 1619
+- 1620
+- 1621
+- 1622
+- 1707
+- 1711
+- 1715
+- 1712
+- 1719
+- 1720
+- 1721
+- 1722
+- 1807
+- 1808
+- 1811
+- 1816
+- 1817
+- 1818
+- 1820
+- 1907
+- 1908
+- 1911
+- 1912
+- 1916
+- 1917
+- 1918
+- 1919
+- 1921
+- 1922
+- 1923
+- 1924
+- 2007
+- 2011
+- 2019
+- 2021
+- 2012
+- 2020
+- 2022
+- 2023
+- 2024
+- 2107
+- 2108
+- 2111
+- 2112
+- 2115
+- 2116
+- 2117
+- 2118
+- 2120
+- 2121
+- 2122
+- 2123
+- 2124
+- 2207
+- 2208
+- 2211
+- 2212
+- 2215
+- 2217
+- 2218
+- 2219
+- 2220
+- 2221
+- 2222
+- 2307
+- 2311
+- 2315
+- 2317"
+56,Room & Renovation Tracking,List rooms with no bath screen.,"The rooms with no bath screen are as follows:
+
+- 1819
+- 1920
+- 2119
+- 2223
+- 2323
+- 2519
+- 2526
+- 2623
+- 2820
+- 2826
+- 2920
+- 3020
+- 3220
+- 3226
+- 3325
+- 3419
+- 1619
+- 1620
+- 1621
+- 1622
+- 1719
+- 1720
+- 1721
+- 1722
+- 1820
+- 1821
+- 1822
+- 1919
+- 1923
+- 1924
+- 2019
+- 2020
+- 2023
+- 2024
+- 2120
+- 2123
+- 2124
+- 2219
+- 2220
+- 2224
+- 2319
+- 2320
+- 2419
+- 2420
+- 2425
+- 2426
+- 2520
+- 2525
+- 2619
+- 2620
+- 2625
+- 2626
+- 2719
+- 2720
+- 2723
+- 2724
+- 2725
+- 2726
+- 2819
+- 2823
+- 2824
+- 2825
+- 2919
+- 2925
+- 2926
+- 3019
+- 3025
+- 3026
+- 3119
+- 3125
+- 3120
+- 3126
+- 3219
+- 3225
+- 3425
+- 3524
+- 3519
+- 3320
+- 3326
+- 3426
+- 3507
+- 3508
+- 3511
+- 3512
+- 3515
+- 3516
+- 3520
+- 3523
+- 3525"
+57,Room & Renovation Tracking,Show floors with the most rooms to be renovated.,"Floors 19 and 21 have the most rooms pending renovation, each with 16 rooms."
+58,Room & Renovation Tracking,List rooms that have desk only on left side.,"The rooms that have a desk only on the left side are as follows:
+
+- 1717
+- 1819
+- 2013
+- 2119
+- 2209
+- 2223
+- 2321
+- 2323
+- 2519
+- 2623
+- 2711
+- 2809
+- 2913
+- 3009
+- 3109
+- 3121
+- 3211
+- 3325
+- 3419
+- 1609
+- 1611
+- 1615
+- 1617
+- 1619
+- 1621
+- 1707
+- 1709
+- 1711
+- 1715
+- 1719
+- 1721
+- 1807
+- 1809
+- 1811
+- 1813
+- 1817
+- 1821
+- 1907
+- 1909
+- 1911
+- 1917
+- 1919
+- 1921
+- 1923
+- 2007
+- 2009
+- 2011
+- 2019
+- 2021
+- 2023
+- 2107
+- 2109
+- 2111
+- 2113
+- 2115
+- 2117
+- 2121
+- 2123
+- 2207
+- 2211
+- 2213
+- 2215
+- 2217
+- 2219
+- 2221
+- 2307
+- 2309
+- 2311
+- 2313
+- 2315
+- 2317
+- 2319
+- 2407
+- 2409
+- 2411
+- 2413
+- 2415
+- 2417
+- 2419
+- 2421
+- 2423
+- 2425
+- 2507
+- 2509
+- 2511
+- 2513
+- 2515
+- 2517
+- 2521
+- 2523
+- 2525
+- 2607
+- 2609
+- 2611
+- 2613
+- 2615
+- 2617
+- 2619
+- 2621
+- 2625
+- 2709
+- 2713
+- 2715
+- 2719
+- 2723
+- 2725
+- 2807
+- 2811
+- 2813
+- 2815
+- 2817
+- 2819
+- 2823
+- 2825
+- 2907
+- 2909
+- 2911
+- 2915
+- 2917
+- 2919
+- 2923
+- 2925
+- 3007
+- 3017
+- 3019
+- 3021
+- 3023
+- 3025
+- 3107
+- 3111
+- 3113
+- 3115
+- 3119
+- 3123
+- 3125
+- 3207
+- 3209
+- 3213
+- 3215
+- 3217
+- 3219
+- 3221
+- 3223
+- 3225
+- 3307
+- 3309
+- 3311
+- 3313
+- 3315
+- 3321
+- 3415
+- 3417
+- 3423
+- 3425
+- 3519
+- 1607
+- 3317
+- 3409
+- 3411
+- 3413
+- 3507
+- 3511
+- 3515
+- 3523
+- 3525"
+59,Room & Renovation Tracking,Show rooms described as ‘Delux’ or similar.,"The rooms described as ‘Delux’ or similar, including terms like 'Luxury', 'Lux', 'Executive', or 'Suite', are as follows:
+
+- 2223
+- 2323
+- 2526
+- 2826
+- 3226
+- 3325
+- 1621
+- 1622
+- 1721
+- 1722
+- 1821
+- 1822
+- 1923
+- 1924
+- 2023
+- 2024
+- 2123
+- 2124
+- 2224
+- 2425
+- 2426
+- 2525
+- 2625
+- 2626
+- 2725
+- 2726
+- 2825
+- 2925
+- 2926
+- 3025
+- 3026
+- 3125
+- 3126
+- 3225
+- 3425
+- 3326
+- 3426
+- 3525
+
+These rooms have descriptions that match variations of 'Delux' and related luxury terms."
+60,Room & Renovation Tracking,What’s the total number of rooms pending renovation?,The total number of rooms pending renovation is 316.
+61,User/Audit Trail,Who checked the most containers?,I am unable to determine who checked the most containers due to issues in querying the database.
+62,User/Audit Trail,List all actions done by invited user 'John'.,Agent stopped due to iteration limit or time limit.
+63,User/Audit Trail,Which user checked inventory the most?,Agent stopped due to iteration limit or time limit.
+64,User/Audit Trail,Who received the most warehouse requests?,Unable to determine who received the most warehouse requests due to persistent query execution issues. Recommend consulting with a database administrator.
+65,User/Audit Trail,Who checked the last 5 warehouse_shipment entries?,"The last 3 warehouse shipment entries were checked by the user ""vipin""."
+66,User/Audit Trail,Which users have never logged in?,All users have logged in at least once; there are no users who have never logged in.
+67,User/Audit Trail,Who received the most damaged items?,"To find out who received the most damaged items, identify the relevant table and columns in your database, construct a query to count the items received by each user, and execute it using a SQL client or database management tool."
+68,User/Audit Trail,Which user marked the most items as installed?,"The user with ID 1 marked the most items as installed, with a total of 28 items."
+69,User/Audit Trail,Who did the last check for floor 5 items?,Agent stopped due to iteration limit or time limit.
+70,User/Audit Trail,List all users and their roles.,"- Vipin: inventory, installation, hotel_warehouse, admin, administrator, floormanager
+- Eval User: no roles assigned"
+71,Chatbot Metadata,Show all chatbot sessions from last 24 hours.,There were 35 chatbot sessions in the last 24 hours.
+72,Chatbot Metadata,Which user had the longest chatbot session?,"There is no available data to determine which user had the longest chatbot session, as no completed sessions with both start and end times are recorded."
+73,Chatbot Metadata,What was the average response latency yesterday?,There is no available data to determine the average response latency for yesterday.
+74,Chatbot Metadata,What’s the most common question asked?,"The most common question asked in the chatbot sessions does not have a specific topic, but it has been asked 90 times."
+75,Chatbot Metadata,Which test cases failed in chat_evaluations?,There are no failed test cases recorded in the `chat_evaluations` table.
+76,Chatbot Metadata,Which user used the chatbot the most?,"The user who used the chatbot the most is ""vipin"" with 91 sessions."
+77,Chatbot Metadata,List chat messages with high token_count.,"The top 10 chat messages with high token counts were retrieved, but their specific token counts were not provided. The messages include inquiries about product availability and warehouse requests."
+78,Chatbot Metadata,Show sessions grouped by topic.,"The sessions are grouped by topic as follows: ""None"" with 90 sessions and ""Inventory Management Query"" with 1 session."
+79,Chatbot Metadata,How many chat_users have active sessions?,There is 1 chat_user with an active session.
+80,Chatbot Metadata,What were the last 10 prompts used?,"The last 10 prompts used are:
+1. What were the last 10 prompts used?
+2. There is 1 chat_user with an active session.
+3. The sessions are grouped by topic as follows: ""None"" with 90 sessions and ""Inventory Management Query"" with 1 session.
+4. How many chat_users have active sessions?
+5. Show sessions grouped by topic.
+6. The top 10 chat messages with high token counts were retrieved, but their specific token counts were not provided. The messages include inquiries about product availability and warehouse requests.
+7. List chat messages with high token_count.
+8. The user who used the chatbot the most is ""vipin"" with 91 sessions.
+9. Which user used the chatbot the most?
+10. There are no failed test cases recorded in the `chat_evaluations` table."
+81,Relationship & Cross-Domain Reasoning,Which product is installed the most across all rooms?,"The product installed the most across all rooms is ""Electrical self contained outlets"" with an installation count of 3."
+82,Relationship & Cross-Domain Reasoning,What product was installed by user 'John' in floor 3?,Agent stopped due to iteration limit or time limit.
+83,Relationship & Cross-Domain Reasoning,Show all rooms with missing install_detail records.,"The rooms with missing `install_detail` records are those with the following room IDs: 22, 42, 39, 59, 64, 76, 70, 80, 95, 91, 104, 116, 111, 131, 128, 129, 153, 157, 171, 165, 178, 189, 192, 187, 201, 216, 220, 235, 238, 242, 255, 260, 275, 280, 293, 286, 297, 301, 315, 318, 328, 345, 9, 2, 10, 3, 11, 12, 5, 13, 6, 14, 7, 15, 8, 16, 17, 18, 19, 21, 26, 27, 28, 23, 31, 24, 32, 33, 41, 34, 35, 36, 44, 45, 38, 46, 47, 40, 48, 58, 50, 51, 60, 61, 62, 54, 63, 55, 56, 65, 57, 66, 67, 68, 69, 73, 74, 77, 78, and 79."
+84,Relationship & Cross-Domain Reasoning,What are the floor-wise total installed products?,"The floor-wise total installed products are as follows:
+- Floor 16: 22 products
+- Floor 23: 1 product
+- Floor 33: 3 products
+- Floor 34: 2 products"
+85,Relationship & Cross-Domain Reasoning,Link pulled inventory to installation — which items were pulled but not installed?,"The items that were pulled from inventory but not installed are: P012, P043, P035, P127, P131, P061, P067, P114M, P123, P068, P010, P097, P002M, P096M, P112, P145, P062, P141, P095, P036, P093M, P066, P040, P113M, P091, P008, P069, P016, P122, P006, P142, P119, P113, P005, P039, P115, P103, P143, P009, P129, P125, P116, P070, P105, P143M, P063, P128, P115M, P004, P104, P130, P120, P102, P096, P046, P007, P015, P094, P099, P146, P117, P098, INSTALL KIT 2, P071, P140, P107, P003, INSTALL KIT, P110, P124, P099M, P047, P114, P015-P016-P017 PARTS, P118, P042, P108, P093, P065, P002, P144, P054, P106, INSTALL KIT 1B, P147, P015-016-017 PARTS, TAG, P060, P017, P059, P126, P001."
+86,Relationship & Cross-Domain Reasoning,How many items were installed the same day they were received at hotel?,0 items were installed on the same day they were received at the hotel.
+87,Relationship & Cross-Domain Reasoning,"For each floor, show qty_ordered vs quantity_installed.","For each floor, the quantity ordered vs quantity installed is as follows:
+- Floor 30: 8544 items ordered, 320 items installed
+- Floor 20: 4005 items ordered, 150 items installed"
+88,Relationship & Cross-Domain Reasoning,Show rooms where renovation is pending and nothing has been installed.,"The rooms where renovation is pending and nothing has been installed are as follows: 1717, 1810, 1819, 1910, 1920, 2008, 2013, 2016, 2110, 2119, 2209, 2223, 2310, 2321, 2323, 2416, 2424, 2512, 2519, 2526, 2608, 2614, 2623, 2711, 2722, 2809, 2820, 2826, 2913, 2920, 3009, 3020, 3109, 3116, 3121, 3124, 3211, 3220, 3226, 3325, 3419, 1608, 1609, 1610, 1611, 1612, 1614, 1615, 1616, 1617, 1618, 1619, 1620, 1621, 1622, 1707, 1709, 1711, 1715, 1710, 1712, 1714, 1719, 1720, 1721, 1722, 1807, 1808, 1809, 1811, 1813, 1814, 1816, 1817, 1820, 1821, 1822, 1907, 1908, 1909, 1911, 1912, 1914, 1916, 1917, 1918, 1919, 1921, 1922, 1923, 1924, 2007, 2009, 2011, 2019, 2021, 2010, 2012, 2014, 2020."
+89,Relationship & Cross-Domain Reasoning,What is the average delay in installation across all floors?,"There are no records with both received and installation dates available in the database, so the average delay in installation across all floors cannot be calculated."
+90,Relationship & Cross-Domain Reasoning,What was the last installed product per floor?,"The last installed product per floor is as follows:
+- Floor 16: Product ID 33
+- Floor 23: Product ID 26
+- Floor 33: Product ID 15
+- Floor 34: Product ID 4"
+91,Relationship & Cross-Domain Reasoning,Show the mismatch between install records and pulled inventory.,"There are 46 product IDs that have a mismatch between the install records and the pulled inventory. These mismatches include product IDs that are present in one table but not in the other. The mismatched product IDs are: P001, 13, 28, 19, 14, 25, 34, 6, 18, 38, 32, 2, 58, 37, 4, 9, 33, 30, P002, 66, 53, 36, 11, 31, 42, 67, 10, 7, 15, 5, 52, 44, 77, P003, 29, 1, 17, 56, 48, 35, 22, 3, 16, 26, 70, and 8."
+92,Relationship & Cross-Domain Reasoning,What’s the installation efficiency (installed vs total planned) per floor?,"The installation efficiency (installed vs total planned) per floor is as follows:
+- Floor 16: 100.0%
+- Floor 19: 0.0%
+- Floor 23: 4.35%
+- Floor 33: 12.0%
+- Floor 34: 8.0%"
+93,Relationship & Cross-Domain Reasoning,What floors had early installations?,No floors had early installations.
+94,Relationship & Cross-Domain Reasoning,Which products appear in install_detail but not in product_room_model?,Agent stopped due to iteration limit or time limit.
+95,Relationship & Cross-Domain Reasoning,Are there any items installed that were never pulled?,"Yes, there are items installed that were never pulled. The product IDs for these items are: 10, 7, 13, 28, 15, 5, 52, 19, 14, 25, 44, 34, 6, 18, 77, 38, 32, 2, 29, 58, 1, 37, 4, 9, 17, 56, 33, 48, 30, 35, 66, 22, 3, 53, 36, 11, 31, 16, 42, 26, 70, 8, and 67."
+96,Relationship & Cross-Domain Reasoning,Which room_models have the highest product count?,Agent stopped due to iteration limit or time limit.
+97,Relationship & Cross-Domain Reasoning,List product_room_model combinations with missing inventory data.,"The product_room_model combinations with missing inventory data are identified by the following product IDs and room model IDs:
+
+- (1, 9), (1, 13), (1, 15), (1, 16), (1, 17), (1, 18), (1, 19)
+- (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7), (2, 8), (2, 9), (2, 10), (2, 11), (2, 12), (2, 13), (2, 15), (2, 16), (2, 17), (2, 18), (2, 19)
+- (3, 9), (3, 13), (3, 15), (3, 16), (3, 17), (3, 18), (3, 19)
+- (4, 9), (4, 10), (4, 13), (4, 15), (4, 16), (4, 17), (4, 18), (4, 19)
+- (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (5, 8), (5, 9), (5, 10), (5, 11), (5, 12), (5, 13), (5, 15), (5, 16), (5, 17), (5, 18), (5, 19)
+- (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 7), (6, 8), (6, 11), (6, 12), (6, 13), (6, 15), (6, 16), (6, 17), (6, 18)
+- (7, 1), (7, 3), (7, 4), (7, 17)
+- (8, 1), (8, 3), (8, 4), (8, 17)
+- (9, 2), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9), (9, 10), (9, 11), (9, 12), (9, 13), (9, 15), (9, 16), (9, 18), (9, 19)
+- (10, 2), (10, 5), (10, 6), (10, 7), (10, 8)
+
+These combinations indicate where inventory data is missing for specific product and room model pairings."
+98,Relationship & Cross-Domain Reasoning,Show all discrepancies between received_qty and hotel_warehouse_quantity.,"The discrepancies between `received_qty` and `hotel_warehouse_quantity` are:
+
+- Item P003: 70 received, 10 in hotel warehouse
+- Item P002: 80 received, 61 in hotel warehouse
+- Item P001: 90 received, 36 in hotel warehouse"
+99,Relationship & Cross-Domain Reasoning,List rooms where install_detail status = 'NO' but install table says install = 'YES'.,There are no rooms where the `install_detail` status is 'NO' but the `install` table indicates install as 'YES'.
+100,Relationship & Cross-Domain Reasoning,What is the completion percentage of installation per floor?,"The completion percentage of installation per floor is as follows:
+- Floor 16: 100%
+- Floor 19: 0%
+- Floor 23: 4.35%
+- Floor 33: 12%
+- Floor 34: 8%"

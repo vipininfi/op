@@ -1,0 +1,27 @@
+[	{
+		"countryName": "United States",
+		"code": "US",
+		"phoneCode": "1"
+	},
+	{
+		"countryName": "Turkey",
+		"code": "TR",
+		"phoneCode": "90"
+	},
+
+	{
+		"countryName": "Germany",
+		"code": "DE",
+		"phoneCode": "49"
+	},
+
+	{
+		"countryName": "United Kingdom",
+		"code": "GB",
+		"phoneCode": "44"
+	},
+	{
+		"countryName": "India",
+		"code": "IN",
+		"phoneCode": "91"
+	},]
