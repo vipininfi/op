@@ -45,12 +45,13 @@ class IssueForm(forms.ModelForm):
         widget=forms.FileInput(attrs={'class': 'form-control d-none', 'accept': 'video/*'}),
         required=False
     )
-    related_rooms = forms.ModelMultipleChoiceField(
-        queryset=RoomData.objects.all(),
+    related_floors = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'}),
         required=False,
-        label="Related Rooms (if type is Room)"
+        label="Related Floors (if type is Floor)",
+        choices=[]  # Empty initially, will populate in __init__
     )
+
     related_floors = forms.MultipleChoiceField(
         widget=forms.SelectMultiple(attrs={'class': 'form-control select2-multiple'}),
         # queryset=RoomData.objects.values_list('floor', flat=True).distinct(),
@@ -91,6 +92,12 @@ class IssueForm(forms.ModelForm):
         # Set default to empty if not already set
         if not self.initial.get('type'):
             self.initial['type'] = ''
+        try:
+            floors = RoomData.objects.values_list('floor', flat=True).distinct()
+            self.fields['related_floors'].choices = [(i, f'Floor {i}') for i in floors]
+        except Exception:
+            self.fields['related_floors'].choices = []  # fallback if DB isn't ready
+
 
         self.helper = FormHelper()
         self.helper.layout = Layout(
