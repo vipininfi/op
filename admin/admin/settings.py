@@ -11,13 +11,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import environ,os
 from pathlib import Path
-ENV_FILE = os.path.join(BASE_DIR, "hotel_bot_app/.env")
-if os.path.exists(ENV_FILE):
-    environ.Env.read_env(ENV_FILE)
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+ENV_FILE = os.path.join(BASE_DIR, "hotel_bot_app/.env")
+if os.path.exists(ENV_FILE):
+    environ.Env.read_env(ENV_FILE)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
