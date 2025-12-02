@@ -4,6 +4,8 @@ This guide provides instructions for setting up the Hotel Installation Bot proje
 
 ## Overview
 
+https://drive.google.com/file/d/1IPp4lDQA1VnAK_7uG9Iqa3sMtt3MnM06/view?usp=sharing
+
 The project is a Django web application designed to assist with hotel furniture installation tracking. It includes an administrative interface for managing data (rooms, inventory, products, schedules) and an AI-powered chatbot interface to query project information using natural language.
 
 ## Prerequisites
